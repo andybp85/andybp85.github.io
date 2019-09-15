@@ -1,0 +1,10 @@
+@font-face {
+    font-family: 'Monoid Nerd Font';
+    src: url('MonoidNerdFontC-Retina.woff2') format('woff2'),
+        url('MonoidNerdFontC-Retina.woff') format('woff'),
+        url('MonoidNerdFontC-Retina.ttf') format('truetype'),
+        url('MonoidNerdFontC-Retina.svg#MonoidNerdFontC-Retina') format('svg');
+    font-weight: 300;
+    font-style: normal;
+}
+
