@@ -8,6 +8,7 @@ services:
       - PORT=3000
     ports:
       - '3000:3000'
+      - '10000:10000'
     working_dir: /var/app
     volumes:
       - .:/var/app:cached
