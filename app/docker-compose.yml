@@ -1,0 +1,13 @@
+version: '3'
+services:
+  andysite:
+    build: .
+    command: sh -c "npm install && npm run dev"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+    ports:
+      - '3000:3000'
+    working_dir: /var/app
+    volumes:
+      - .:/var/app:cached
