@@ -4,7 +4,7 @@ FROM mhart/alpine-node:12.13.0
 
 #RUN ["apk", "update"]
 #RUN ["apk", "add", "--no-cache", "nodejs", "nodejs-npm", "python3", "zsh"]
-RUN apk update && apk add --no-cache python3 zsh && pip3 install awscli
+RUN apk update && apk add --no-cache python3 zsh rsync && pip3 install awscli
 
 #FROM node:12
 #RUN ["apt-get", "update"]
