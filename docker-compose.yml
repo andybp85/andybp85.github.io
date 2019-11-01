@@ -1,0 +1,14 @@
+version: '3'
+services:
+  andysite:
+    build: .
+    command: sh -c "npm ci && npm run dev"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+    ports:
+      - '3000:3000'
+      - '10000:10000'
+    working_dir: /root/andybp85.github.io/app
+    volumes:
+      - .:/root/andybp85.github.io:cached
