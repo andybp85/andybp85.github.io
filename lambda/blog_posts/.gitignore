@@ -1,5 +1,4 @@
-*~
-function.zip
+__pycache__
 application
-__pycache__/
-
+requirements/
+function.zip

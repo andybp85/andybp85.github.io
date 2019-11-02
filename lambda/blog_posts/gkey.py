@@ -5,6 +5,7 @@ import os
 
 
 class GKey:
+
     kms = boto3.Session(
         aws_access_key_id=os.environ['S3_ACCESS_KEY'],
         aws_secret_access_key=os.environ['S3_SECRET_ACCESS_KEY'],
@@ -26,4 +27,4 @@ class GKey:
         decoded_ciphertext = base64.b64decode(response['Body'].read())
         plaintext = self.kms.decrypt(CiphertextBlob=bytes(decoded_ciphertext))
 
-        return json.loads(plaintext["Plaintext"])
+        return json.loads(plaintext['Plaintext'])

@@ -1,13 +1,18 @@
 import subprocess
 
 from gkey import GKey
+from posts import Posts
 
 
 def load(event, context):
 
-    print(GKey().getKey())
+    posts = Posts(GKey().getKey())
 
-    subprocess.run("./application")
+    print(
+        *posts.get(), sep='\n'
+    )
+
+    # subprocess.run("./application")
     return
 
 
