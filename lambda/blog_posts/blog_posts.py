@@ -1,10 +1,14 @@
 import subprocess
 
+from gkey import GKey
+
 
 def load(event, context):
-    print('test')
+
+    print(GKey().getKey())
+
     subprocess.run("./application")
     return
 
 
-# load_blog_posts(None, None)
+load(None, None)
