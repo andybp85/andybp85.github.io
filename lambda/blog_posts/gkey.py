@@ -18,7 +18,7 @@ class GKey:
         region_name=os.environ['S3_REGION']
     ).client('s3')
 
-    def getKey(self):
+    def get(self):
         response = self.s3.get_object(
             Bucket=os.environ['S3_BUCKET'],
             Key=os.environ['S3_KEY']

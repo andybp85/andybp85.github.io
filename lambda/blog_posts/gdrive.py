@@ -9,7 +9,7 @@ def _meta(post: dict):
     return post
 
 
-class Posts:
+class GDrive:
 
     def __init__(self, key):
         creds = service_account.Credentials.from_service_account_info(key)
@@ -20,17 +20,14 @@ class Posts:
             cache_discovery=False
         )
 
-    def get(self):
+    def get_posts(self):
         results = self.service.files().list(
             pageSize=10,
             fields="files(id, name, description, modifiedTime)",
             q="'" + os.environ['GD_POSTS_FOLDER'] + "' in parents"
         ).execute()
 
-        return map(
-            lambda p: _meta(self._body(p)),
-            (post for post in results.get("files", []) if post['name'][0] != "_")
-        )
+        return [_meta(self._body(post)) for post in results.get("files", []) if post['name'][0] != "_"]
 
     def _body(self, post: dict):
         body = self.service.files().export_media(
