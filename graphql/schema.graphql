@@ -1,0 +1,124 @@
+﻿schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
+
+type BlogPosts {
+  body: String
+  date: String
+  id: ID!
+  modifiedTime: AWSTimestamp
+  name: String
+  slug: String
+  tags: AWSJSON
+}
+
+type BlogPostsConnection {
+  items: [BlogPosts]
+  nextToken: String
+}
+
+type Mutation {
+  createBlogPosts(input: CreateBlogPostsInput!): BlogPosts
+  deleteBlogPosts(input: DeleteBlogPostsInput!): BlogPosts
+  updateBlogPosts(input: UpdateBlogPostsInput!): BlogPosts
+}
+
+type Query {
+  getBlogPosts(id: ID!): BlogPosts
+  listBlogPosts(filter: TableBlogPostsFilterInput, limit: Int, nextToken: String): BlogPostsConnection
+}
+
+type Subscription {
+  onCreateBlogPosts(body: String, date: String, id: ID, modifiedTime: AWSTimestamp, name: String): BlogPosts @aws_subscribe(mutations : ["createBlogPosts"])
+  onDeleteBlogPosts(body: String, date: String, id: ID, modifiedTime: AWSTimestamp, name: String): BlogPosts @aws_subscribe(mutations : ["deleteBlogPosts"])
+  onUpdateBlogPosts(body: String, date: String, id: ID, modifiedTime: AWSTimestamp, name: String): BlogPosts @aws_subscribe(mutations : ["updateBlogPosts"])
+}
+
+input CreateBlogPostsInput {
+  body: String
+  date: String
+  modifiedTime: AWSTimestamp
+  name: String
+  slug: String
+  tags: AWSJSON
+}
+
+input DeleteBlogPostsInput {
+  id: ID!
+}
+
+input TableBlogPostsFilterInput {
+  body: TableStringFilterInput
+  date: TableStringFilterInput
+  id: TableIDFilterInput
+  modifiedTime: TableIntFilterInput
+  name: TableStringFilterInput
+  slug: TableStringFilterInput
+}
+
+input TableBooleanFilterInput {
+  eq: Boolean
+  ne: Boolean
+}
+
+input TableFloatFilterInput {
+  between: [Float]
+  contains: Float
+  eq: Float
+  ge: Float
+  gt: Float
+  le: Float
+  lt: Float
+  ne: Float
+  notContains: Float
+}
+
+input TableIDFilterInput {
+  beginsWith: ID
+  between: [ID]
+  contains: ID
+  eq: ID
+  ge: ID
+  gt: ID
+  le: ID
+  lt: ID
+  ne: ID
+  notContains: ID
+}
+
+input TableIntFilterInput {
+  between: [Int]
+  contains: Int
+  eq: Int
+  ge: Int
+  gt: Int
+  le: Int
+  lt: Int
+  ne: Int
+  notContains: Int
+}
+
+input TableStringFilterInput {
+  beginsWith: String
+  between: [String]
+  contains: String
+  eq: String
+  ge: String
+  gt: String
+  le: String
+  lt: String
+  ne: String
+  notContains: String
+}
+
+input UpdateBlogPostsInput {
+  body: String
+  date: String
+  id: ID!
+  modifiedTime: AWSTimestamp
+  name: String
+  slug: String
+  tags: AWSJSON
+}
