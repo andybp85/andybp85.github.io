@@ -1,8 +1,8 @@
 {
-	"background_color": "#ffffff",
-	"theme_color": "#333333",
-	"name": "TODO",
-	"short_name": "TODO",
+	"background_color": "#222",
+	"theme_color": "#f9f9f9",
+	"name": "Andy's Site",
+	"short_name": "Andy",
 	"display": "minimal-ui",
 	"start_url": "/",
 	"icons": [
