@@ -3,6 +3,7 @@ import ApolloClient, { gql } from 'apollo-boost';
 // import { ApolloQueryResult } from 'apollo-client';
 
 import posts from './_posts';
+import { Request, Response } from 'express';
 
 export interface PostResult {
     body: string;
@@ -54,7 +55,7 @@ const contents = JSON.stringify(posts.map(post => {
     };
 }));
 
-export function get(req, res) {
+export function get(req: Request, res: Response) {
     res.writeHead(200, {
         'Content-Type': 'application/json'
     });
