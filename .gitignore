@@ -1,2 +1,4 @@
 .idea
-app/
+src/pyenv
+.DS_Store
+__pycache__
