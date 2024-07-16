@@ -1,30 +1,48 @@
+from bs4 import BeautifulSoup
+from glob import glob
 from livereload import Server
-import sass
-import os
-import glob
+from markdown import markdown
+from os import remove
+from pathlib import Path
+from sass import compile as compileSass
+from sys import exit
 
 def parseSassFiles(fileList):
     if not any(file.endswith(".sass") for file in fileList): return
-    sass.compile(dirname=('src/sass', 'src/sass'), output_style='compressed')
-    with open('styles.css', "w") as styles:
-        for file in glob.glob("src/sass/*.css"):
+    compileSass(dirname=("src/sass", "src/sass"), output_style="compressed")
+    with open("styles.css", "w+") as styles:
+        for file in glob("src/sass/*.css"):
             with open(file) as style:
                 styles.write(style.read())
-            os.remove(file)
+            remove(file)
+
+def buildPages(fileList):
+    for mdFileName in filter(lambda f: f.endswith(".md"), fileList):
+        path = str(Path(mdFileName).parent)
+        with open(mdFileName, "r") as mdFile, \
+          open("src/template.html", "r") as template, \
+          open(path + "/index.html", "w+") as index:
+            page = BeautifulSoup(template, features="html.parser")
+            contents = BeautifulSoup(markdown(mdFile.read()),
+                                              features="html.parser")
+            page.find("main").append(contents)
+            index.write(page.prettify())
 
 def build(fileList):
     parseSassFiles(fileList)
-
-def ignore(filepath):
-    return filepath.startswith("env/") \
-        or filepath == "serve.py" \
-        or filepath.endswith(".txt")
+    buildPages(fileList)
 
 def serve():
     try:
         server = Server()
-        server.watch('**/*', ignore=ignore, func=build)
+        server.watch("**/*",
+                     func=build,
+                     ignore=lambda f: f.startswith("env/") \
+                        or f == "serve.py" \
+                        or f.endswith(".txt"))
         server.serve()
+    except KeyboardInterrupt:
+        exit()
     except Exception:
         serve()
 
