@@ -2,6 +2,7 @@ asttokens==2.4.1
 beautifulsoup4==4.12.3
 decorator==5.1.1
 executing==2.0.1
+iniconfig==2.0.0
 ipdb==0.13.13
 ipython==8.26.0
 jedi==0.19.1
@@ -9,12 +10,15 @@ libsass==0.23.0
 livereload==2.7.0
 Markdown==3.6
 matplotlib-inline==0.1.7
+packaging==24.1
 parso==0.8.4
 pexpect==4.9.0
+pluggy==1.5.0
 prompt_toolkit==3.0.47
 ptyprocess==0.7.0
 pure-eval==0.2.2
 Pygments==2.18.0
+pytest==8.2.2
 six==1.16.0
 soupsieve==2.5
 stack-data==0.6.3
