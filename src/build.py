@@ -37,7 +37,7 @@ def page(mdFilePath, templatePath):
 def build(fileList, sassFilePaths=glob("src/sass/*.sass"), templatePath="src/template.html", stylesPath="styles.css"):
     if any(file.endswith(".sass") for file in fileList):
         with open(stylesPath, "w+") as stylesFile:
-            for style in styles(sassFilePaths):
+            for style in styles(sorted(sassFilePaths)):
                 stylesFile.write(style)
 
     for mdFilePath in filter(lambda f: f.endswith(".md"), fileList):

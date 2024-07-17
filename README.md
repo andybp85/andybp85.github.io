@@ -14,7 +14,7 @@ makes you a nice [virtualenv](https://docs.python.org/3/library/venv.html#how-ve
 and serves the site at [http://localhost:5500/](http://localhost:5500/)
 
 ## How It Works
-First it compiles the Sass in `src/sass` and jams it all in `/main.css`. These go in alpha order, so I just prefixed a 
+First it compiles the Sass files and jams everything `/styles.css`. These go in alpha order, so I just prefixed a 
 number to the ones that matter.
 
 Then it grabs any non-README markdown file it sees in the top-level dirs and uses `src/template.html` to build an

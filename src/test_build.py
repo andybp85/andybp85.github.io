@@ -53,7 +53,7 @@ class TestStyles:
         assert css == ["body{color:black}\n"]
 
     def test_twoFiles(self):
-        """it should parse two sass files"""
+        """it should parse two sass files in the correct order"""
         css = [o for o in build.styles(["fixtures/sass/01.sass", "fixtures/sass/02.sass"])]
         assert css[0] == "body{color:black}\n"
         assert css[1] == "div{font-size:1em}\n"
