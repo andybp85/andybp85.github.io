@@ -3,4 +3,4 @@ src/pyenv
 .DS_Store
 __pycache__
 .coverage
-
+src/htmlcov

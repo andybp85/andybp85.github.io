@@ -14,11 +14,14 @@ makes you a nice [virtualenv](https://docs.python.org/3/library/venv.html#how-ve
 and serves the site at [http://localhost:5500/](http://localhost:5500/)
 
 ## How It Works
-First it compiles the Sass in `src/sass` and jams it all in `/main.css`.
+First it compiles the Sass in `src/sass` and jams it all in `/main.css`. These go in alpha order, so I just prefixed a 
+number to the ones that matter.
 
 Then it grabs any non-README markdown file it sees in the top-level dirs and uses `src/template.html` to build an
-`index.html` file in the same dir by dumping the markdown contents into the `<main>` section of the template, and
-updating the class on the nav to underline it.
+`index.html` file in the same dir by dumping the markdown contents into the `<main>` section of the template.
+
+There's a trick to the nav: the markdown file must match the text of the link, e.g. `Page.md` will update the link to
+`Page`. It simply adds a class that underlines it.
 
 Since this is a simple site, that's literally it for the build process, and once it's good locally it's just a
 git commit-push away from being live.
@@ -38,10 +41,10 @@ Coverage:
 ```shell
 > pytest --cov=src --cov-branch --cov-report=html
 ```
-HTML report is in `src/htmlcov`
+The HTML report is in `src/htmlcov`.
 
-### Development
-Ipython and ipdb! Just put this anywhere to breakpoint:
+### Dev Tools
+`ipython` and `ipdb`! Just put this anywhere to breakpoint:
 ```python
 import ipdb; ipdb.set_trace()
 ```

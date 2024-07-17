@@ -16,13 +16,23 @@ def styles(sassFilePaths):
         with open(sassFilePath, "r") as style:
             yield compileSass(string=style.read(), indented=True, output_style="compressed")
 
+def _updateNav(path, page):
+    name = path.name.split(".")[0]
+    for a in page.body.header.nav.find_all('a'):
+        if a.string == name:
+            a["class"] = "current"
+            break
+
 def page(mdFilePath, templatePath):
-    path = str(Path(mdFilePath).parent)
+    path = Path(mdFilePath)
+    parentPath = str(path.parent)
     with open(mdFilePath, "r") as mdFile, open(templatePath, "r") as template:
         page = BeautifulSoup(template, features="html.parser")
         contents = BeautifulSoup(markdown(mdFile.read()), features="html.parser")
         page.find("main").append(contents)
-        return path + "/index.html", page.prettify()
+        if parentPath != ".":
+            _updateNav(path, page)
+        return parentPath + "/index.html", page.prettify()
 
 def build(fileList, sassFilePaths=glob("src/sass/*.sass"), templatePath="src/template.html", stylesPath="styles.css"):
     if any(file.endswith(".sass") for file in fileList):
@@ -34,4 +44,3 @@ def build(fileList, sassFilePaths=glob("src/sass/*.sass"), templatePath="src/tem
         path, contents = page(mdFilePath, templatePath)
         with open(path, "w+") as file:
             file.write(contents)
-
