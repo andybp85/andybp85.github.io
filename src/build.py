@@ -1,37 +1,37 @@
 from bs4 import BeautifulSoup
 from glob import glob
-from livereload import Server
 from markdown import markdown
-from os import remove
 from pathlib import Path
 from sass import compile as compileSass
-from sys import exit
-
-def parseSassFiles(fileList):
-    if not any(file.endswith(".sass") for file in fileList): return
-    for sassFile in glob("src/sass/*.sass"):
-        with open(sassFile, "r") as style:
-            yield compileSass(string=style.read(), output_style="compressed")
-
-
-def buildPages(fileList):
-    for mdFileName in filter(lambda f: f.endswith(".md"), fileList):
-        path = str(Path(mdFileName).parent)
-        with open(mdFileName, "r") as mdFile, open("src/template.html", "r") as template:
-            page = BeautifulSoup(template, features="html.parser")
-            contents = BeautifulSoup(markdown(mdFile.read()), features="html.parser")
-            page.find("main").append(contents)
-            yield path + "/index.html", page.prettify()
-
-def build(fileList):
-    with open("styles.css", "w+") as styles:
-        for style in parseSassFiles(fileList):
-            styles.write()
-    for path, contents in buildPages(fileList):
-        with open(path, "w+") as file:
-            file.write(contents)
 
 def ignore(filePath):
     return filePath.startswith("env/") \
-      or filePath == "serve.py" \
-      or filePath.endswith(".txt")
+      or filePath.startswith("fixtures/") \
+      or filePath.endswith(".py") \
+      or filePath.endswith(".txt") \
+      or filePath.endswith("README.md")
+
+def styles(sassFilePaths):
+    for sassFilePath in sassFilePaths:
+        with open(sassFilePath, "r") as style:
+            yield compileSass(string=style.read(), indented=True, output_style="compressed")
+
+def page(mdFilePath, templatePath):
+    path = str(Path(mdFilePath).parent)
+    with open(mdFilePath, "r") as mdFile, open(templatePath, "r") as template:
+        page = BeautifulSoup(template, features="html.parser")
+        contents = BeautifulSoup(markdown(mdFile.read()), features="html.parser")
+        page.find("main").append(contents)
+        return path + "/index.html", page.prettify()
+
+def build(fileList, sassFilePaths=glob("src/sass/*.sass"), templatePath="src/template.html", stylesPath="styles.css"):
+    if any(file.endswith(".sass") for file in fileList):
+        with open(stylesPath, "w+") as stylesFile:
+            for style in styles(sassFilePaths):
+                stylesFile.write(style)
+
+    for mdFilePath in filter(lambda f: f.endswith(".md"), fileList):
+        path, contents = page(mdFilePath, templatePath)
+        with open(path, "w+") as file:
+            file.write(contents)
+
