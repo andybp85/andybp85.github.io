@@ -18,11 +18,11 @@ and serves the site at [http://localhost:5500/](http://localhost:5500/)
 First it compiles the Sass files and jams everything `/styles.css`. These go in alpha order, so I just prefixed a 
 number to the ones that matter.
 
-Then it grabs any non-README markdown file it sees in the top-level dirs and uses `src/template.html` to build an
-`index.html` file in the same dir by dumping the markdown contents into the `<main>` section of the template.
+The site structure is defined in `src/pages`. Any folder in here will become a path on the site, and and markdown file
+in one of the folders will become and `index.html` for that path. It does this by dumping the contents of the markdown
+into the `main` tag of `src/template.html`. It also builds the nav from the folder structure.
 
-There's a trick to the nav: the markdown file must match the text of the link, e.g. `Page.md` will update the link to
-`Page`. It simply adds a class that underlines it.
+`// TODO: blog`
 
 Since this is a simple site, that's literally it for the build process, and once it's good locally it's just a
 git commit-push away from being live.
