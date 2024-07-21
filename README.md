@@ -1,9 +1,10 @@
 # Andy's Site
 A simple custom build system in a proper tooling language: Python!
 
-## Getting Started
-The whole thing is a module and I made a setup script, so this is stupid easy:
+## Getting Started 
+`src/` is a module and I made a setup script, so this is stupid easy:
 ```shell
+> cd src/
 > sh setup.sh
 > source src/pyenv/bin/activate
 > python .
@@ -34,7 +35,7 @@ Run all from `src/`
 ```
 Watch:
 ```shell
-> ptw
+> ptw -- -vv
 ```
 
 Coverage:
@@ -48,6 +49,13 @@ The HTML report is in `src/htmlcov`.
 ```python
 import ipdb; ipdb.set_trace()
 ```
+
+#### Pre-Commit hook
+```
+/src/pre-commit
+```
+This get installed by `setup.sh`. It just runs the tests, since Python requires well formatted code to run! If you
+modify it you'll have to move it into `.git/hooks` manually.
 
 ## Why?
 Go read the [site](https://www.andrewstanish.com/about) :)

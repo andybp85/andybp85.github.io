@@ -1,11 +1,13 @@
 from livereload import Server
-from src.build import build, ignore
+from build import build, ignore
 from sys import exit
+
 
 def serve():
     server = Server()
     server.watch("**/*", func=build, ignore=ignore)
-    server.serve()
+    server.serve(root="..")
+
 
 if __name__ == "__main__":
     try:
