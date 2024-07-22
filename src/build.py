@@ -31,39 +31,46 @@ def _nav_vals(p: str, page_name: str) -> dict:
     }
 
 
-def make_page_path(md_file_path: str, pages_path: str) -> str:
+def make_page_path(pages_path: str, md_file_path: str) -> str:
     return "/".join(Path(md_file_path).parts[len(Path(pages_path).parts):-1])
 
 
 def nav(pages_path: str, page_name: str):
-    pages = [make_page_path(f, pages_path) + Path(f).stem for f in scandir(pages_path) if f.is_dir()]
+    pages = [make_page_path(pages_path, f) + Path(f).stem for f in scandir(pages_path) if f.is_dir()]
     template = Template('<a$current href="$page_name">$text</a>')
     return [BeautifulSoup(template.substitute(**_nav_vals(p, page_name)), features="html.parser") for p in pages]
 
 
-def page(md_file_path: str, template_path: str, pages_path: str) -> str:
+def page(pages_path: str, template_path: str, md_file_path: str) -> str:
     with open(md_file_path, "r") as mdFile, open(template_path, "r") as template:
         template = BeautifulSoup(template, features="html.parser")
         template.find("main").append(BeautifulSoup(markdown(mdFile.read()), features="html.parser"))
         nav_elm = template.find("nav")
-        for link in [link for link in nav(pages_path, make_page_path(md_file_path, pages_path))]:
+        for link in [link for link in nav(pages_path, make_page_path(pages_path, md_file_path))]:
             nav_elm.append(link)
         return template.prettify()
 
 
-def _sass_paths(pages_path: str) -> [str]:
-    return sorted(glob(str(Path(pages_path).joinpath("**/*.sass")), recursive=True), key=lambda p: Path(p).name)
+def _paths(pages_path: str, extension: str) -> [str]:
+    return glob(str(Path(pages_path).joinpath("**/*." + extension)), recursive=True)
 
 
-def build(file_list: [str], pages_path="pages", template_path="template.html", out_path="..") -> None:
-    if any(file.endswith(".sass") for file in file_list):
+def build(changed_files: [str], pages_path="pages", template_path="template.html", out_path="..") -> None:
+    if any(file.endswith(".sass") for file in changed_files):
         with open(Path(out_path, "styles.css"), "w+") as stylesFile:
-            for style in styles(_sass_paths(pages_path)):
+            for style in styles(sorted(_paths(pages_path, "sass"), key=lambda p: Path(p).name)):
                 stylesFile.write(style)
 
-    if any(file.endswith(".md") for file in file_list):
-        for md_file_path in filter(lambda f: f.endswith(".md"), file_list):
-            contents = page(md_file_path, template_path, pages_path)
-            page_path = Path(out_path, make_page_path(md_file_path, pages_path), "index.html")
+    pages_to_build = []
+
+    if any(file == template_path for file in changed_files):
+        pages_to_build = _paths(pages_path, "md")
+    elif any(file.endswith(".md") for file in changed_files):
+        pages_to_build = [f for f in filter(lambda f: f.endswith(".md"), changed_files)]
+
+    if len(pages_to_build) > 0:
+        for md_file_path in pages_to_build:
+            contents = page(pages_path, template_path, md_file_path)
+            page_path = Path(out_path, make_page_path(pages_path, md_file_path), "index.html")
             page_path.parent.mkdir(exist_ok=True, parents=True)
             page_path.write_text(contents)

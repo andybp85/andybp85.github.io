@@ -77,7 +77,7 @@ class TestNav:
 class TestPage:
     def test_index(self):
         """it should parse and append markdown to main in template for home page"""
-        contents = build.page(pages_path + "/home.md", "test/src/template.html", pages_path)
+        contents = build.page(pages_path, "test/src/template.html", pages_path + "/home.md")
         assert str(contents) == BeautifulSoup(
             "<html><head></head><body><header><nav>"
             "<a href=\"page\">Page</a><a href=\"blog\">Blog</a>"
@@ -86,7 +86,7 @@ class TestPage:
 
     def test_page(self):
         """it should build properly with an empty markdown file and update the nav"""
-        contents = build.page(pages_path + "/page/page.md", "test/src/template.html", pages_path)
+        contents = build.page(pages_path, "test/src/template.html", pages_path + "/page/page.md")
         assert str(contents) == BeautifulSoup(
             "<html><head></head><body><header><nav>"
             "<a class=\"current\" href=\"page\">Page</a><a href=\"blog\">Blog</a>"
@@ -96,41 +96,41 @@ class TestPage:
 
 class TestMakePagePath:
     def test_make_home_path(self):
-        file_path = build.make_page_path(pages_path + "/home.md", pages_path)
+        file_path = build.make_page_path(pages_path, pages_path + "/home.md")
         assert file_path == ""
 
     def test_make_page_path(self):
-        file_path = build.make_page_path(pages_path + "/page/page.md", pages_path)
+        file_path = build.make_page_path(pages_path, pages_path + "/page/page.md")
         assert file_path == "page"
 
 
 class TestBuild:
-    buildArgs = {
+    build_args = {
         "pages_path": "test/src/pages",
         "out_path": "test",
         "template_path": "test/src/template.html"
     }
-    stylesPath = "test/styles.css"
+    styles_path = "test/styles.css"
 
     def test_build_styles(self):
         """it should properly build the styles.css file"""
-        build.build(["test/01.sass"], **self.buildArgs)
+        build.build(["test/01.sass"], **self.build_args)
         try:
-            with open(self.stylesPath) as styles:
+            with open(self.styles_path) as styles:
                 assert styles.read() == "body{color:black}\ndiv{font-size:1em}\n"
         except Exception as e:
             fail(str(e))
         finally:
-            remove(self.stylesPath)
+            remove(self.styles_path)
 
     def test_build_index(self):
         """it should build the specified index file, but no others"""
-        build.build([pages_path + "/home.md"], **self.buildArgs)
+        build.build([pages_path + "/home.md"], **self.build_args)
         try:
             assert path.exists("test/index.html") is True
             assert path.exists("test/page/index.html") is False
             assert path.exists("index.html") is False
-            assert path.exists(self.stylesPath) is False
+            assert path.exists(self.styles_path) is False
         except Exception as e:
             fail(str(e))
         finally:
@@ -145,15 +145,33 @@ class TestBuild:
             pages_path + "/blog/blog.md",
             pages_path + "/01.sass",
             pages_path + "/blog/blog.sass"
-        ], **self.buildArgs)
+        ], **self.build_args)
         try:
             assert path.exists("test/index.html") is True
             assert path.exists("test/page/index.html") is True
-            assert path.exists(self.stylesPath) is True
+            assert path.exists(self.styles_path) is True
         except Exception as e:
             fail(str(e))
         finally:
-            remove(self.stylesPath)
+            remove(self.styles_path)
+            remove("test/index.html")
+            remove("test/page/index.html")
+            remove("test/blog/index.html")
+            rmdir("test/page/")
+            rmdir("test/blog/")
+
+    def test_change_template(self):
+        """it should build the entire html site if the template is changed"""
+        build.build(
+            [self.build_args["template_path"]],
+            **self.build_args)
+        try:
+            assert path.exists("test/index.html") is True
+            assert path.exists("test/page/index.html") is True
+            assert path.exists(self.styles_path) is False
+        except Exception as e:
+            fail(str(e))
+        finally:
             remove("test/index.html")
             remove("test/page/index.html")
             remove("test/blog/index.html")
