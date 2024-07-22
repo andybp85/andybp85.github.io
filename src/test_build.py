@@ -177,3 +177,5 @@ class TestBuild:
             remove("test/blog/index.html")
             rmdir("test/page/")
             rmdir("test/blog/")
+
+    # TODO: handle delete

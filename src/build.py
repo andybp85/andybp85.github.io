@@ -35,10 +35,11 @@ def make_page_path(pages_path: str, md_file_path: str) -> str:
     return "/".join(Path(md_file_path).parts[len(Path(pages_path).parts):-1])
 
 
-def nav(pages_path: str, page_name: str):
+def nav(pages_path: str, page_name: str) -> str:
     pages = [make_page_path(pages_path, f) + Path(f).stem for f in scandir(pages_path) if f.is_dir()]
     template = Template('<a$current href="$page_name">$text</a>')
-    return [BeautifulSoup(template.substitute(**_nav_vals(p, page_name)), features="html.parser") for p in pages]
+    for p in pages:
+        yield BeautifulSoup(template.substitute(**_nav_vals(p, page_name)), features="html.parser")
 
 
 def page(pages_path: str, template_path: str, md_file_path: str) -> str:
