@@ -1,50 +1,71 @@
-## About Me
+## About Me {#about-me}
 
-## About This Site
+> "It means something being from New Jersey. It means you have a sense of humor."  
+> &nbsp;&nbsp;&nbsp;&nbsp;- Anthony Bourdain
+
+I'm your typical programmer/musician with a ton of hobbies, including biking, history, electronics,
+and spicy food. By day I work for NBCUniversal (née CNBC) as a principal software engineer for
+the CMS. Nights and weekends I do music, including sound at one of the best bars (and with some
+of the best people) I've ever stumbled upon, The Laundromat in Morristown, NJ. I also play bass 
+in a blues rock band, Kru Kerly, out of my hometown of Jersey City.
+
+## About This Site {#about-site}
 
 ### Build
-I do Javascript all day at work for well over a decade now. There's plenty I like and don't like about the language, but
-honestly the thing I hate most is what the JS community has decided on as the "standard style". Rather than rant about
-exactly why, I'm just going to include some links at the bottom of this section to stuff that's heavily
-influenced my preferences.
 
-So, that's why the builder for site is in Python. I've done a bunch of work with it and I think it nails everything
-I want in an everyday language. For details on how this works, check out the 
-[ReadMe](https://github.com/andybp85/andybp85.github.io). I'm also using real Sass, without the bleeping curly braces. I
-swear it's like my industry has Stockholm Syndrome for noisy code... but I promised I wouldn't rant.
+I do Javascript all day at work for well over a decade now. I'm not going to say I'm sick of it,
+because there's plenty I like about using a multi-paradigm Scheme derivative (and Typescript is
+huge improvement on vanilla JS). But, there's several other languages I like far more, especially
+Python, which is the main language the logic for this site is in.
 
-Will I write any JS for this site? I don't plan on it, but we shall see. It's definitely not going to be a SPA,
-which I don't think actually makes for a great UX. I use [Clicky](https://clicky.com/) for less-sketchy analytics, so
-there's the JS code for that, although I didn't write it. Maybe for some animations or something... but definitely not
-for the kind of breaking-the-back-button behavior that's all the rage these days.
+I've done a bunch of work with Python, and I think it nails everything I want in an everyday
+language. For details on how this works, check out the
+[ReadMe](https://github.com/andybp85/andybp85.github.io). I'm also using real Sass, without the
+bleeping curly braces. I swear it's like my industry has Stockholm Syndrome for noisy code...
+so, mini-rant to follow.
+
+Will I write any JS for this site? I don't plan on it, but we shall see. It's definitely not going
+to be a SPA, which I don't think actually makes for a great UX. I use
+[Clicky](https://clicky.com/) for less-sketchy analytics, so there's the JS code for that,
+although I didn't write it. Maybe for some animations or something...but definitely not for the
+kind of breaking-the-back-button behavior that's all the rage these days.
+
+Honestly the thing I hate about JS is what the community has decided on as the "standard
+style". Rather than get into exactly why, I'm just going to include some links at the bottom of
+this section to stuff that's heavily influenced my preferences.
 
 * [Linux kernel coding style: Indentation](https://www.kernel.org/doc/html/v4.10/process/coding-style.html#indentation)
 * [Hissp Style Guid](https://hissp.readthedocs.io/en/latest/style_guide.html)
-* [Eloquent Javascript: Introduction](https://eloquentjavascript.net/2nd_edition/00_intro.html), specifically the
-"On Programming" section
+* [Eloquent Javascript: Introduction](https://eloquentjavascript.net/2nd_edition/00_intro.html),
+specifically the "On Programming" section
 
 ### Design
 
-I have kind of a signature style for pages I've built, and my main idea is that a site should be simple enough that it
-can look and work basically the same on desktop and mobile. It also has a light and dark mode, but you don't have to
-click a button for it; it uses the media query to detect what you have your OS set to.
+I have kind of a signature style for pages I've built, and my main idea is that a site should be
+simple enough that it can look and work basically the same on desktop and mobile. It also has a
+light and dark mode, but you don't have to click a button for it; it uses the media query to
+detect what you have your OS set to.
 
 #### Fonts
 
-I used a [type scale](https://type-scale.com/) based on perfect fourths for the sizing. I wanted to use the golden
+I used a [type scale](https://type-scale.com/) based on perfect fourths for the sizing. I wanted to
+use the golden
+
 ratio or perfect fifths, but the size gets too huge too quickly.
 
 ##### Headings: [B612](https://b612-font.com/)
 
-This font was developed by AirBus to have high visibility on airplane cockpit screens, which is just about the coolest
-thing I've ever heard about a font. I'd love to use it as a programming font (there's a monospace version), but the
-parentheses look far too close to square brackets.
+This font was developed by AirBus to have high visibility on airplane cockpit screens, which is just
+about the coolest thing I've ever heard about a font. I'd love to use it as a programming font 
+(there's a monospace version), but the parentheses look far too close to square brackets.
 
 ##### Body: [Inter](https://rsms.me/inter/)
 
-I found this font from this [fascinating Quora answer](https://www.quora.com/What-is-the-most-readable-font-for-the-screen).
+I found this font from
+this [fascinating Quora answer](https://www.quora.com/What-is-the-most-readable-font-for-the-screen).
 The site has some super interesting info as well.
 
 ##### Code: [Berkeley Mono](https://berkeleygraphics.com/typefaces/berkeley-mono/)
 
-Never thought I'd pay for a coding font, but I love its retro look, and I was able to get a 7 with a slash through it.
+Never thought I'd pay for a coding font, but I love its retro look, and I was able to get a 7 with a
+slash through it.

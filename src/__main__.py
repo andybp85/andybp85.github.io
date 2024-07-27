@@ -3,7 +3,7 @@ from build import build, ignore
 from sys import exit
 
 
-def serve():
+def serve() -> None:
     server = Server()
     server.watch("**/*", func=build, ignore=ignore)
     server.serve(root="..")

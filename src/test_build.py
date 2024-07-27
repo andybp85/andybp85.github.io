@@ -1,10 +1,54 @@
-from bs4 import BeautifulSoup
-from os import path, remove, rmdir
-from pytest import fail
+from unittest.mock import call, patch
+from pathlib import Path
+import pytest
 
 from . import build
 
-pages_path = "test/src/pages"
+
+@pytest.fixture
+def build_args():
+    return {"pages_path": "test/src/pages",
+            "out_path": "test",
+            "template_path": "test/src/template.html"}
+
+
+@pytest.fixture
+def home():
+    return "<p>test</p>"
+
+
+@pytest.fixture
+def nav():
+    def _nav(page):
+        match page:
+            case "index":
+                return '<nav><a href="/page">Page</a><a href="/blog">Blog</a></nav>'
+            case "page":
+                return '<nav><a class="current" href="/page">Page</a><a href="/blog">Blog</a></nav>'
+            case "blog":
+                return '<nav><a href="/page">Page</a><a class="current" href="/blog">Blog</a></nav>'
+
+    return _nav
+
+
+@pytest.fixture
+def page():
+    return '<h2 id="page-id">page</h2>'
+
+
+@pytest.fixture(autouse=True)
+def pages_path():
+    return "test/src/pages"
+
+
+@pytest.fixture
+def template():
+    return "<html><head></head><body><header>", "</header><main>", "</main></body></html>"
+
+
+@pytest.fixture
+def styles_path():
+    return Path("test/styles.css")
 
 
 class TestIgnore:
@@ -46,136 +90,102 @@ class TestIgnore:
         assert not build.ignore('file.html')
 
 
-class TestStyles:
+class TestMakeCss:
     def test_empty(self):
         """it should do nothing for an empty input list"""
-        out = [o for o in build.styles([])]
+        out = [o for o in build.make_css([])]
         assert len(out) == 0
 
     def test_one_file(self):
         """it should parse one sass file"""
-        css = [o for o in build.styles(["test/src/pages/01.sass"])]
+        css = [o for o in build.make_css(["test/src/pages/01.sass"])]
         assert css == ["body{color:black}\n"]
 
     def test_two_files(self):
         """it should parse two sass files in the correct order"""
-        css = [o for o in build.styles(["test/src/pages/01.sass", "test/src/pages/02.sass"])]
+        css = [o for o in build.make_css(["test/src/pages/01.sass", "test/src/pages/02.sass"])]
         assert css[0] == "body{color:black}\n"
         assert css[1] == "div{font-size:1em}\n"
 
 
-class TestNav:
-    def test_index(self):
-        nav = [str(a) for a in build.nav(pages_path, 'test')]
-        assert nav == ['<a href="page">Page</a>', '<a href="blog">Blog</a>']
+@pytest.mark.usefixtures
+class TestMakeNav:
+    def test_index(self, pages_path):
+        page_nav = [str(a) for a in build.make_nav('test', pages_path)]
+        assert page_nav == ['<a href="/page">Page</a>', '<a href="/blog">Blog</a>']
 
-    def test_page(self):
-        nav = [str(a) for a in build.nav(pages_path, 'page')]
-        assert nav == ['<a class="current" href="page">Page</a>', '<a href="blog">Blog</a>']
+    def test_page(self, pages_path):
+        page_nav = [str(a) for a in build.make_nav('page', pages_path)]
+        assert page_nav == ['<a class="current" href="/page">Page</a>', '<a href="/blog">Blog</a>']
 
 
-class TestPage:
-    def test_index(self):
+@pytest.mark.usefixtures("home", "page", "nav", "template")
+class TestMakePage:
+    def test_index(self, home, nav, pages_path, template):
         """it should parse and append markdown to main in template for home page"""
-        contents = build.page(pages_path, "test/src/template.html", pages_path + "/home.md")
-        assert str(contents) == BeautifulSoup(
-            "<html><head></head><body><header><nav>"
-            "<a href=\"page\">Page</a><a href=\"blog\">Blog</a>"
-            "</nav></header><main><p>test</p></main></body></html>",
-            features="html.parser").prettify()
+        contents = build.make_page(pages_path + "/home.md", pages_path,
+                                   "test/src/template.html")
+        assert str(contents) == template[0] + nav("index") + template[1] + home + template[2]
 
-    def test_page(self):
+    def test_page(self, page, pages_path, template):
         """it should build properly with an empty markdown file and update the nav"""
-        contents = build.page(pages_path, "test/src/template.html", pages_path + "/page/page.md")
-        assert str(contents) == BeautifulSoup(
-            "<html><head></head><body><header><nav>"
-            "<a class=\"current\" href=\"page\">Page</a><a href=\"blog\">Blog</a>"
-            "</nav></header><main></main></body></html>",
-            features="html.parser").prettify()
+        contents = build.make_page(pages_path + "/page/page.md", pages_path,
+                                   "test/src/template.html")
+        assert str(contents) == (
+                template[0]
+                + '<nav><a class="current" href="/page">Page</a><a href="/blog">Blog</a></nav>'
+                + template[1] + page + template[2])
 
 
+@pytest.mark.usefixtures
 class TestMakePagePath:
-    def test_make_home_path(self):
-        file_path = build.make_page_path(pages_path, pages_path + "/home.md")
+    def test_make_home_path(self, pages_path):
+        file_path = build.make_page_path(pages_path + "/home.md", pages_path)
         assert file_path == ""
 
-    def test_make_page_path(self):
-        file_path = build.make_page_path(pages_path, pages_path + "/page/page.md")
+    def test_make_page_path(self, pages_path):
+        file_path = build.make_page_path(pages_path + "/page/page.md", pages_path)
         assert file_path == "page"
 
 
+@pytest.mark.build
+@pytest.mark.usefixtures("build_args", "home", "page", "nav", "styles_path", "template")
+@patch("src.build._write")
 class TestBuild:
-    build_args = {
-        "pages_path": "test/src/pages",
-        "out_path": "test",
-        "template_path": "test/src/template.html"
-    }
-    styles_path = "test/styles.css"
+    def test_build_styles(self, mock_write, build_args, styles_path):
+        """it should properly build the styles.css file from only numbered sass files"""
+        build.build(["test/01.sass"], **build_args)
+        mock_write.assert_called_once_with("body{color:black}\n\ndiv{font-size:1em}\n", styles_path)
 
-    def test_build_styles(self):
-        """it should properly build the styles.css file"""
-        build.build(["test/01.sass"], **self.build_args)
-        try:
-            with open(self.styles_path) as styles:
-                assert styles.read() == "body{color:black}\ndiv{font-size:1em}\n"
-        except Exception as e:
-            fail(str(e))
-        finally:
-            remove(self.styles_path)
-
-    def test_build_index(self):
+    def test_build_index(self, mock_write, home, build_args, nav, pages_path, template):
         """it should build the specified index file, but no others"""
-        build.build([pages_path + "/home.md"], **self.build_args)
-        try:
-            assert path.exists("test/index.html") is True
-            assert path.exists("test/page/index.html") is False
-            assert path.exists("index.html") is False
-            assert path.exists(self.styles_path) is False
-        except Exception as e:
-            fail(str(e))
-        finally:
-            remove("test/index.html")
+        build.build([pages_path + "/home.md"], **build_args)
+        mock_write.assert_called_once_with(
+            template[0] + nav("index") + template[1] + home + template[2],
+            Path('test/index.html'))
 
-    def test_build_mini_site(self):
-        """it should build a mini site consisting of a home page,
-           a styles.css, and a page in test/"""
-        build.build([
-            pages_path + "/home.md",
-            pages_path + "/page/page.md",
-            pages_path + "/blog/blog.md",
-            pages_path + "/01.sass",
-            pages_path + "/blog/blog.sass"
-        ], **self.build_args)
-        try:
-            assert path.exists("test/index.html") is True
-            assert path.exists("test/page/index.html") is True
-            assert path.exists(self.styles_path) is True
-        except Exception as e:
-            fail(str(e))
-        finally:
-            remove(self.styles_path)
-            remove("test/index.html")
-            remove("test/page/index.html")
-            remove("test/blog/index.html")
-            rmdir("test/page/")
-            rmdir("test/blog/")
-
-    def test_change_template(self):
+    def test_change_template(self, mock_write, home, page, build_args, nav, template):
         """it should build the entire html site if the template is changed"""
-        build.build(
-            [self.build_args["template_path"]],
-            **self.build_args)
-        try:
-            assert path.exists("test/index.html") is True
-            assert path.exists("test/page/index.html") is True
-            assert path.exists(self.styles_path) is False
-        except Exception as e:
-            fail(str(e))
-        finally:
-            remove("test/index.html")
-            remove("test/page/index.html")
-            remove("test/blog/index.html")
-            rmdir("test/page/")
-            rmdir("test/blog/")
+        build.build([build_args["template_path"]], **build_args)
+        print(mock_write.call_args_list)
+        mock_write.assert_has_calls(
+            [call(template[0] + nav("index") + template[1] + home + template[2],
+                  Path('test/index.html')),
+             call(template[0] + nav("page") + template[1] + page + template[2],
+                  Path('test/page/index.html')),
+             call(template[0] + nav("blog") + template[1] + template[2],
+                  Path('test/blog/index.html'))])
 
     # TODO: handle delete
+    @pytest.mark.skip
+    def test_delete_md_file_and_folder(self, build_args):
+        """if called with no arguments (livereload implementation detail), it should delete a
+        corresponding index (and folder if empty) if a markdown file gets deleted """
+        page_path = Path("test/old/index.html")
+        page_path.parent.mkdir(exist_ok=True, parents=True)
+        page_path.write_text('test')
+        build.build([build_args["template_path"]], **build_args)
+
+    @pytest.mark.skip
+    def test_delete_md_file_but_leave_folder(self):
+        None
