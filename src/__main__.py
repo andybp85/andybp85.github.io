@@ -1,5 +1,5 @@
 from livereload import Server
-from build import build, ignore
+from build import build, build_all, ignore
 from sys import exit
 
 
@@ -10,6 +10,7 @@ def serve() -> None:
 
 
 if __name__ == "__main__":
+    build_all()
     try:
         serve()
     except KeyboardInterrupt:
