@@ -11,32 +11,6 @@ in a blues rock band, Kru Kerly, which is based out of my hometown of Jersey Cit
 
 ## About This Site {#about-site}
 
-### Build
-
-I do Javascript all day at work for well over a decade now. I'm not going to say I'm sick of it,
-because there's plenty I like about using a multi-paradigm Scheme derivative (and Typescript is
-huge improvement on vanilla JS). But, there's several other languages I like far more, especially
-Python. So I used Python for the site builder. I've done a bunch of work with Python,
-and I think it nails everything I want in an everyday language. For details on how this works,
-check out the [ReadMe](https://github.com/andybp85/andybp85.github.io). I'm also using real Sass,
-without the bleeping curly braces. (I swear it's like my industry has Stockholm Syndrome for
-noisy code...)
-
-Will I write any JS for this site? It's definitely not going to be a SPA, which I don't think  
-actually makes for a great UX (and frankly does make for a damn-near nightmarish dev experience, 
-which is why we need these bloated-ass frameworks to make web apps). I use
-[Clicky](https://clicky.com/) for less-sketchy analytics, so there's the JS code for that, 
-although I didn't write it. Maybe embedded in the HTML for animations or something...but 
-definitely not for the kind of breaking-the-back-button behavior that's all the rage these days.
-
-Honestly the thing I hate about JS is what the community has decided on as the "standard style".
-Rather than get into exactly why, I'll just post some links below that I think explain my
-thoughts for me.
-
-* [Linux kernel coding style: Indentation](https://www.kernel.org/doc/html/v4.10/process/coding-style.html#indentation)
-* [Hissp Style Guid](https://hissp.readthedocs.io/en/latest/style_guide.html)
-* [Eloquent Javascript: Introduction](https://eloquentjavascript.net/2nd_edition/00_intro.html), specifically the "On Programming" section
-
 ### Design
 
 I have kind of a signature style for pages I've built, and my main idea is that a site should be
@@ -65,3 +39,29 @@ The site has some super interesting info as well.
 
 Never thought I'd pay for a coding font, but I love its retro look, and I was able to get a 7 with a
 slash through it.
+
+### Build
+
+I do Javascript all day at work for well over a decade now. I'm not going to say I'm sick of it,
+because there's plenty I like about using a multi-paradigm Scheme derivative (and Typescript is
+huge improvement on vanilla JS). But, there's several other languages I like far more, especially
+Python. So I used Python for the site builder. I've done a bunch of work with Python,
+and I think it nails everything I want in an everyday language. For details on how this works,
+check out the [ReadMe](https://github.com/andybp85/andybp85.github.io). I'm also using real Sass,
+without the bleeping curly braces. (I swear it's like my industry has Stockholm Syndrome for
+noisy code...)
+
+Will I write any JS for this site? It's definitely not going to be a SPA, which I don't think
+actually makes for a great UX (and frankly does make for a damn-near nightmarish dev experience,
+which is why we need these bloated-ass frameworks to make web apps). I use
+[Clicky](https://clicky.com/) for less-sketchy analytics, so there's the JS code for that,
+although I didn't write it. Maybe embedded in the HTML for animations or something...but
+definitely not for the kind of breaking-the-back-button behavior that's all the rage these days.
+
+Honestly, the thing I hate most about JS is what the community has decided on as the "standard
+style". Rather than get into exactly why, I'll just post some links below that I think explain my
+thoughts for me.
+
+* [Linux kernel coding style: Indentation](https://www.kernel.org/doc/html/v4.10/process/coding-style.html#indentation)
+* [Hissp Style Guid](https://hissp.readthedocs.io/en/latest/style_guide.html)
+* [Eloquent Javascript: Introduction](https://eloquentjavascript.net/2nd_edition/00_intro.html), specifically the "On Programming" section
