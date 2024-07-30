@@ -1,6 +1,6 @@
 from pathlib import Path
 from string import Template
-from unittest.mock import call, patch
+from unittest.mock import ANY, call, patch
 
 import pytest
 
@@ -153,23 +153,30 @@ Main
 @pytest.mark.usefixtures('build_args', 'home', 'page', 'page_styles', 'nav', 'styles_path',
                          'template')
 @patch('src.build._write')
+@patch('os.mkdir')
 class TestBuild:
-    def test_build_styles(self, mock_write, build_args, page_styles, styles_path):
+    def test_build_styles(self, _mock_mkdir, mock_write, build_args, page_styles, styles_path):
         """it should properly build and sort the styles.css file from only numbered sass files"""
         build.build(['pages/01.sass'], **build_args)
         mock_write.assert_called_once_with('body{color:black}\ndiv{font-size:1em}\n', styles_path)
 
-    def test_build_index(self, mock_write, home, build_args, nav, pages_path, page_styles,
-                         template):
+    def test_build_index(self, mock_mkdir, mock_write, home, build_args, nav, pages_path,
+                         page_styles, template):
         """it should build the specified index file, but no others"""
         build.build([pages_path + '/home.md'], **build_args)
+        mock_mkdir.assert_called_once_with(Path('test'), ANY)
         mock_write.assert_called_once_with(
             template.substitute(head=page_styles('index'), header=nav('index'), main=home),
             Path('test/index.html'))
 
-    def test_change_template(self, mock_write, build_args, home, nav, page, page_styles, template):
+    def test_change_template(self, mock_mkdir, mock_write, build_args, home, nav, page, page_styles,
+                             template):
         """it should build the entire html site if the template is changed"""
         build.build([build_args['template_path']], **build_args)
+        mock_mkdir.assert_has_calls([
+            call(Path('test'), ANY),
+            call(Path('test/page'), ANY),
+            call(Path('test/blog'), ANY)])
         mock_write.assert_has_calls(
             [call(template.substitute(head=page_styles('index'), header=nav('index'), main=home),
                   Path('test/index.html')),
@@ -178,20 +185,22 @@ class TestBuild:
              call(template.substitute(head=page_styles('blog'), header=nav('blog'), main=''),
                   Path('test/blog/index.html'))])
 
-    def test_build_home_styles(self, mock_write, build_args, home, nav, pages_path, page_styles,
-                               template):
+    def test_build_home_styles(self, mock_mkdir, mock_write, build_args, home, nav, pages_path,
+                               page_styles, template):
         """it should properly compile home.sass and append it to the home page"""
         build.build([pages_path + '/home.sass'], **build_args)
+        mock_mkdir.assert_called_once_with(Path('test'), ANY)
         mock_write.assert_has_calls([
             call('div{color:red}\n', Path('test/home.css')),
             call(template.substitute(
                 head=page_styles('index'),
                 header=nav('index'), main=home), Path('test/index.html'))])
 
-    def test_build_blog_styles(self, mock_write, build_args, home, nav, pages_path, page_styles,
-                               template):
+    def test_build_blog_styles(self, mock_mkdir, mock_write, build_args, home, nav, pages_path,
+                               page_styles, template):
         """it should properly compile home.sass and append it to the home page"""
         build.build([pages_path + '/blog/blog.sass'], **build_args)
+        mock_mkdir.assert_called_once_with(Path('test/blog'), ANY)
         mock_write.assert_has_calls([
             call('div{color:blue}\n', Path('test/blog/blog.css')),
             call(template.substitute(
