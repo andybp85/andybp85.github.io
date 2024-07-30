@@ -2,6 +2,8 @@
 
 A simple custom build system in a proper tooling language: Python!
 
+See it live at [www.andrewstanish.com](https://www.andrewstanish.com/)
+
 ## Getting Started
 
 `src/` is a module and I made a setup script, so this is stupid easy:
