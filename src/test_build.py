@@ -202,6 +202,16 @@ class TestBuild:
                 head=page_styles('index'),
                 header=nav('index'), main=home), Path('test/index.html'))])
 
+    def test_build_blog_styles(self, mock_write, build_args, home, nav, pages_path, page_styles,
+                               template):
+        """it should properly compile home.sass and append it to the home page"""
+        build.build([pages_path + '/blog/blog.sass'], **build_args)
+        mock_write.assert_has_calls([
+            call('div{color:blue}\n', Path('test/blog/blog.css')),
+            call(template.substitute(
+                head=page_styles('blog'),
+                header=nav('blog'), main=''), Path('test/blog/index.html'))])
+
 
 @pytest.mark.usefixtures('build_args')
 @patch('src.build.build')
