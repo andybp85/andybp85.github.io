@@ -178,20 +178,6 @@ class TestBuild:
              call(template.substitute(head=page_styles('blog'), header=nav('blog'), main=''),
                   Path('test/blog/index.html'))])
 
-    # TODO: handle delete
-    @pytest.mark.skip
-    def test_delete_md_file_and_folder(self, build_args):
-        """if called with no arguments (livereload implementation detail), it should delete a
-        corresponding index (and folder if empty) if a markdown file gets deleted """
-        page_path = Path('test/old/index.html')
-        page_path.parent.mkdir(exist_ok=True, parents=True)
-        page_path.write_text('test')
-        build.build([build_args['template_path']], **build_args)
-
-    @pytest.mark.skip
-    def test_delete_md_file_but_leave_folder(self):
-        print(None)
-
     def test_build_home_styles(self, mock_write, build_args, home, nav, pages_path, page_styles,
                                template):
         """it should properly compile home.sass and append it to the home page"""
@@ -211,6 +197,20 @@ class TestBuild:
             call(template.substitute(
                 head=page_styles('blog'),
                 header=nav('blog'), main=''), Path('test/blog/index.html'))])
+
+    # TODO: handle delete
+    @pytest.mark.skip
+    def test_delete_md_file_and_folder(self, build_args):
+        """if called with no arguments (livereload implementation detail), it should delete a
+        corresponding index (and folder if empty) if a markdown file gets deleted """
+        page_path = Path('test/old/index.html')
+        page_path.parent.mkdir(exist_ok=True, parents=True)
+        page_path.write_text('test')
+        build.build([build_args['template_path']], **build_args)
+
+    @pytest.mark.skip
+    def test_delete_md_file_but_leave_folder(self):
+        print(None)
 
 
 @pytest.mark.usefixtures('build_args')

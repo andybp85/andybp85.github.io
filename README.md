@@ -15,9 +15,9 @@ See it live at [www.andrewstanish.com](https://www.andrewstanish.com/)
 > python .
 ```
 
-This makes you a nice [virtualenv](https://docs.python.org/3/library/venv.html#how-venvs-work) 
-in `src/pyenv`, loads up [LiveReload](https://livereload.readthedocs.io/en/stable/), and serves
-the site at [http://localhost:5500/](http://localhost:5500/)
+This makes you a nice [virtualenv](https://docs.python.org/3/library/venv.html#how-venvs-work)
+in `src/pyenv`, loads up [LiveReload](https://livereload.readthedocs.io/en/stable/), and serves the
+site at [http://localhost:5500/](http://localhost:5500/)
 
 ### Build All
 
@@ -68,8 +68,6 @@ Watch:
 ```shell
 > ptw -- -vv
 ```
-
-(Although I'm mainly just using the auto-run in PyCharm.)
 
 Coverage:
 
