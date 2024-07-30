@@ -11,6 +11,7 @@ def serve() -> None:
 
 if __name__ == "__main__":
     build_all()
+    # noinspection PyBroadException
     try:
         serve()
     except KeyboardInterrupt:

@@ -123,12 +123,14 @@ Brevity is readability. Hence: Python. Here's some of my preferences:
 - Max 250 lines in a source (non-test) file.
     - It's way easier to have separate files in panes than to have to scroll or keep track of
       multiple panes with the same file.
-- Function should have Max 20 lines & 10 cognitive complexity.
-- Functions take and return the most primitive type possible.
-    - Help ensure an easy-to-grok interface.
+- Variables should never be named `value` or `data`.
+  - We know that already. What's the actual purpose of the thing?
 - Functions have action names, verbs are nouns, and make sure to pluralize correctly.
 - Functions do what the name says, and that's it.
     - If you feel dumb typing the name of a function, it probably shouldn't be one.
+- Function should have Max 20 lines & 10 cognitive complexity.
+- Functions take and return the most primitive type possible.
+        - Help ensure an easy-to-grok interface.
 - Functions starting with `_` are private to the module.
 - Everything should be sorted alphabetically wherever possible
 - Side effects (in this case writing to files) are localized to one function per kind.
