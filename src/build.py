@@ -21,8 +21,21 @@ def _compile_sass(sass: str) -> str:
     return compile_sass(string=sass, indented=True, output_style='compressed')
 
 
+def _glob(glob_pattern: str, pages_path: str, recursive: bool = True) -> [str]:
+    return glob(str(Path(pages_path).joinpath(glob_pattern)), recursive=recursive)
+
+
 def _markdown(md: str) -> str:
     return markdown(md, extensions=['attr_list', 'meta'])
+
+
+def _markdown_file_paths(changed_files: [str], pages_path: str, page_sass_paths: [str],
+                         template_path: str) -> [str]:
+    if any(path == template_path for path in changed_files):
+        return _glob('**/*.md', pages_path)
+    else:
+        return ([p for p in filter(lambda f: f.endswith('.md'), changed_files)]
+                + [Path(p).with_suffix('.md') for p in page_sass_paths])
 
 
 def _nav_vals(p: str, page_name: str) -> dict[str, str]:
@@ -37,12 +50,15 @@ def _page_path(file_path: str, pages_path: str) -> str:
     return '/'.join(Path(file_path).parts[len(Path(pages_path).parts):-1])
 
 
+def _sass_paths(changed_files: [str]) -> (str, str):
+    return reduce(
+        lambda a, c: (a[0] + [c], a[1]) if Path(c).stem[:2].isdigit() else (a[0], a[1] + [c]),
+        filter(lambda f: f.endswith('.sass'), changed_files),
+        ([], []))
+
+
 def _soup(html: str | TextIO) -> BeautifulSoup:
     return BeautifulSoup(html, features='html.parser')
-
-
-def _glob(glob_pattern: str, pages_path: str, recursive: bool = True) -> [str]:
-    return glob(str(Path(pages_path).joinpath(glob_pattern)), recursive=recursive)
 
 
 def _write(contents: str, outfile_path: Path) -> None:
@@ -83,35 +99,9 @@ def _make_page(md_file_path: str, pages_path: str, template_path: str, style_pat
         return str(template)
 
 
-'''
-Builder Functions
-
-These write to files and are tested as part of `build()`.
-'''
-
-
-def _build_pages(out_path: str, md_file_paths: [str], pages_path: str, template_path: str) -> None:
-    for path in md_file_paths:
-        css_path = (Path(_page_path(path, pages_path), Path(path).stem + '.css')
-                    if exists(Path(path).with_suffix('.sass')) else '')
-        contents = _make_page(path, pages_path, template_path, str(css_path))
-        page_path = Path(out_path, _page_path(path, pages_path), 'index.html')
-        page_path.parent.mkdir(exist_ok=True, parents=True)
-        _write(contents, page_path)
-
-
-def _build_page_styles(out_path: str, pages_path: str, sass_file_paths: [str]) -> None:
-    for path in sass_file_paths:
-        css = _make_css(path)
-        page_path = _page_path(path, pages_path)
-        page_name = Path(path).stem
-        _write(css, Path(out_path, page_path, page_name + '.css'))
-
-
-def _build_styles(out_path: str, pages_path: str) -> None:
+def _make_styles(pages_path: str) -> str:
     paths = sorted(_glob('[0-9][0-9]*.sass', pages_path), key=lambda p: Path(p).name)
-    contents = ''.join([_make_css(style) for style in paths])
-    _write(contents, Path(out_path, 'styles.css'))
+    return ''.join([_make_css(style) for style in paths])
 
 
 '''
@@ -123,25 +113,21 @@ These are the actual interface to the module, structured around the needs of `li
 
 def build(changed_files: [str] = None, out_path: str = '..', pages_path: str = 'pages',
           template_path: str = 'template.html') -> None:
-    """changed_files` works with livereload's watch method's `func` param"""
-    print(changed_files)
-    global_sass_paths, page_sass_paths = reduce(
-        lambda a, c: (a[0] + [c], a[1]) if Path(c).stem[:2].isdigit() else (a[0], a[1] + [c]),
-        filter(lambda f: f.endswith('.sass'), changed_files),
-        ([], []))
+    """`changed_files` works with livereload's watch method's `func` param"""
+    global_sass_paths, page_sass_paths = _sass_paths(changed_files)
+
     if len(global_sass_paths) > 0:
-        _build_styles(out_path, pages_path)
-    if len(page_sass_paths) > 0:
-        _build_page_styles(out_path, pages_path, page_sass_paths)
+        _write(_make_styles(pages_path), Path(out_path, 'styles.css'))
 
-    if any(path == template_path for path in changed_files):
-        _build_pages(out_path, _glob('**/*.md', pages_path), pages_path, template_path)
-        return
+    for p in page_sass_paths:
+        _write(_make_css(p), Path(out_path, _page_path(p, pages_path), Path(p).stem + '.css'))
 
-    md_paths = ([p for p in filter(lambda f: f.endswith('.md'), changed_files)]
-                + [Path(p).with_suffix('.md') for p in page_sass_paths])
-    if len(md_paths) > 0:
-        _build_pages(out_path, md_paths, pages_path, template_path)
+    for path in _markdown_file_paths(changed_files, pages_path, page_sass_paths, template_path):
+        css_path = (Path(_page_path(path, pages_path), Path(path).stem + '.css')
+                    if exists(Path(path).with_suffix('.sass')) else '')
+        page_path = Path(out_path, _page_path(path, pages_path), 'index.html')
+        page_path.parent.mkdir(exist_ok=True, parents=True)
+        _write(_make_page(path, pages_path, template_path, str(css_path)), page_path)
 
 
 def build_all(out_path: str = '..', pages_path: str = 'pages',
