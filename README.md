@@ -34,15 +34,17 @@ in the nav, and any Markdown file in one of these folders (including `src/pages`
 and `index.html` for that path. It does this by dumping the contents of the Markdown into the
 `main` tag of `src/template.html`. Multiple Markdown files in a folder are not handled.
 
-### Subpages
+```
+// TODO: ### Subpages
 
 Any Markdown files in sub dirs of `src/pages` will be built out and added to the hierarchy in the
 sub nav on the right side of the page.
 
-`// TODO: Deleting a Markdown file in a folder with no subfolders will delete the folder as
-well, and remove it from the nav (if applicable).`
+Deleting a Markdown file in a folder with no subfolders will delete the folder as
+well, and remove it from the nav (if applicable).
 
-`// TODO: more`
+...
+```
 
 ### Styles
 
