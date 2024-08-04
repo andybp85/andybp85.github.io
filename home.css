@@ -1,1 +1,1 @@
-main{display:flex;gap:30px}
+main{grid-template-columns:2fr 300px;justify-items:end}main a{display:inline-block;text-decoration:none}main section{text-align:center;width:100%}main section div{display:flex;justify-content:space-evenly;margin-top:2rem}@media (max-width: 460px){main section div{flex-wrap:wrap-reverse;gap:2rem;margin-top:2rem}}@media (max-width: 790px){main{grid-template-columns:1fr}main div{display:flex;justify-content:center;grid-row:2;width:100%}main section{margin-top:2rem}}

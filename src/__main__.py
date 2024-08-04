@@ -1,6 +1,8 @@
-from livereload import Server
-from build import build, build_all, ignore
 from sys import exit
+
+from livereload import Server
+
+from build import build, build_all, ignore
 
 
 def serve() -> None:

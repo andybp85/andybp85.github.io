@@ -34,23 +34,24 @@ in the nav, and any Markdown file in one of these folders (including `src/pages`
 and `index.html` for that path. It does this by dumping the contents of the Markdown into the
 `main` tag of `src/template.html`. Multiple Markdown files in a folder are not handled.
 
-```
-// TODO: ### Subpages
+### Subpages
 
 Any Markdown files in sub dirs of `src/pages` will be built out and added to the hierarchy in the
 sub nav on the right side of the page.
 
+```
+// TODO:
+
 Deleting a Markdown file in a folder with no subfolders will delete the folder as
 well, and remove it from the nav (if applicable).
-
-...
 ```
 
 ### Styles
 
-First it compiles the Sass files starting with numbers in `src/pages` and jams everything in
-order in `/styles.css`. Any Sass file with the same name as a Markdown file will be compiled and
-appended to the `index.html` in the same dir.
+All Sass files starting with numbers in `src/pages` are top-level; they get compiled and
+jammed in order in `/styles.css`, which is present in the template so is on every page. Any Sass
+file with the same name as a Markdown file will be compiled and appended to the `index.html` in
+the same dir.
 
 ### Tests
 
@@ -66,7 +67,7 @@ Run all commands from `src/`.
 Watch:
 
 ```shell
-> ptw -- -vv
+> ptw --ext=sass,html,md,py -- -vv
 ```
 
 Coverage:
@@ -120,17 +121,19 @@ Brevity is readability. Hence: Python. Here's some of my preferences:
       about this.
 - 100 character line width.
     - This fits nicely in my editor with multiple panes (and my 14" MBP is set to 2048x1330).
+    - Also, I tend to write long lines of Python, so this helps reel them in.
 - Max 250 lines in a source (non-test) file.
     - It's way easier to have separate files in panes than to have to scroll or keep track of
       multiple panes with the same file.
 - Variables should never be named `value` or `data`.
-  - We know that already. What's the actual purpose of the thing?
+    - We know that already. What's the actual purpose of the thing?
 - Functions have action names, verbs are nouns, and make sure to pluralize correctly.
+    - Single-letter var names are okay in iteration contexts.
 - Functions do what the name says, and that's it.
     - If you feel dumb typing the name of a function, it probably shouldn't be one.
 - Function should have Max 20 lines & 10 cognitive complexity.
 - Functions take and return the most primitive type possible.
-        - Help ensure an easy-to-grok interface.
+    - Helps ensure an easy-to-grok interface.
 - Functions starting with `_` are private to the module.
 - Everything should be sorted alphabetically wherever possible
 - Side effects (in this case writing to files) are localized to one function per kind.
@@ -138,6 +141,10 @@ Brevity is readability. Hence: Python. Here's some of my preferences:
 - Prefer functions over OOP.
     - I need to write a blog post about this at some point, but basically if you're not actually
       modeling the interaction of objects, OOP isn't the best abstraction.
+- All patching/spys/etc. are set up in the unit tests in which they're used.
+    - Yes, this violates DRY. In this case, it's better for readability (especially for the next 
+      guy) to not have to wonder what magic is happening somewhere else in the file to get the 
+      test to pass. 
 
 (This is a bit of a rant, for [why](https://www.andrewstanish.com/about#about-site) go read the
 site :)

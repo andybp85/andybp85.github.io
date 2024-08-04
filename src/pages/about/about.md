@@ -59,8 +59,8 @@ although I didn't write it. Maybe embedded in the HTML for animations or somethi
 definitely not for the kind of breaking-the-back-button behavior that's all the rage these days.
 
 Honestly, the thing I hate most about JS is what the community has decided on as the "standard
-style". Rather than get into exactly why, I'll just post some links below that I think explain my
-thoughts for me.
+style" (and don't get me started on Prettier). Rather than get into exactly why, I'll just post
+some links below that I think explain my thoughts for me.
 
 * [Linux kernel coding style: Indentation](https://www.kernel.org/doc/html/v4.10/process/coding-style.html#indentation)
 * [Hissp Style Guid](https://hissp.readthedocs.io/en/latest/style_guide.html)

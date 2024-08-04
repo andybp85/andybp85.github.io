@@ -3,47 +3,26 @@
 @import "fonts/Berkeley-Mono-Variable/berkeley-Mono.css"
 
 body
-	margin: 0
-	padding: 0
-	font-family: InterVariable, sans-serif, font-optical-sizing auto
 	background-color: #222
 	color: #f0f0f0
-
-	#github
-		filter: invert(1)
+	font-family: InterVariable, sans-serif, font-optical-sizing auto
+	margin: 0
+	padding: 0
 
 main
+	display: grid
+	gap: 1rem
+	margin: 0 auto 1rem
 	max-width: 1024px
-	margin: 0 auto 100px
 	padding: 0 15px
 
-footer
-	background-color: #222
-	border-top: 1px solid #666
-	bottom: 0
-	display: flex
-	gap: 15px
-	justify-content: center
-	padding: 15px 0
-	position: fixed
-	width: 100%
-
-	> a
-	    display: flex
-	    align-content: center
-
-	    img
-	        height: 32px
-
-	#clicky
-		align-self: center
-		position: absolute
-		right: 15px
+	img
+        border-radius: 5px
 
 h1, h2, h3, h4, h5, h6
 	font-family: B612-Regular, serif
-	margin-top: 1.5rem
 	margin-bottom: 1rem
+	margin-top: 1.5rem
 
 h1
 	font-size: 3.157rem
