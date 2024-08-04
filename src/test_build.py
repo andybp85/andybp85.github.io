@@ -14,7 +14,7 @@ Fixtures
 @pytest.fixture
 def build_args(template_path):
     return {'out_path': 'test',
-            'pages_path': 'test/src/pages',
+            'pages_path': 'test/pages',
             'template_path': template_path}
 
 
@@ -44,7 +44,7 @@ def page():
 
 @pytest.fixture(autouse=True)
 def pages_path():
-    return 'test/src/pages'
+    return 'test/pages'
 
 
 @pytest.fixture
@@ -87,7 +87,7 @@ def template():
 
 @pytest.fixture
 def template_path():
-    return 'test/src/template.html'
+    return 'test/template.html'
 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -114,16 +114,16 @@ Makers
 class TestMakeCss:
     def test_file(self):
         """it should parse a sass file"""
-        assert build._make_css('test/src/pages/01.sass') == 'body{color:black}\n'
+        assert build._make_css('test/pages/01.sass') == 'body{color:black}\n'
 
     def test_empty_file(self):
         """it should parse an empty sass file"""
-        assert build._make_css('test/src/empty.sass') == ''
+        assert build._make_css('test/empty.sass') == ''
 
     @pytest.mark.skip
     def test_file_with_import(self):
         """it should parse a sass file"""
-        assert build._make_css('test/src/pages/blog/post/post.sass') == 'div{color:blue}\n'
+        assert build._make_css('test/pages/blog/post/post.sass') == 'div{color:blue}\n'
 
 
 @pytest.mark.navs
@@ -302,10 +302,10 @@ class TestBuildAll:
         build.build_all(**build_args)
 
         mock_build.assert_called_once_with(
-            ['test/src/pages/01.sass', 'test/src/pages/home.md', 'test/src/pages/02.sass',
-             'test/src/pages/home.sass', 'test/src/pages/page/page.md',
-             'test/src/pages/blog/blog.md', 'test/src/pages/blog/blog.sass',
-             'test/src/pages/blog/post/post.md', 'test/src/pages/blog/post/post.sass'],
+            ['test/pages/01.sass', 'test/pages/home.md', 'test/pages/02.sass',
+             'test/pages/home.sass', 'test/pages/page/page.md',
+             'test/pages/blog/blog.md', 'test/pages/blog/blog.sass',
+             'test/pages/blog/post/post.md', 'test/pages/blog/post/post.sass'],
             **build_args)
 
 
