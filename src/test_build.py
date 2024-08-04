@@ -138,7 +138,6 @@ class TestMakeNav:
         """it should make a page nav with the page marked current"""
         page_nav = build._make_nav('page', pages_path)
         assert page_nav == ['<a class="current" href="/page">Page</a>', '<a href="/blog">Blog</a>']
-        # pytest.fail()
 
     def test_page_with_subpages(self, pages_path):
         """it should make a page nav with the top-level page marked current"""
