@@ -88,7 +88,7 @@ def _make_page(md_file_path: str, pages_path: str, template_path: str, style_pat
         if parent_path != '.':
             page_name = page_path.split('/')[-1]
             sub_nav = _soup(f'<nav>{''.join(_make_nav(page_name, pages_path, parent_path))}</nav>')
-            main.insert_after(sub_nav)
+            main.insert_before(sub_nav)
 
         if style_path != '':
             head_elm = index.find('head')

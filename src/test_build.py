@@ -81,8 +81,8 @@ def subnav():
 @pytest.fixture
 def template():
     return Template(('<html><head>$head</head><body>'
-                     '<header>$header</header>'
-                     '<main>$main</main>$side_nav</body></html>\n'))
+                     '<header>$header</header>$side_nav'
+                     '<main>$main</main></body></html>\n'))
 
 
 @pytest.fixture

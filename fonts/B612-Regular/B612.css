@@ -1,6 +1,7 @@
 @font-face {
+    font-display: swap;
     font-family: 'B612-Regular';
-    src: url('B612-Regular.woff') format('woff');
-    font-weight: normal;
     font-style: normal;
+    font-weight: normal;
+    src: url('B612-Regular.woff') format('woff');
 }

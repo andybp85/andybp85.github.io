@@ -1,6 +1,7 @@
 @font-face {
+    font-display: swap;
     font-family: "Berkeley Mono Variable";
+    font-weight: 100 1000;
     src: url("BerkeleyMonoVariable-Regular.woff2") format("woff2-variations"),
     url("BerkeleyMonoVariable-Italic.woff2") format("woff2-variations");
-    font-weight: 100 1000;
 }

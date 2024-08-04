@@ -1,12 +1,18 @@
 main
     grid-template-columns: 2fr 300px
+    grid-template-rows: 150px
     justify-items: end
+    column-gap: 2rem
 
     a
         display: inline-block
         text-decoration: none
 
-    section
+    section:first-child
+        font-size: 1.2rem
+        line-height: 1.6rem
+
+    section:last-child
         text-align: center
         width: 100%
 
@@ -22,6 +28,7 @@ main
 
     @media (max-width: 790px)
         grid-template-columns: 1fr
+        grid-template-rows: auto
 
         div
             display: flex
@@ -29,5 +36,5 @@ main
             grid-row: 2
             width: 100%
 
-        section
+        section:last-child
             margin-top: 2rem
