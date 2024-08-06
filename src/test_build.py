@@ -140,17 +140,17 @@ class TestMakeNav:
         assert page_nav == ['<a class="current" href="/page">Page</a>', '<a href="/blog">Blog</a>']
 
     def test_page_with_subpages(self, pages_path):
-        """it should make a page nav with the top-level page marked current"""
-        page_nav = build._make_nav('blog', pages_path)
-        assert page_nav == ['<a href="/page">Page</a>', '<a class="current" href="/blog">Blog</a>']
+        """it should make a subnav with no page marked current"""
+        sub_nav = build._make_nav('blog', pages_path, 'blog')
+        assert sub_nav == ['<a href="/blog/post">Post</a>']
 
     def test_subpage(self, pages_path):
-        """it should make the top-level nav showing which page we're on and a subnav showing
-        which subpage we're on"""
+        """it should make a subnav showing which subpage we're on"""
         sub_nav = build._make_nav('post', pages_path, 'blog')
         assert sub_nav == ['<a class="current" href="/blog/post">Post</a>']
 
 
+@pytest.mark.page
 @pytest.mark.usefixtures('home', 'nav', 'page', 'page_styles', 'template', 'template_path')
 class TestMakePage:
     def test_index(self, home, nav, pages_path, template, template_path):
@@ -163,16 +163,16 @@ class TestMakePage:
         contents = build._make_page(pages_path + '/page/page.md', pages_path, template_path)
         assert contents == template.substitute(head='', header=nav('page'), main=page, side_nav='')
 
-    def test_add_stylesheet(self, home, nav, page, pages_path, page_styles, template,
+    def test_add_stylesheet(self, home, nav, page, pages_path, page_styles, subnav, template,
                             template_path):
         index_contents = build._make_page(pages_path + '/home.md', pages_path, template_path,
                                           'home.css')
         assert index_contents == template.substitute(head=page_styles('index'),
                                                      header=nav('index'), main=home, side_nav='')
-        page_contents = build._make_page(pages_path + '/blog/blog.md', pages_path, template_path,
+        blog_contents = build._make_page(pages_path + '/blog/blog.md', pages_path, template_path,
                                          'blog/blog.css')
-        assert page_contents == template.substitute(head=page_styles('blog'), header=nav('blog'),
-                                                    main='', side_nav='')
+        assert blog_contents == template.substitute(head=page_styles('blog'), header=nav('blog'),
+                                                    main='', side_nav=subnav('blog'))
 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -196,7 +196,6 @@ class TestBuild:
         """it should build the specified index file and attach styles"""
         mock_mkdir = mocker.patch('os.mkdir')
         mock_write = mocker.patch('src.build._write')
-        mocker.patch('os.path.exists', return_value=True)
 
         build.build([pages_path + '/home.md'], **build_args)
 
@@ -207,12 +206,10 @@ class TestBuild:
             Path('test/index.html'))
 
     def test_change_template(self, build_args, home, mocker, nav, page, pages_path, page_styles,
-                             template):
+                             subnav, template):
         """it should build the entire html site if the template is changed"""
         mock_mkdir = mocker.patch('os.mkdir')
         mock_write = mocker.patch('src.build._write')
-        mocker.patch('os.path.exists',
-                     side_effect=lambda x: str(x) != pages_path + '/page/page.sass')
 
         build.build([build_args['template_path']], **build_args)
 
@@ -227,7 +224,7 @@ class TestBuild:
              call(template.substitute(head='', header=nav('page'), main=page, side_nav=''),
                   Path('test/page/index.html')),
              call(template.substitute(head=page_styles('blog'), header=nav('blog'), main='',
-                                      side_nav=''),
+                                      side_nav=subnav('blog')),
                   Path('test/blog/index.html'))])
 
     def test_build_home_styles(self, build_args, home, mocker, nav, pages_path, page_styles,
@@ -235,7 +232,6 @@ class TestBuild:
         """it should properly compile home.sass and append it to the home page"""
         mock_mkdir = mocker.patch('os.mkdir')
         mock_write = mocker.patch('src.build._write')
-        mocker.patch('os.path.exists', return_value=True)
 
         build.build([pages_path + '/home.sass'], **build_args)
 
@@ -247,11 +243,10 @@ class TestBuild:
                 header=nav('index'), main=home, side_nav=''), Path('test/index.html'))])
 
     def test_build_blog_styles(self, build_args, home, mocker, nav, pages_path, page_styles,
-                               template):
-        """it should properly compile home.sass and append it to the home page"""
+                               subnav, template):
+        """it should properly compile and add blog.sass, and make the blog with side nav"""
         mock_mkdir = mocker.patch('os.mkdir')
         mock_write = mocker.patch('src.build._write')
-        mocker.patch('os.path.exists', return_value=True)
 
         build.build([pages_path + '/blog/blog.sass'], **build_args)
 
@@ -260,21 +255,21 @@ class TestBuild:
             call('div{color:blue}\n', Path('test/blog/blog.css')),
             call(template.substitute(
                 head=page_styles('blog'),
-                header=nav('blog'), main='', side_nav=''), Path('test/blog/index.html'))])
+                header=nav('blog'), main='', side_nav=subnav('blog')),
+                Path('test/blog/index.html'))])
 
     def test_build_subpage(self, build_args, home, mocker, nav, pages_path, page_styles, subnav,
                            template):
         """it should build a subpage with a side nav, the correct top nav, and a stylesheet"""
         mock_mkdir = mocker.patch('os.mkdir')
         mock_write = mocker.patch('src.build._write')
-        mocker.patch('os.path.exists', return_value=True)
 
         build.build([pages_path + '/blog/post/post.md'], **build_args)
 
         mock_mkdir.assert_called_once_with(Path('test/blog/post/'), ANY)
         mock_write.assert_called_once_with(template.substitute(
-            head=page_styles('post'), header=nav('blog'), main='<p>test post</p>', side_nav=subnav(
-                'post')),
+            head=page_styles('post'), header=nav('blog'), main='<p>test post</p>',
+            side_nav=subnav('post')),
             Path('test/blog/post/index.html'))
 
     # TODO: handle delete

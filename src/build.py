@@ -82,17 +82,16 @@ def _make_page(md_file_path: str, pages_path: str, template_path: str, style_pat
         main = index.find('main')
         main.append(_soup(_markdown(mdFile.read())))
         page_path = _page_path(md_file_path, pages_path)
-        index.find('nav').append(_soup(''.join(_make_nav(page_path.split('/')[0], pages_path))))
+        top_level = page_path.split('/')[0]
+        index.find('nav').append(_soup(''.join(_make_nav(top_level, pages_path))))
 
-        parent_path = str(Path(page_path).parent)
-        if parent_path != '.':
-            page_name = page_path.split('/')[-1]
-            sub_nav = _soup(f'<nav>{''.join(_make_nav(page_name, pages_path, parent_path))}</nav>')
-            main.insert_before(sub_nav)
+        if str(Path(md_file_path).parent) != pages_path:
+            sub_nav_links = _make_nav(page_path.split('/')[-1], pages_path, top_level)
+            if len(sub_nav_links) > 0:
+                main.insert_before(_soup(f'<nav>{''.join(sub_nav_links)}</nav>'))
 
         if style_path != '':
-            head_elm = index.find('head')
-            head_elm.append(_soup('<link rel="stylesheet" href="/' + style_path + '">'))
+            index.find('head').append(_soup('<link rel="stylesheet" href="/' + style_path + '">'))
 
         return str(index)
 
