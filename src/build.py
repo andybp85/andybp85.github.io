@@ -1,3 +1,5 @@
+import re
+import subprocess
 from functools import reduce
 from glob import glob
 from os import path, scandir
@@ -6,17 +8,12 @@ from typing import TextIO
 
 from bs4 import BeautifulSoup
 from markdown import markdown
-from sass import compile as compile_sass
 
 '''
 Utility Functions
 
 Misc stuff that's better to have a small function handle
 '''
-
-
-def _compile_sass(sass: str) -> str:
-    return compile_sass(string=sass, indented=True, output_style='compressed')
 
 
 def _glob(glob_pattern: str, pages_path: str, recursive: bool = True) -> [str]:
@@ -40,10 +37,22 @@ def _page_path(file_path: str, pages_path: str) -> str:
     return '/'.join(Path(file_path).parts[len(Path(pages_path).parts):-1])
 
 
-def _sass_paths(changed_files: [str]) -> (str, str):
+def _handle_sass_partials(changed_files: [str], pages_path: str) -> [str]:
+    for sass_path in filter(lambda f: f.endswith('.sass'), changed_files):
+        sass_file_name = Path(sass_path).stem
+        if sass_file_name[0] == '_':
+            import_test = re.compile(f'^@use.*{sass_file_name[1:]}\'$', re.M)
+            for check_sass_path in _glob('**/*.sass', pages_path):
+                if import_test.search(Path(check_sass_path).read_text()) is not None:
+                    yield check_sass_path
+        else:
+            yield sass_path
+
+
+def _sass_paths(changed_files: [str], pages_path: str) -> (str, str):
     return reduce(
         lambda a, c: (a[0] + [c], a[1]) if Path(c).stem[:2].isdigit() else (a[0], a[1] + [c]),
-        filter(lambda f: f.endswith('.sass'), changed_files),
+        [p for p in _handle_sass_partials(changed_files, pages_path)],
         ([], []))
 
 
@@ -53,7 +62,7 @@ def _soup(html: str | TextIO) -> BeautifulSoup:
 
 def _write(contents: str, outfile_path: Path) -> None:
     with open(outfile_path, 'w') as outfile:
-        outfile.write(contents)
+        outfile.write(contents.replace('\n', ''))
 
 
 '''
@@ -63,10 +72,12 @@ These make pieces of page content
 '''
 
 
-def _make_css(sass_file_path: str) -> str:
-    with open(sass_file_path, 'r') as sass_file:
-        sass = sass_file.read()
-        return sass if sass == '' else _compile_sass(sass)
+def _make_css(sass_file_path: str, sass_partials: str) -> str:
+    css_output = subprocess.run(
+        ['sass', sass_file_path, '-I', sass_partials, '-s', 'compressed'],
+        stdout=subprocess.PIPE,
+        text=True)
+    return css_output.stdout
 
 
 def _make_nav(page_name: str, pages_path: [str], sub_dir: str = '') -> [str]:
@@ -96,9 +107,9 @@ def _make_page(md_file_path: str, pages_path: str, template_path: str, style_pat
         return str(index)
 
 
-def _make_styles(pages_path: str) -> str:
+def _make_styles(pages_path: str, sass_partials: str) -> str:
     paths = sorted(_glob('[0-9][0-9]*.sass', pages_path), key=lambda p: Path(p).name)
-    return ''.join([_make_css(style) for style in paths])
+    return ''.join([_make_css(style, sass_partials) for style in paths])
 
 
 '''
@@ -109,21 +120,23 @@ These are the actual interface to the module, structured around the needs of `li
 
 
 def build(changed_files: [str] = None, out_path: str = '..', pages_path: str = 'pages',
-          template_path: str = 'template.html') -> None:
+          sass_partials: str = 'sass-partials', template_path: str = 'template.html') -> None:
     """
     :param [str] changed_files: see livereload's watch method's `func` param
     :param str out_path: destination path
     :param str pages_path: path to Markdown source directory
+    :param str sass_partials: path to Sass partials directory
     :param str template_path: path to HTML template file
     :return: None
     `changed_files` works with livereload's watch method's `func` param"""
-    global_sass_paths, page_sass_paths = _sass_paths(changed_files)
+    global_sass_paths, page_sass_paths = _sass_paths(changed_files, pages_path)
 
     if len(global_sass_paths) > 0:
-        _write(_make_styles(pages_path), Path(out_path, 'styles.css'))
+        _write(_make_styles(pages_path, sass_partials), Path(out_path, 'styles.css'))
 
     for p in page_sass_paths:
-        _write(_make_css(p), Path(out_path, _page_path(p, pages_path), Path(p).stem + '.css'))
+        _write(_make_css(p, sass_partials),
+               Path(out_path, _page_path(p, pages_path), Path(p).stem + '.css'))
 
     for md_path in _markdown_file_paths(changed_files, pages_path, page_sass_paths, template_path):
         css_path = Path(_page_path(md_path, pages_path), Path(md_path).stem + '.css')
@@ -133,11 +146,12 @@ def build(changed_files: [str] = None, out_path: str = '..', pages_path: str = '
         _write(_make_page(md_path, pages_path, template_path, style_path), page_path)
 
 
-def build_all(out_path: str = '..', pages_path: str = 'pages',
+def build_all(out_path: str = '..', pages_path: str = 'pages', sass_partials: str = 'sass-partials',
               template_path: str = 'template.html') -> None:
     """
     :param out_path: see build()
     :param pages_path: see build()
+    :param sass_partials: see build()
     :param template_path: see build()
     :return: None
     convenience method to build everything, also runs on startup

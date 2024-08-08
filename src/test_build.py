@@ -6,15 +6,16 @@ import pytest
 
 from . import build
 
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''
 Fixtures
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''
 
 
 @pytest.fixture
 def build_args(template_path):
     return {'out_path': 'test',
             'pages_path': 'test/pages',
+            'sass_partials': 'test/sass-partials',
             'template_path': template_path}
 
 
@@ -90,9 +91,9 @@ def template_path():
     return 'test/template.html'
 
 
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''
 Utilities
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''
 
 
 @pytest.mark.usefixtures
@@ -106,24 +107,27 @@ class TestPagePath:
         assert file_path == 'page'
 
 
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''
 Makers
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''
 
 
+@pytest.mark.usefixtures('build_args')
 class TestMakeCss:
-    def test_file(self):
+    def test_file(self, build_args):
         """it should parse a sass file"""
-        assert build._make_css('test/pages/01.sass') == 'body{color:black}\n'
+        sass_file = 'test/pages/01.sass'
+        assert build._make_css(sass_file, build_args['sass_partials']) == 'body{color:#000}\n'
 
-    def test_empty_file(self):
+    def test_empty_file(self, build_args):
         """it should parse an empty sass file"""
-        assert build._make_css('test/empty.sass') == ''
+        assert build._make_css('test/empty.sass', build_args['sass_partials']) == ''
 
-    @pytest.mark.skip
-    def test_file_with_import(self):
+    def test_file_with_import(self, build_args):
         """it should parse a sass file"""
-        assert build._make_css('test/pages/blog/post/post.sass') == 'div{color:blue}\n'
+        sass_file = 'test/pages/blog/post/post.sass'
+        assert build._make_css(sass_file,
+                               build_args['sass_partials']) == 'div{color:green}div{color:blue}\n'
 
 
 @pytest.mark.navs
@@ -175,9 +179,9 @@ class TestMakePage:
                                                     main='', side_nav=subnav('blog'))
 
 
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''
 Main
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'''
 
 
 @pytest.mark.build
@@ -190,7 +194,59 @@ class TestBuild:
 
         build.build(['pages/01.sass'], **build_args)
 
-        mock_write.assert_called_once_with('body{color:black}\ndiv{font-size:1em}\n', styles_path)
+        mock_write.assert_called_once_with(
+            'body{color:#000}\ndiv{color:green}div{font-size:1em}\n',
+            styles_path)
+
+    def test_build_home_styles(self, build_args, home, mocker, nav, pages_path, page_styles,
+                               template):
+        """it should properly compile home.sass and append it to the home page"""
+        mock_mkdir = mocker.patch('os.mkdir')
+        mock_write = mocker.patch('src.build._write')
+
+        build.build([pages_path + '/home.sass'], **build_args)
+
+        mock_mkdir.assert_called_once_with(Path('test'), ANY)
+        mock_write.assert_has_calls([
+            call('div{color:red}\n', Path('test/home.css')),
+            call(template.substitute(
+                head=page_styles('index'),
+                header=nav('index'), main=home, side_nav=''), Path('test/index.html'))])
+
+    def test_build_blog_styles(self, build_args, home, mocker, nav, pages_path, page_styles,
+                               subnav, template):
+        """it should properly compile and add blog.sass, and make the blog with side nav"""
+        mock_mkdir = mocker.patch('os.mkdir')
+        mock_write = mocker.patch('src.build._write')
+
+        build.build([pages_path + '/blog/blog.sass'], **build_args)
+
+        mock_mkdir.assert_called_once_with(Path('test/blog'), ANY)
+        mock_write.assert_has_calls([
+            call('div{color:green}div{color:blue}\n', Path('test/blog/blog.css')),
+            call(template.substitute(
+                head=page_styles('blog'),
+                header=nav('blog'), main='', side_nav=subnav('blog')),
+                Path('test/blog/index.html'))])
+
+    def test_sass_partials(self, build_args, mocker, nav, page_styles, subnav, template):
+        """it should build all sass files and Markdown pages that contain the partial"""
+        mock_mkdir = mocker.patch('os.mkdir')
+        mock_write = mocker.patch('src.build._write')
+
+        build.build([build_args['sass_partials'] + '/_test.sass'], **build_args)
+
+        print(mock_mkdir.call_args_list)
+        mock_mkdir.assert_called_once_with(Path('test/blog'), ANY)
+        mock_write.assert_has_calls([
+            call('body{color:#000}\ndiv{color:green}div{font-size:1em}\n',
+                 Path('test/styles.css')),
+            call('div{color:green}div{color:blue}\n',
+                 Path('test/blog/blog.css')),
+            call(template.substitute(
+                head=page_styles('blog'),
+                header=nav('blog'), main='', side_nav=subnav('blog')),
+                Path('test/blog/index.html'))])
 
     def test_build_index(self, home, build_args, mocker, nav, pages_path, page_styles, template):
         """it should build the specified index file and attach styles"""
@@ -226,37 +282,6 @@ class TestBuild:
              call(template.substitute(head=page_styles('blog'), header=nav('blog'), main='',
                                       side_nav=subnav('blog')),
                   Path('test/blog/index.html'))])
-
-    def test_build_home_styles(self, build_args, home, mocker, nav, pages_path, page_styles,
-                               template):
-        """it should properly compile home.sass and append it to the home page"""
-        mock_mkdir = mocker.patch('os.mkdir')
-        mock_write = mocker.patch('src.build._write')
-
-        build.build([pages_path + '/home.sass'], **build_args)
-
-        mock_mkdir.assert_called_once_with(Path('test'), ANY)
-        mock_write.assert_has_calls([
-            call('div{color:red}\n', Path('test/home.css')),
-            call(template.substitute(
-                head=page_styles('index'),
-                header=nav('index'), main=home, side_nav=''), Path('test/index.html'))])
-
-    def test_build_blog_styles(self, build_args, home, mocker, nav, pages_path, page_styles,
-                               subnav, template):
-        """it should properly compile and add blog.sass, and make the blog with side nav"""
-        mock_mkdir = mocker.patch('os.mkdir')
-        mock_write = mocker.patch('src.build._write')
-
-        build.build([pages_path + '/blog/blog.sass'], **build_args)
-
-        mock_mkdir.assert_called_once_with(Path('test/blog'), ANY)
-        mock_write.assert_has_calls([
-            call('div{color:blue}\n', Path('test/blog/blog.css')),
-            call(template.substitute(
-                head=page_styles('blog'),
-                header=nav('blog'), main='', side_nav=subnav('blog')),
-                Path('test/blog/index.html'))])
 
     def test_build_subpage(self, build_args, home, mocker, nav, pages_path, page_styles, subnav,
                            template):
@@ -328,6 +353,8 @@ class TestIgnore:
     def test_sass(self):
         """it should not ignore sass files"""
         assert not build.ignore('file.sass')
+        assert not build.ignore('sass-partials/test.sass')
+        assert not build.ignore('page/page.sass')
 
     def test_css(self):
         """it should not ignore css files"""

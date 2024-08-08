@@ -9,7 +9,6 @@ iniconfig==2.0.0
 ipdb==0.13.13
 ipython==8.26.0
 jedi==0.19.1
-libsass==0.23.0
 livereload==2.7.0
 Markdown==3.6
 matplotlib-inline==0.1.7

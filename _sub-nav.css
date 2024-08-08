@@ -1,0 +1,1 @@
+body{display:grid;gap:1rem;grid-template-columns:1fr 1fr 1fr 1fr}body header{grid-column:1/5}body>nav{grid-column:4/5}

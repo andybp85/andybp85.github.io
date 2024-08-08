@@ -6,6 +6,12 @@ See it live at [www.andrewstanish.com](https://www.andrewstanish.com/)
 
 ## Getting Started
 
+First we need to install [dart-sass](https://sass-lang.com/documentation/cli/dart-sass/), since 
+they can't be bothered maintaining wrapper libs anymore:
+```shell
+> brew install sass
+```
+
 `src/` is a module and I made a setup script, so this is stupid easy:
 
 ```shell
@@ -22,7 +28,7 @@ site at [http://localhost:5500/](http://localhost:5500/)
 ### Build All
 
 ```shell
-python -c "import build; build.build_all()"
+> python -c "import build; build.build_all()"
 ```
 
 This is also run first when you run the module to make sure the site is in a consistent state.
