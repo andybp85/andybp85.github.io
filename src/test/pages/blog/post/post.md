@@ -1,4 +1,4 @@
-Date:       July 31, 2024
-Category:   testing
+date:         2024-07-31
+categories:   testone testtwo
 
 test post

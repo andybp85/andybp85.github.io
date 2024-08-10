@@ -1,14 +1,14 @@
-<section>
+<section id="about-me">
     I'm Andy, a software engineer and musician living my dreams in Jersey City, NJ.
     I have a ton of interests and always have several side projects going. This
     is my place to share my work and ideas with the world.
 </section>
 
-<div>
+<div id="pic-of-me">
     <img alt="Andy Stanish" src="/images/me.webp" height="300" width="300"/>
 </div>
 
-<section>
+<section id="featured-products">
     <h2>Featured Projects</h2>
     <div>
         <a href="https://www.pandajamfromhamsterdam.com/" target="_blank" title="PandaJAM from HamsterDAM (opens in a new tab)">

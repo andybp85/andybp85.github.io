@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import TextIO
 
 from bs4 import BeautifulSoup
-from markdown import markdown
+import markdown
 
 '''
 Utility Functions
@@ -20,8 +20,10 @@ def _glob(glob_pattern: str, pages_path: str, recursive: bool = True) -> [str]:
     return glob(str(Path(pages_path).joinpath(glob_pattern)), recursive=recursive)
 
 
-def _markdown(md: str) -> str:
-    return markdown(md, extensions=['attr_list', 'meta'])
+def _markdown(md_text: str) -> (str, str):
+    md = markdown.Markdown(extensions=['attr_list', 'meta'])
+    html = md.convert(md_text)
+    return html, md.Meta
 
 
 def _markdown_file_paths(changed_files: [str], pages_path: str, page_sass_paths: [str],
@@ -80,26 +82,45 @@ def _make_css(sass_file_path: str, sass_partials: str) -> str:
     return css_output.stdout
 
 
-def _make_nav(page_name: str, pages_path: [str], sub_dir: str = '') -> [str]:
+def _make_nav_link(href: str, text: str, class_attr: str = None,
+                   data: dict[str, [str]] = None) -> BeautifulSoup:
+    soup = _soup(f'<a href="{href}">{text}</a>')
+    if class_attr is not None:
+        soup.a.attrs['class'] = class_attr
+    if data is not None:
+        for k, v in data.items():
+            soup.a.attrs[k] = v
+    return soup
+
+
+def _make_nav(page_name: str, pages_path: [str], sub_dir: str = '') -> [BeautifulSoup]:
     page_path = Path(pages_path, sub_dir, page_name)
-    return [(f'<a{' class="current"' if page_path == Path(pages_path, sub_dir, d) else ''} '
-             f'href="/{Path(sub_dir, d)}">{d.capitalize()}</a>')
-            for d in [f.name for f in scandir(Path(pages_path, sub_dir)) if f.is_dir()]]
+    sub_dirs = [f.name for f in scandir(Path(pages_path, sub_dir)) if f.is_dir()]
+    for d in sub_dirs:
+        class_attr = 'current' if page_path == Path(pages_path, sub_dir, d) else None
+        yield _make_nav_link(f'/{Path(sub_dir, d)}', d.capitalize(), class_attr)
 
 
-def _make_page(md_file_path: str, pages_path: str, template_path: str, style_path: str = '') -> str:
+def _make_page(md_file_path: str, pages_path: str, style_path: str,
+               subnav_template_path: str, template_path: str) -> str:
     with open(md_file_path, 'r') as mdFile, open(template_path, 'r') as template:
         index = _soup(template.read())
         main = index.find('main')
-        main.append(_soup(_markdown(mdFile.read())))
+        html, _ = _markdown(mdFile.read())
+        main.append(_soup(html))
         page_path = _page_path(md_file_path, pages_path)
         top_level = page_path.split('/')[0]
-        index.find('nav').append(_soup(''.join(_make_nav(top_level, pages_path))))
+        nav = index.find('nav')
+        for nav_link in _make_nav(top_level, pages_path):
+            nav.append(nav_link)
 
         if str(Path(md_file_path).parent) != pages_path:
-            sub_nav_links = _make_nav(page_path.split('/')[-1], pages_path, top_level)
+            sub_nav_links = [a for a in _make_nav(page_path.split('/')[-1], pages_path, top_level)]
             if len(sub_nav_links) > 0:
-                main.insert_before(_soup(f'<nav>{''.join(sub_nav_links)}</nav>'))
+                subnav = _soup(Path(subnav_template_path).read_text()).find('nav')
+                for link in sub_nav_links:
+                    subnav.append(link)
+                main.insert_before(subnav)
 
         if style_path != '':
             index.find('head').append(_soup('<link rel="stylesheet" href="/' + style_path + '">'))
@@ -120,12 +141,14 @@ These are the actual interface to the module, structured around the needs of `li
 
 
 def build(changed_files: [str] = None, out_path: str = '..', pages_path: str = 'pages',
-          sass_partials: str = 'sass-partials', template_path: str = 'template.html') -> None:
+          sass_partials: str = 'sass-partials', subnav_template_path: str = 'subnav_template.html',
+          template_path: str = 'template.html') -> None:
     """
     :param [str] changed_files: see livereload's watch method's `func` param
     :param str out_path: destination path
     :param str pages_path: path to Markdown source directory
     :param str sass_partials: path to Sass partials directory
+    :param subnav_template_path: path to subnav template
     :param str template_path: path to HTML template file
     :return: None
     `changed_files` works with livereload's watch method's `func` param"""
@@ -143,15 +166,18 @@ def build(changed_files: [str] = None, out_path: str = '..', pages_path: str = '
         style_path = str(css_path) if path.exists(Path(md_path).with_suffix('.sass')) else ''
         page_path = Path(out_path, _page_path(md_path, pages_path), 'index.html')
         page_path.parent.mkdir(exist_ok=True, parents=True)
-        _write(_make_page(md_path, pages_path, template_path, style_path), page_path)
+        _write(_make_page(md_path, pages_path, style_path, subnav_template_path, template_path),
+               page_path)
 
 
 def build_all(out_path: str = '..', pages_path: str = 'pages', sass_partials: str = 'sass-partials',
+              subnav_template_path: str = 'subnav_template.html',
               template_path: str = 'template.html') -> None:
     """
     :param out_path: see build()
     :param pages_path: see build()
     :param sass_partials: see build()
+    :param subnav_template_path: see build()
     :param template_path: see build()
     :return: None
     convenience method to build everything, also runs on startup

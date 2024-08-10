@@ -12,10 +12,11 @@ Fixtures
 
 
 @pytest.fixture
-def build_args(template_path):
+def build_args(subnav_template_path, template_path):
     return {'out_path': 'test',
             'pages_path': 'test/pages',
             'sass_partials': 'test/sass-partials',
+            'subnav_template_path': subnav_template_path,
             'template_path': template_path}
 
 
@@ -76,7 +77,19 @@ def subnav():
             case 'post':
                 return '<nav><a class="current" href="/blog/post">Post</a></nav>'
 
+        # case 'blog':
+        #     return ('<nav><a --data-date="2024-07-31" --data-categories="testone testtwo" '
+        #             'href="/blog/post">Post</a></nav>')
+        # case 'post':
+        #     return ('<nav><a --data-categories="testone testtwo" --data-date="2024-07-31" '
+        #             'class="current" href="/blog/post">Post</a></nav>')
+
     return _subnav
+
+
+@pytest.fixture
+def subnav_template_path():
+    return 'test/subnav_template.html'
 
 
 @pytest.fixture
@@ -135,46 +148,49 @@ class TestMakeCss:
 class TestMakeNav:
     def test_index(self, pages_path):
         """it should make the home nav with nothing marked current"""
-        page_nav = build._make_nav('', pages_path)
+        page_nav = [str(a) for a in build._make_nav('', pages_path)]
         assert page_nav == ['<a href="/page">Page</a>', '<a href="/blog">Blog</a>']
 
     def test_page(self, pages_path):
         """it should make a page nav with the page marked current"""
-        page_nav = build._make_nav('page', pages_path)
+        page_nav = [str(a) for a in build._make_nav('page', pages_path)]
         assert page_nav == ['<a class="current" href="/page">Page</a>', '<a href="/blog">Blog</a>']
 
     def test_page_with_subpages(self, pages_path):
         """it should make a subnav with no page marked current"""
-        sub_nav = build._make_nav('blog', pages_path, 'blog')
+        sub_nav = [str(a) for a in build._make_nav('blog', pages_path, 'blog')]
         assert sub_nav == ['<a href="/blog/post">Post</a>']
 
     def test_subpage(self, pages_path):
         """it should make a subnav showing which subpage we're on"""
-        sub_nav = build._make_nav('post', pages_path, 'blog')
+        sub_nav = [str(a) for a in build._make_nav('post', pages_path, 'blog')]
         assert sub_nav == ['<a class="current" href="/blog/post">Post</a>']
 
 
 @pytest.mark.page
-@pytest.mark.usefixtures('home', 'nav', 'page', 'page_styles', 'template', 'template_path')
+@pytest.mark.usefixtures('home', 'nav', 'page', 'page_styles', 'template', 'subnav_template_path',
+                         'template_path')
 class TestMakePage:
-    def test_index(self, home, nav, pages_path, template, template_path):
+    def test_index(self, home, nav, pages_path, subnav_template_path, template, template_path):
         """it should parse and append markdown to main in template for home page"""
-        contents = build._make_page(pages_path + '/home.md', pages_path, template_path)
+        contents = build._make_page(pages_path + '/home.md', pages_path, '', subnav_template_path,
+                                    template_path)
         assert contents == template.substitute(head='', header=nav('index'), main=home, side_nav='')
 
-    def test_page(self, nav, page, pages_path, template, template_path):
+    def test_page(self, nav, page, pages_path, template, subnav_template_path, template_path):
         """it should build properly with an empty markdown file and update the nav"""
-        contents = build._make_page(pages_path + '/page/page.md', pages_path, template_path)
+        contents = build._make_page(pages_path + '/page/page.md', pages_path, '',
+                                    subnav_template_path, template_path)
         assert contents == template.substitute(head='', header=nav('page'), main=page, side_nav='')
 
-    def test_add_stylesheet(self, home, nav, page, pages_path, page_styles, subnav, template,
-                            template_path):
-        index_contents = build._make_page(pages_path + '/home.md', pages_path, template_path,
-                                          'home.css')
+    def test_add_stylesheet(self, home, nav, page, pages_path, page_styles, subnav,
+                            subnav_template_path, template, template_path):
+        index_contents = build._make_page(pages_path + '/home.md', pages_path, 'home.css',
+                                          subnav_template_path, template_path)
         assert index_contents == template.substitute(head=page_styles('index'),
                                                      header=nav('index'), main=home, side_nav='')
-        blog_contents = build._make_page(pages_path + '/blog/blog.md', pages_path, template_path,
-                                         'blog/blog.css')
+        blog_contents = build._make_page(pages_path + '/blog/blog.md', pages_path, 'blog/blog.css',
+                                         subnav_template_path, template_path)
         assert blog_contents == template.substitute(head=page_styles('blog'), header=nav('blog'),
                                                     main='', side_nav=subnav('blog'))
 
@@ -236,7 +252,6 @@ class TestBuild:
 
         build.build([build_args['sass_partials'] + '/_test.sass'], **build_args)
 
-        print(mock_mkdir.call_args_list)
         mock_mkdir.assert_called_once_with(Path('test/blog'), ANY)
         mock_write.assert_has_calls([
             call('body{color:#000}\ndiv{color:green}div{font-size:1em}\n',

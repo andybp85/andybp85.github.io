@@ -1,40 +1,38 @@
 main
-    grid-template-columns: 2fr 300px
     grid-template-rows: 150px
     justify-items: end
-    column-gap: 2rem
 
-    a
-        display: inline-block
-        text-decoration: none
-
-    section:first-child
-        font-size: 1.2rem
-        line-height: 1.6rem
-
-    section:last-child
-        text-align: center
-        width: 100%
-
-        div
-            display: flex
-            justify-content: space-evenly
-            margin-top: 2rem
-
-            @media (max-width: 460px)
-                flex-wrap: wrap-reverse
-                gap: 2rem
-                margin-top: 2rem
-
-    @media (max-width: 790px)
-        grid-template-columns: 1fr
+    @media (max-width: 55rem)
         grid-template-rows: auto
+        //grid-template-columns: 1fr !important
 
-        div
-            display: flex
-            justify-content: center
-            grid-row: 2
-            width: 100%
+#about-me
+    grid-column: 1 / 4
+    font-size: 1.2rem
+    line-height: 1.6rem
 
-        section:last-child
-            margin-top: 2rem
+    //@media (max-width: 55rem)
+    //    grid-column: 2
+
+#featured-products
+    grid-column: 2
+    place-self: center
+    text-align: center
+
+    //@media (max-width: 55rem)
+    //    grid-column: 2
+    //    grid-row: 3
+
+    div
+        display: flex
+        gap: 1rem
+        justify-content: space-evenly
+
+//#pic-of-me
+//    @media (max-width: 55rem)
+//        display: flex
+//        grid-column: 2
+//        grid-row: 2
+//        justify-content: center
+//        flex-wrap: wrap-reverse
+//        width: 100%

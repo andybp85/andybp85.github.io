@@ -1,40 +1,28 @@
 footer
-    background-color: #222
     border-top: 1px solid darkred
-    bottom: 0
+    display: grid
+    row-gap: 1em
+    grid-column: 1 / 5
+    grid-template-columns: repeat(3, 1fr)
+    padding: 2rem 0
+
+#social-media-links
+    align-self: center
     display: flex
-    flex-wrap: wrap
-    gap: 15px
+    gap: 1em
+    grid-column: 2
     justify-content: center
-    padding: 15px 0
-    position: fixed
-    width: 100%
 
-    @media (max-width: 790px)
-        align-content: center
-        flex-direction: column
-        gap: 2rem
-        padding-top: 2em
-
-    @media (max-width: 450px)
-        position: relative
-
-    div:first-child
-        display: flex
-        justify-content: space-between
-        width: 180px
-
-        a
-            text-decoration: none
+    a
+        text-decoration: none
 
 #clicky
-    align-self: center
-    position: absolute
-    right: 15px
+    place-self: end
 
     @media (max-width: 450px)
-        position: relative
-        right: 0
+        grid-column: 2
+        grid-row: 2
+        place-self: center
 
 #github
     filter: invert(1)

@@ -3,25 +3,25 @@
 
 body
     color: #f0f0f0
-    font-family: InterVariable, sans-serif, font-optical-sizing auto
-    margin: 0
-    padding: 0
-    visibility: visible !important
-
-main
     display: grid
-    gap: 1rem
-    margin: 0 auto 100px
+    font-family: InterVariable, sans-serif, font-optical-sizing auto
+    grid-template-columns: repeat(4, 1fr)
+    margin: 0 auto
     max-width: 1024px
-    padding: 0 15px
+    padding: 0 1rem
+    gap: 2rem
+    visibility: visible !important
 
     img
         border-radius: 5px
 
+    main
+        display: grid
+        grid-template-columns: subgrid
+        grid-column: 1 / 5
+
 h1, h2, h3, h4, h5, h6
     font-family: B612-Regular, serif
-    margin-bottom: 1rem
-    margin-top: 1.5rem
 
 h1
     font-size: 3.157rem
