@@ -1,8 +1,13 @@
 @import "fonts/B612-Regular/B612.css"
 @import "fonts/Inter/inter.css"
 
+\:root
+    --oasis-blue: rgb(0, 120, 180)
+    --dark-red: darkred
+    --text-color: #f0f0f0
+
 body
-    color: #f0f0f0
+    color: var(--text-color)
     display: grid
     font-family: InterVariable, sans-serif, font-optical-sizing auto
     grid-template-columns: repeat(4, 1fr)
@@ -10,15 +15,16 @@ body
     max-width: 1024px
     padding: 0 1rem
     gap: 2rem
-    visibility: visible !important
+    visibility: visible
 
     img
         border-radius: 5px
 
     main
-        display: grid
-        grid-template-columns: subgrid
         grid-column: 1 / 5
+
+        >p:first-child
+            margin-top: 0
 
 h1, h2, h3, h4, h5, h6
     font-family: B612-Regular, serif
@@ -40,7 +46,8 @@ h5
     font-weight: bold
 
 a
-    color: inherit
+    color: var(--oasis-blue)
+    text-decoration: none
 
 blockquote
     font-style: italic

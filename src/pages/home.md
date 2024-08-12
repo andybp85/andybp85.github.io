@@ -8,7 +8,7 @@
     <img alt="Andy Stanish" src="/images/me.webp" height="300" width="300"/>
 </div>
 
-<section id="featured-products">
+<section id="featured-projects">
     <h2>Featured Projects</h2>
     <div>
         <a href="https://www.pandajamfromhamsterdam.com/" target="_blank" title="PandaJAM from HamsterDAM (opens in a new tab)">

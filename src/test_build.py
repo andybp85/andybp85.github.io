@@ -73,16 +73,11 @@ def subnav():
     def _subnav(page):
         match page:
             case 'blog':
-                return '<nav><a href="/blog/post">Post</a></nav>'
+                return ('<nav><a --data-categories="testone|test-two" --data-date="2024-07-31" '
+                        'href="/blog/post">Post</a></nav>')
             case 'post':
-                return '<nav><a class="current" href="/blog/post">Post</a></nav>'
-
-        # case 'blog':
-        #     return ('<nav><a --data-date="2024-07-31" --data-categories="testone testtwo" '
-        #             'href="/blog/post">Post</a></nav>')
-        # case 'post':
-        #     return ('<nav><a --data-categories="testone testtwo" --data-date="2024-07-31" '
-        #             'class="current" href="/blog/post">Post</a></nav>')
+                return ('<nav><a --data-categories="testone|test-two" --data-date="2024-07-31" '
+                        'class="current" href="/blog/post">Post</a></nav>')
 
     return _subnav
 
@@ -96,7 +91,7 @@ def subnav_template_path():
 def template():
     return Template(('<html><head>$head</head><body>'
                      '<header>$header</header>$side_nav'
-                     '<main>$main</main></body></html>\n'))
+                     '<main>$main</main></body></html>'))
 
 
 @pytest.fixture
@@ -159,12 +154,14 @@ class TestMakeNav:
     def test_page_with_subpages(self, pages_path):
         """it should make a subnav with no page marked current"""
         sub_nav = [str(a) for a in build._make_nav('blog', pages_path, 'blog')]
-        assert sub_nav == ['<a href="/blog/post">Post</a>']
+        assert sub_nav == ['<a --data-categories="testone|test-two" --data-date="2024-07-31" '
+                           'href="/blog/post">Post</a>']
 
     def test_subpage(self, pages_path):
         """it should make a subnav showing which subpage we're on"""
         sub_nav = [str(a) for a in build._make_nav('post', pages_path, 'blog')]
-        assert sub_nav == ['<a class="current" href="/blog/post">Post</a>']
+        assert sub_nav == ['<a --data-categories="testone|test-two" --data-date="2024-07-31" '
+                           'class="current" href="/blog/post">Post</a>']
 
 
 @pytest.mark.page
@@ -311,6 +308,27 @@ class TestBuild:
             head=page_styles('post'), header=nav('blog'), main='<p>test post</p>',
             side_nav=subnav('post')),
             Path('test/blog/post/index.html'))
+
+    def test_build_subnav_template(self, build_args, home, mocker, nav, page, pages_path,
+                                   page_styles, subnav, template):
+        """it should build all pages that include a subnav"""
+        mock_mkdir = mocker.patch('os.mkdir')
+        mock_write = mocker.patch('src.build._write')
+
+        build.build([build_args['subnav_template_path']], **build_args)
+
+        mock_mkdir.assert_has_calls([
+            call(Path('test/blog'), ANY),
+            call(Path('test/blog/post'), ANY)
+        ], any_order=True)
+        mock_write.assert_has_calls([
+            call(template.substitute(head=page_styles('blog'), header=nav('blog'), main='',
+                                     side_nav=subnav('blog')),
+                 Path('test/blog/index.html')),
+            call(template.substitute(head=page_styles('post'), header=nav('blog'),
+                                     main='<p>test post</p>', side_nav=subnav('post')),
+                 Path('test/blog/post/index.html'))
+        ], any_order=True)
 
     # TODO: handle delete
     @pytest.mark.skip

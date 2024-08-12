@@ -1,4 +1,4 @@
 date:         2024-07-31
-categories:   testone testtwo
+categories:   testone|test-two
 
 test post

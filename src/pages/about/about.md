@@ -3,19 +3,18 @@
 > It means something being from New Jersey. It means you have a sense of humor.  
 > *&mdash; Anthony Bourdain*
 
-I'm your typical programmer/musician with a ton of hobbies, including biking, history, electronics,
-and spicy food. By day I work for NBCUniversal (née CNBC) as a principal software engineer for
-the CMS. Nights and weekends I do music, including sound at one of the best bars (and with some
-of the best people) I've ever stumbled upon, The Laundromat in Morristown, NJ. I also play bass
+I'm your typical programmer/musician with a ton of hobbies, including biking, history, electronics, 
+and spicy food. By day I work for NBCUniversal (née CNBC) as a principal software engineer for 
+the CMS. Nights and weekends I do music, including sound at one of the best bars (and with some 
+of the best people) I've ever stumbled upon, The Laundromat in Morristown, NJ. I also play bass 
 in a blues rock band, Kru Kerly, which is based out of my hometown of Jersey City, NJ.
 
 ## About This Site {#about-site}
 
 ### Design
 
-I have kind of a signature style for pages I've built, and my main idea is that a site should be
-simple enough that it can look and work basically the same on desktop and mobile. It also has a
-light and dark mode, but you don't have to click a button for it; it uses the media query to
+KISS. It also has a light and dark mode, but you don't have to click a button for it; it uses 
+a [media query](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme) to 
 detect what you have your OS set to.
 
 #### Fonts

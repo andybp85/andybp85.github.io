@@ -1,0 +1,1 @@
+#subnav{grid-column:4;grid-row:2}#subnav h3{line-height:1rem}#subnav nav{text-indent:1em hanging}@media(max-width: 55rem){#subnav{grid-column:1/5;grid-row:2}}body main{grid-column:1/4;grid-row:2}@media(max-width: 55rem){body main{grid-column:1/5;grid-row:3}}main img{display:block;max-width:100%}

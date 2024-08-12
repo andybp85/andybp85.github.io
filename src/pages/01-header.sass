@@ -1,19 +1,22 @@
+@use "breakpoints"
+
 header
-    border-bottom: 1px solid darkred
+    border-bottom: 1px solid var(--dark-red)
     display: grid
     grid-column: 1 / 5
     grid-template-columns: repeat(3, 1fr)
 
-    @media (max-width: 30rem)
+    @media (max-width: breakpoints.$small)
         padding-bottom: 1em
 
     a
+        color: var(--text-color)
         text-decoration: none
 
     h1
         grid-column: 1 / 3
 
-        @media (max-width: 30rem)
+        @media (max-width: breakpoints.$small)
             grid-column: 2
             place-self: center
             text-wrap: nowrap
@@ -27,7 +30,7 @@ header
         font-family: B612-Regular, serif
         font-size: 2rem
 
-        @media (max-width: 30rem)
+        @media (max-width: breakpoints.$small)
             grid-column: 2
             grid-row: 2
             place-self: center
