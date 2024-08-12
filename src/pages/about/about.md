@@ -43,11 +43,11 @@ Never thought I'd pay for a coding font, but I love its retro look, and I was ab
 
 I do Javascript all day at work for well over a decade now. I'm not going to say I'm sick of it, 
 because there's plenty I like about using a multi-paradigm Scheme derivative (and Typescript is 
-huge improvement on vanilla JS). But, there's several other languages I like far more, especially 
+huge improvement on vanilla JS). But, there's several other languages I like far more, especially  
 Python. So I used Python for the site builder. I've done a bunch of work with Python, 
 and I think it nails everything I want in an everyday language. For details on how this works, 
 check out the [ReadMe](https://github.com/andybp85/andybp85.github.io). I'm also using real Sass, 
-without the bleeping curly braces. (I swear it's like my industry has Stockholm Syndrome for
+without the bleeping curly braces. (I swear it's like my industry has Stockholm Syndrome for 
 noisy code...)
 
 Will I write any JS for this site? It's definitely not going to be a SPA, which I don't think 
