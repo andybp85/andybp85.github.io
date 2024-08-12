@@ -1,4 +1,5 @@
 <section id="about-me">
+    <h2>Welcome!</h2>
     I'm Andy, a software engineer and musician living my dreams in Jersey City, NJ.
     I have a ton of interests and always have several side projects going. This
     is my place to share my work and ideas with the world.
