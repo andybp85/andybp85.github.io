@@ -161,7 +161,7 @@ def build(changed_files: [str] = None, out_path: str = '..', pages_path: str = '
     :param subnav_template_path: path to subnav template
     :param str template_path: path to HTML template file
     :return: None
-    `changed_files` works with livereload's watch method's `func` param"""
+    """
     global_sass_paths, page_sass_paths = _sass_paths(changed_files, pages_path)
 
     if len(global_sass_paths) > 0:
@@ -181,26 +181,24 @@ def build(changed_files: [str] = None, out_path: str = '..', pages_path: str = '
                page_path)
 
 
-def build_all(out_path: str = '..', pages_path: str = 'pages', sass_partials: str = 'sass-partials',
-              subnav_template_path: str = 'subnav_template.html',
-              template_path: str = 'template.html') -> None:
+def build_all(pages_path: str = 'pages', **kwargs) -> None:
     """
-    :param out_path: see build()
     :param pages_path: see build()
-    :param sass_partials: see build()
-    :param subnav_template_path: see build()
-    :param template_path: see build()
+    :param kwargs: see build()
     :return: None
+
     convenience method to build everything, also runs on startup
     """
-    build(_glob('**/*.*', pages_path), **locals())
+    build(_glob('**/*.*', pages_path), **kwargs)
 
 
 def ignore(file_path: str) -> bool:
     """
     :param str file_path: see livereload's watch method's `ignore` param
     :return: None
-    files that should be ignored when livereload detects changes"""
+
+    files that should be ignored when livereload detects changes
+    """
     return file_path.startswith('env/') \
         or file_path.startswith('fixtures/') \
         or file_path.startswith('test/') \

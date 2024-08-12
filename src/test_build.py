@@ -350,8 +350,10 @@ class TestBuildAll:
     def test_build_all(self, build_args, mocker):
         """it should call build.build with all Markdown and Sass files"""
         mock_build = mocker.patch('src.build.build')
+        pages_path = build_args['pages_path']
+        del build_args['pages_path']
 
-        build.build_all(**build_args)
+        build.build_all(pages_path, **build_args)
 
         mock_build.assert_called_once_with(
             ['test/pages/01.sass', 'test/pages/home.md', 'test/pages/02.sass',
