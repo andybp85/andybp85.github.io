@@ -1,9 +1,9 @@
 date:          2016-10-22
 categories:    life|sleep
 
-## Tips for Waking Up Far, Far Too Early
-
 _October 22, 2016_
+
+## Tips for Waking Up Far, Far Too Early
 
 I’ve always been a stay-up-late kind of guy. Part of it is I don’t need a ton of sleep; 3 AM, 4 
 AM, I’d still be on the computer, then get four or five hours of sleep and be totally fine at work the next day. Now, I’ve always wanted to get more bass guitar practice in, but I always ran into a problem: in the evening, my brain wants to unwind from the day, not dedicate its depleted energy reserves to the kind of focus and perseverance it takes to do things like work on technique or learn a new piece of music. If I picked up my bass after work once a week, it was a lot. As of recent, I tried squeezing in some practice before work in the morning, which is great. My brain’s refreshed and I get to start the day doing one of the things I love most. Needless to say though, squeezing in 15 or 30 minutes of practice every so often isn’t going to make anyone the next Rocco Prestia, and after having a mind-blowing time at Catskill Chill music festival a few weeks ago I’ve been extremely motivated. I wanted to put hours a day towards playing, but I still had the evening motivation problems… which brings me to this past week.

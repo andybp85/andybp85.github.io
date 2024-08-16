@@ -13,19 +13,18 @@
     <link rel="preload" href="/fonts/Inter/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/fonts/Inter/InterVariable-Italic.woff2" as="font" type="font/woff2" crossorigin>
     <style>
+        body {
+            visibility: hidden;
+        }
+
         html {
             background-image: linear-gradient(270deg, #222 90%, #2A2A2A 100%);
-            height: 1vh;
         }
 
         @media (prefers-color-scheme: light) {
             html {
-                background-image: linear-gradient(270deg, #f9f9f9 85%, #999 100%);
+                background-image: linear-gradient(90deg, #f9f9f9 95%, #BBB 100%);
             }
-        }
-
-        body {
-            visibility: hidden;
         }
     </style>
     <link as="style" href="/styles.css" rel="preload">

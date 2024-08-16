@@ -6,8 +6,10 @@ from os import path, scandir
 from pathlib import Path
 from typing import TextIO
 
-from bs4 import BeautifulSoup
 import markdown
+from bs4 import BeautifulSoup
+from markdown.extensions.codehilite import CodeHiliteExtension
+from pygments.formatters.html import HtmlFormatter
 
 '''
 Utility Functions
@@ -21,7 +23,8 @@ def _glob(glob_pattern: str, pages_path: str, recursive: bool = True) -> [str]:
 
 
 def _markdown(md_text: str) -> (str, str):
-    md = markdown.Markdown(extensions=['attr_list', 'meta'])
+    md = markdown.Markdown(extensions=['attr_list', 'meta', 'fenced_code',
+                                       CodeHiliteExtension(pygments_formatter=HtmlFormatter, wrapcode=True)])
     return md.convert(md_text), md.Meta
 
 
@@ -67,7 +70,7 @@ def _soup(html: str | TextIO) -> BeautifulSoup:
 
 def _write(contents: str, outfile_path: Path) -> None:
     with open(outfile_path, 'w') as outfile:
-        outfile.write(contents.replace('\n', ''))
+        outfile.write(contents)
 
 
 '''
@@ -101,11 +104,12 @@ def _make_nav_link(href: str, text: str, class_attr: str = None,
 #         sub_page_paths = [Path(f, f.name + '.md') for f in scandir(Path(pages_path, sub_dir))
 #                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #     FileNotFoundError: [Errno 2] No such file or directory: 'pages/pages'
-def _make_nav(page_name: str, pages_path: [str], sub_dir: str = '') -> [BeautifulSoup]:
+def _make_nav(page_name: str, pages_path: [str], sort: bool = False,
+              sub_dir: str = '') -> [BeautifulSoup]:
     page_path = Path(pages_path, sub_dir, page_name)
     sub_page_paths = [Path(f, f.name + '.md') for f in scandir(Path(pages_path, sub_dir))
                       if (f.is_dir())]
-    for p in sub_page_paths:
+    for p in sorted(sub_page_paths) if sort else sub_page_paths:
         class_attr = 'current' if page_path == p.parent else None
         _, meta = _markdown(p.read_text())
         yield _make_nav_link('/' + _page_path(str(p), pages_path), p.stem.replace('-', ' ').title(),
@@ -120,11 +124,12 @@ def _make_page(md_file_path: str, pages_path: str, style_path: str,
     page_path = _page_path(md_file_path, pages_path)
     top_level = page_path.split('/')[0]
     nav = index_soup.find('nav')
-    for nav_link in _make_nav(top_level, pages_path):
+    for nav_link in _make_nav(top_level, pages_path, sort=True):
         nav.append(nav_link)
 
     if str(Path(md_file_path).parent) != pages_path:
-        sub_nav_links = [a for a in _make_nav(Path(page_path).parts[-1], pages_path, top_level)]
+        sub_nav_links = [a for a in
+                         _make_nav(Path(page_path).parts[-1], pages_path, sub_dir=top_level)]
         if len(sub_nav_links) > 0:
             subnav_soup = _soup(Path(subnav_template_path).read_text())
             subnav = subnav_soup.find('nav')
@@ -135,7 +140,7 @@ def _make_page(md_file_path: str, pages_path: str, style_path: str,
     if style_path != '':
         index_soup.find('head').append(_soup('<link rel="stylesheet" href="/' + style_path + '">'))
 
-    return str(index_soup).replace('\n', '')
+    return str(index_soup)
 
 
 def _make_styles(pages_path: str, sass_partials: str) -> str:

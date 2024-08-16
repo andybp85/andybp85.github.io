@@ -30,11 +30,11 @@ def nav():
     def _nav(page):
         match page:
             case 'index':
-                return '<nav><a href="/page">Page</a><a href="/blog">Blog</a></nav>'
+                return '<nav><a href="/blog">Blog</a><a href="/page">Page</a></nav>'
             case 'page':
-                return '<nav><a class="current" href="/page">Page</a><a href="/blog">Blog</a></nav>'
+                return '<nav><a href="/blog">Blog</a><a class="current" href="/page">Page</a></nav>'
             case 'blog':
-                return '<nav><a href="/page">Page</a><a class="current" href="/blog">Blog</a></nav>'
+                return '<nav><a class="current" href="/blog">Blog</a><a href="/page">Page</a></nav>'
 
     return _nav
 
@@ -74,10 +74,10 @@ def subnav():
         match page:
             case 'blog':
                 return ('<nav><a --data-categories="testone|test-two" --data-date="2024-07-31" '
-                        'href="/blog/post">Post</a></nav>')
+                        'href="/blog/post">Post</a></nav>\n')
             case 'post':
                 return ('<nav><a --data-categories="testone|test-two" --data-date="2024-07-31" '
-                        'class="current" href="/blog/post">Post</a></nav>')
+                        'class="current" href="/blog/post">Post</a></nav>\n')
 
     return _subnav
 
@@ -91,7 +91,7 @@ def subnav_template_path():
 def template():
     return Template(('<html><head>$head</head><body>'
                      '<header>$header</header>$side_nav'
-                     '<main>$main</main></body></html>'))
+                     '<main>$main</main></body></html>\n'))
 
 
 @pytest.fixture
@@ -153,13 +153,13 @@ class TestMakeNav:
 
     def test_page_with_subpages(self, pages_path):
         """it should make a subnav with no page marked current"""
-        sub_nav = [str(a) for a in build._make_nav('blog', pages_path, 'blog')]
+        sub_nav = [str(a) for a in build._make_nav('blog', pages_path, sub_dir='blog')]
         assert sub_nav == ['<a --data-categories="testone|test-two" --data-date="2024-07-31" '
                            'href="/blog/post">Post</a>']
 
     def test_subpage(self, pages_path):
         """it should make a subnav showing which subpage we're on"""
-        sub_nav = [str(a) for a in build._make_nav('post', pages_path, 'blog')]
+        sub_nav = [str(a) for a in build._make_nav('post', pages_path, sub_dir='blog')]
         assert sub_nav == ['<a --data-categories="testone|test-two" --data-date="2024-07-31" '
                            'class="current" href="/blog/post">Post</a>']
 

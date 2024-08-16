@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta name="darkreader-lock"/>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="Andy's biographical site for projects and random thoughts." name="description"/>
+<meta content="default-src 'self'; script-src-elem 'unsafe-inline' *.getclicky.com localhost:5500; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src *.getclicky.com ws://localhost:5500" http-equiv="Content-Security-Policy"/>
+<title>Andy Stanish</title>
+<link href="/icons/favicon.ico" rel="icon" type="image/ico"/>
+<link as="font" crossorigin="" href="/fonts/B612-Regular/B612-Regular.woff" rel="preload" type="font/woff"/>
+<link as="font" crossorigin="" href="/fonts/Inter/InterVariable.woff2" rel="preload" type="font/woff2"/>
+<link as="font" crossorigin="" href="/fonts/Inter/InterVariable-Italic.woff2" rel="preload" type="font/woff2"/>
+<style>
+        body {
+            visibility: hidden;
+        }
+
+        html {
+            background-image: linear-gradient(270deg, #222 90%, #2A2A2A 100%);
+        }
+
+        @media (prefers-color-scheme: light) {
+            html {
+                background-image: linear-gradient(90deg, #f9f9f9 95%, #BBB 100%);
+            }
+        }
+    </style>
+<link as="style" href="/styles.css" rel="preload"/>
+<link href="/styles.css" rel="stylesheet"/>
+<link href="/projects/vim-config-with-YouCompleteMe/vim-config-with-YouCompleteMe.css" rel="stylesheet"/></head>
+<body>
+<header>
+<h1><a href="/">Andy Stanish</a></h1>
+<nav aria-label="Main"><a href="/about">About</a><a href="/blog">Blog</a><a class="current" href="/projects">Projects</a></nav>
+</header>
+<section id="subnav">
+<label>Posts</label>
+<nav><a --data-categories="tech|how-to" --data-date="2024-08-16" class="current" href="/projects/vim-config-with-YouCompleteMe">Vim Config With Youcompleteme</a></nav>
+</section>
+<main><p><em>August 16, 2024</em></p>
+<h2>Vim and YouCompleteMe: A Love Story</h2>
+<p>I made learning vim a priority when I first got into linux, and eventually got to the point where I wrote an entire 
+api on MacVim (check out my old <a href="https://github.com/andybp85/nvim">neovim config repo</a> for some insane nerdery). I've 
+been using Webstorm for work for years, and so I got this site started using PyCharm. It's a great IDE, but I miss 
+vim, so I decided to get vim set up to use for this site again.</p>
+<p>My vim config and a summary of the steps here can be found in <a href="https://gist.github.com/andybp85/e5075c69d45c6d8d012ea89199935ea6">this gist</a></p>
+<h3>Goals</h3>
+<ul>
+<li><a href="https://github.com/ycm-core/YouCompleteMe">YouCompleteMe</a> - This is still the best completion enginer I've ever
+used. It's kind of a pain to get setup, so that's why I'm writing this summary of what I did.</li>
+<li><a href="https://macvim.org/">MacVim</a> - I want this working in a GUI (I use Macbook Pros).</li>
+<li>Recreate all the features I need from PyCharm - This will be a WIP, so check back for updates.</li>
+</ul>
+<h3>Guide</h3>
+<p>I had vim installed from source already, but it turned out I needed python support for YCM.</p>
+<h4>Python</h4>
+<p>I use <a href="https://github.com/pyenv/pyenv">pyenv</a>. I also installed vim and YCM in a virtualenv, which I think I've done 
+before with no issues... so we shall see if that bites me in the future.</p>
+<p>When I first tried to install YCM, I got this error on starting vim:</p>
+<div class="codehilite"><pre><span></span><code>symbol not found in flat namespace '_PyByteArray_Type'
+</code></pre></div>
+<p>Turns out YCM needs python with shared lib support, so I reinstalled the latest version with <code>--enable-framework</code>:</p>
+<div class="codehilite"><pre><span></span><code>&gt;<span class="w"> </span><span class="nb">export</span><span class="w"> </span><span class="nv">PYTHON_CONFIGURE_OPTS</span><span class="o">=</span><span class="s2">"--enable-framework"</span>
+&gt;<span class="w"> </span>arch<span class="w"> </span>--arm64<span class="w"> </span>pyenv<span class="w"> </span>install<span class="w">  </span><span class="m">3</span>.12.3
+&gt;<span class="w"> </span>pyenv<span class="w"> </span>global<span class="w"> </span><span class="m">3</span>.12.3
+</code></pre></div>
+<h4>Vim from source</h4>
+<p>This was easy... I think. I forget if I had to jump through any hoops to get it to compile in the first place, but I 
+don't think so. I cloned the <a href="https://github.com/vim/vim">github repo</a> and then:</p>
+<div class="codehilite"><pre><span></span><code>&gt;<span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>penv
+&gt;<span class="w"> </span><span class="nb">source</span><span class="w"> </span>penv/bin/activate
+&gt;<span class="w"> </span>./configure<span class="w"> </span>--with-features<span class="o">=</span>huge<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--enable-multibyte<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--enable-gtk3-check<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--with-python3-command<span class="o">=</span>python<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--enable-python3interp<span class="o">=</span>yes<span class="w">  </span>
+&gt;<span class="w"> </span>sudo<span class="w"> </span>make<span class="w"> </span>install
+</code></pre></div>
+<p>I had already copied my .vimrc into the right place and installed <a href="https://github.com/junegunn/vim-plug">vim-plug</a>, so
+the next step was just starting vim and running <code>:PlugInstall</code></p>
+<h4>YouCompleteMe</h4>
+<p>This is also way simpler these days; when I first used it years ago I had to figure out how to get the c compiler to
+use the Boost lib. I made sure I had the penv activated, then installed some deps it complained about:</p>
+<div class="codehilite"><pre><span></span><code>&gt;<span class="w"> </span>brew<span class="w"> </span>install<span class="w"> </span>cmake<span class="w"> </span>go
+</code></pre></div>
+<p>and then ran the install:</p>
+<div class="codehilite"><pre><span></span><code>&gt;<span class="w"> </span>python<span class="w"> </span>install.py<span class="w"> </span>--all
+</code></pre></div>
+<h4>MacVim</h4>
+<p>Obviously the install here is easy, but I use the zsh (and the wonderful <a href="https://iterm2.com/">iTerm2</a> which I'll 
+have to write up a post on someday) and I want to be able to open files in MacVim easily. So I added this to my 
+<code>.zprofile</code> (I use <a href="https://github.com/sorin-ionescu/prezto">zpresto</a>):</p>
+<div class="codehilite"><pre><span></span><code><span class="nb">alias</span><span class="w"> </span><span class="nv">mvim</span><span class="o">=</span><span class="s2">"open -a MacVim.app </span><span class="nv">$1</span><span class="s2">"</span>
+</code></pre></div>
+<h3>Ta-da!</h3>
+<p>Everything works! I'm sure I'll be adding way more customizations and functionality to vim going forward, so check 
+back at some point and see!</p>
+<div>
+<img alt="vim with monokai pro theme and YCM" height="474" src="/images/vim-YCM.webp" width="600"/>
+</div></main>
+<footer>
+<div id="social-media-links">
+<a href="https://github.com/andybp85" target="_blank" title="Andy's Github (opens in new tab)">
+<img alt="Andy's Github" height="32" id="github" src="/icons/GitHub-Mark-32px.png" width="32"/>
+</a>
+<a href="https://www.facebook.com/andrew.stanish" target="_blank" title="Andy's Facebook (opens in new tab)">
+<img alt="Andy's Facebook" height="32" src="/icons/f_logo_RGB-Blue_1024.png" width="32"/>
+</a>
+<a href="https://twitter.com/andybp85" target="_blank" title="Andy's Twitter (opens in new tab)">
+<img alt="Andy's Twitter" height="32" src="/icons/Twitter_Social_Icon_Rounded_Square_Color.png" width="32"/>
+</a>
+<a href="https://www.linkedin.com/in/andrewstanish/" target="_blank" title="Andy's LinkedIn (opens in new tab)">
+<img alt="Andy's LinkedIn" height="32" src="/icons/In-Blue-34.png" width="32"/>
+</a>
+</div>
+<div id="clicky">
+<a href="https://clicky.com/101459580" target="_blank" title="Web Analytics (opens in new tab)">
+<img alt="Clicky" height="15" src="/icons/click-badge.gif" width="80"/></a>
+<script async="" data-id="101459580" src="//static.getclicky.com/js"></script>
+<noscript><p><img alt="Clicky" height="1" src="//in.getclicky.com/101459580ns.gif" width="1"/></p></noscript>
+</div>
+</footer>
+</body>
+</html>
