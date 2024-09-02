@@ -17,12 +17,12 @@ they can't be bothered maintaining wrapper libs anymore:
 ```shell
 > cd src/
 > sh setup.sh
-> source src/pyenv/bin/activate
+> source src/penv/bin/activate
 > python .
 ```
 
 This makes you a nice [virtualenv](https://docs.python.org/3/library/venv.html#how-venvs-work)
-in `src/pyenv`, loads up [LiveReload](https://livereload.readthedocs.io/en/stable/), and serves the
+in `src/penv`, loads up [LiveReload](https://livereload.readthedocs.io/en/stable/), and serves the
 site at [http://localhost:5500/](http://localhost:5500/)
 
 ### Build All
