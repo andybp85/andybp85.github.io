@@ -52,6 +52,16 @@ def test__subnav_omits_empty_categories():
     assert build._subnav(posts) == '<a href="/blog/a-post" data-date="2016-10-22">A Post</a>'
 
 
+def test__subnav_marks_only_the_current_slug():
+    posts = [{'categories': '', 'content': '', 'date': '2020-01-01',
+              'slug': 'b-post', 'title': 'B Post'},
+             {'categories': '', 'content': '', 'date': '2016-10-22',
+              'slug': 'a-post', 'title': 'A Post'}]
+    assert build._subnav(posts, 'a-post') == (
+        '<a href="/blog/b-post" data-date="2020-01-01">B Post</a>'
+        '<a href="/blog/a-post" data-date="2016-10-22" class="current">A Post</a>')
+
+
 def test__title_turns_slug_into_title_case():
     assert build._title('tips-for-waking-up') == 'Tips For Waking Up'
 
@@ -87,3 +97,10 @@ def test_build_all_writes_post_pages(site):
 def test_build_all_writes_pygments_css(site):
     build.build_all(**site)
     assert '.codehilite' in (site['out_path'] / 'pygments.css').read_text()
+
+
+def test_build_all_marks_current_post_only_on_its_page(site):
+    build.build_all(**site)
+    assert 'class="current"' in (
+        site['out_path'] / 'blog' / 'first-post' / 'index.html').read_text()
+    assert 'class="current"' not in (site['out_path'] / 'blog' / 'index.html').read_text()

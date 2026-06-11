@@ -31,10 +31,11 @@ def _pygments_css() -> str:
     return HtmlFormatter(style='monokai').get_style_defs('.codehilite')
 
 
-def _subnav(posts: list[dict[str, str]]) -> str:
+def _subnav(posts: list[dict[str, str]], current_slug: str | None = None) -> str:
     return ''.join(
         f'<a href="/blog/{p["slug"]}" data-date="{p["date"]}"'
         + (f' data-categories="{p["categories"]}"' if p['categories'] else '')
+        + (' class="current"' if p['slug'] == current_slug else '')
         + f'>{p["title"]}</a>'
         for p in posts)
 
@@ -55,7 +56,6 @@ def build_all(blog_index_template_path: Path = SRC_PATH / 'blog_index_template.h
     :return: None
     """
     posts = _posts(posts_path)
-    subnav = _subnav(posts)
     blog_path = Path(out_path, 'blog')
     blog_path.mkdir(parents=True, exist_ok=True)
 
@@ -64,10 +64,11 @@ def build_all(blog_index_template_path: Path = SRC_PATH / 'blog_index_template.h
         post_path = blog_path / post['slug'] / 'index.html'
         post_path.parent.mkdir(exist_ok=True)
         post_path.write_text(post_template.substitute(
-            content=post['content'], subnav=subnav, title=post['title']))
+            content=post['content'], subnav=_subnav(posts, post['slug']),
+            title=post['title']))
 
     (blog_path / 'index.html').write_text(
-        Template(Path(blog_index_template_path).read_text()).substitute(subnav=subnav))
+        Template(Path(blog_index_template_path).read_text()).substitute(subnav=_subnav(posts)))
     Path(out_path, 'pygments.css').write_text(_pygments_css())
 
 
