@@ -184,8 +184,19 @@ sub-nav {
         margin-bottom: 1rem;
     }
 
-    & nav {
-        text-indent: 1em hanging;
+    & nav a {
+        border-top: 1px solid var(--dark-red);
+        display: block;
+        padding: 0.7rem 0;
+        text-wrap: balance;
+
+        &.current {
+            color: var(--text-color);
+            text-decoration: underline;
+            text-decoration-color: darkred;
+            text-decoration-thickness: 3px;
+            text-underline-offset: 6px;
+        }
     }
 
     @media (width <= 55rem) {
