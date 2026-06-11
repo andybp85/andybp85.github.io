@@ -1,3 +1,4 @@
+from datetime import date
 from pathlib import Path
 from string import Template
 
@@ -18,11 +19,13 @@ def _markdown(md_text: str) -> tuple[str, dict[str, list[str]]]:
 def _posts(posts_path: Path) -> list[dict[str, str]]:
     posts = []
     for md_path in sorted(Path(posts_path).glob('*.md')):
-        content, meta = _markdown(md_path.read_text())
+        content, meta = _markdown(md_path.read_text(encoding='utf-8'))
         if 'date' not in meta:
             raise ValueError(f"post '{md_path.stem}' is missing required 'date' meta")
+        date_str = meta['date'][0]
+        date.fromisoformat(date_str)
         posts.append({'categories': meta.get('categories', [''])[0], 'content': content,
-                      'date': meta['date'][0], 'slug': md_path.stem,
+                      'date': date_str, 'slug': md_path.stem,
                       'title': _title(md_path.stem)})
     return sorted(posts, key=lambda p: p['date'], reverse=True)
 
@@ -59,17 +62,18 @@ def build_all(blog_index_template_path: Path = SRC_PATH / 'blog_index_template.h
     blog_path = Path(out_path, 'blog')
     blog_path.mkdir(parents=True, exist_ok=True)
 
-    post_template = Template(Path(post_template_path).read_text())
+    post_template = Template(Path(post_template_path).read_text(encoding='utf-8'))
     for post in posts:
         post_path = blog_path / post['slug'] / 'index.html'
         post_path.parent.mkdir(exist_ok=True)
         post_path.write_text(post_template.substitute(
             content=post['content'], subnav=_subnav(posts, post['slug']),
-            title=post['title']))
+            title=post['title']), encoding='utf-8')
 
     (blog_path / 'index.html').write_text(
-        Template(Path(blog_index_template_path).read_text()).substitute(subnav=_subnav(posts)))
-    Path(out_path, 'pygments.css').write_text(_pygments_css())
+        Template(Path(blog_index_template_path).read_text(encoding='utf-8')).substitute(subnav=_subnav(posts)),
+        encoding='utf-8')
+    Path(out_path, 'pygments.css').write_text(_pygments_css(), encoding='utf-8')
 
 
 def main() -> None:

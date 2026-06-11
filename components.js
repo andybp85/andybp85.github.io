@@ -1,5 +1,6 @@
 const navLink = (href, text) => {
-    const current = location.pathname.startsWith(href) ? ' class="current"' : "";
+    const isCurrent = location.pathname === href || location.pathname.startsWith(href + '/');
+    const current = isCurrent ? ' class="current" aria-current="page"' : "";
     return `<a href="${href}"${current}>${text}</a>`;
 };
 
