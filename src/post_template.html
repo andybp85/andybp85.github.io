@@ -7,7 +7,7 @@
     <meta name="description" content="Andy's biographical site for projects and random thoughts.">
     <meta http-equiv="Content-Security-Policy"
           content="default-src 'self'; script-src-elem 'self' 'unsafe-inline' *.getclicky.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src *.getclicky.com">
-    <title>Blog — Andy Stanish</title>
+    <title>$title — Andy Stanish</title>
     <link href="/icons/favicon.ico" rel="icon" type="image/ico">
     <link rel="preload" href="/fonts/B612-Regular/B612-Regular.woff" as="font" type="font/woff" crossorigin>
     <link rel="preload" href="/fonts/Inter/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
@@ -29,19 +29,17 @@
     </style>
     <link as="style" href="/styles.css" rel="preload">
     <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/blog/blog.css">
+    <link rel="stylesheet" href="/pygments.css">
     <script type="module" src="/components.js"></script>
 </head>
 <body>
 <site-header></site-header>
 <sub-nav>
     <label>Posts</label>
-    <nav><a href="/blog/tips-for-waking-up-far-far-too-early" data-date="2016-10-22" data-categories="life|sleep">Tips For Waking Up Far Far Too Early</a></nav>
+    <nav>$subnav</nav>
 </sub-nav>
-<main>
-    <h2>Random Musings and Rants</h2>
-    <p>I'm starting this off with a post I made in Facebook back in 2016 from when I first realized
-        I'm way more of a morning person. It's dated, but still a fun read. Hope you enjoy!</p>
-</main>
+<main>$content</main>
 <site-footer></site-footer>
 </body>
 </html>

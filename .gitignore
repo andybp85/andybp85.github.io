@@ -1,3 +1,10 @@
-.idea
-.DS_Store
+.claude/
 .coverage
+.DS_Store
+.idea
+.memsearch/
+.pytest_cache/
+.superpowers/
+.venv/
+__pycache__/
+htmlcov/

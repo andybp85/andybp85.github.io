@@ -1,121 +1,87 @@
 # Andy's Site
 
-A simple custom build system in a proper tooling language: Python!
+Hand-written HTML with vanilla web components and modern CSS, plus a small
+Python tool that builds the blog from Markdown. Zero JavaScript dependencies.
 
 See it live at [www.andrewstanish.com](https://www.andrewstanish.com/)
 
 ## Getting Started
 
-First we need to install [dart-sass](https://sass-lang.com/documentation/cli/dart-sass/), since 
-they can't be bothered maintaining wrapper libs anymore:
-```shell
-> brew install sass
-```
-
-`src/` is a module and I made a setup script, so this is stupid easy:
+Install [uv](https://docs.astral.sh/uv/), then:
 
 ```shell
 > cd src/
-> sh setup.sh
-> source src/penv/bin/activate
-> python .
+> uv run serve
 ```
 
-This makes you a nice [virtualenv](https://docs.python.org/3/library/venv.html#how-venvs-work)
-in `src/penv`, loads up [LiveReload](https://livereload.readthedocs.io/en/stable/), and serves the
-site at [http://localhost:5500/](http://localhost:5500/)
+This builds the blog and serves the site at [http://localhost:5500/](http://localhost:5500/),
+rebuilding whenever a post or template changes (refresh the browser to see it).
 
-### Build All
+To just build:
 
 ```shell
-> python -c "import build; build.build_all()"
+> cd src/
+> uv run build
 ```
-
-This is also run first when you run the module to make sure the site is in a consistent state.
 
 ## How It Works
 
-The site structure is defined in `src/pages`. Any top-level folder in here will become a path
-in the nav, and any Markdown file in one of these folders (including `src/pages`) will become
-and `index.html` for that path. It does this by dumping the contents of the Markdown into the
-`main` tag of `src/template.html`. Multiple Markdown files in a folder are not handled.
+The repo root is the site, served as-is by GitHub Pages. The pages (home,
+about, projects) are hand-written HTML. Shared chrome comes from three web
+components in `components.js`:
 
-### Subpages
+- `<site-header>` — renders the masthead and main nav, and marks the current
+  section from `location.pathname`.
+- `<site-footer>` — renders the social links and analytics badge.
+- `<sub-nav>` — never registered, just styled: its links are real light-DOM
+  children written into each page, so they work without JavaScript.
 
-Any Markdown files in sub dirs of `src/pages` will be built out and added to the hierarchy in the
-sub nav on the right side of the page.
+All styling is plain modern CSS (custom properties, native nesting, `:has()`,
+range media queries) — `styles.css` is global, plus a small per-page file
+where a page needs its own layout.
 
-```
-// TODO:
+### The Blog
 
-Deleting a Markdown file in a folder with no subfolders will delete the folder as
-well, and remove it from the nav (if applicable).
-```
+Posts are Markdown files in `src/posts/`. Each needs a `date:` meta line
+(`YYYY-MM-DD`, used for newest-first ordering) and may have a `categories:`
+line (pipe-separated). The post's title comes from its filename:
+`tips-for-waking-up.md` → "Tips For Waking Up".
 
-### Styles
-
-All Sass files starting with numbers in `src/pages` are top-level; they get compiled and
-jammed in order in `/styles.css`, which is present in the template so is on every page. Any Sass
-file with the same name as a Markdown file will be compiled and appended to the `index.html` in
-the same dir.
+`uv run build` renders each post into `/blog/<slug>/index.html` via
+`src/post_template.html`, regenerates the post list in `/blog/index.html`
+via `src/blog_index_template.html`, and writes the Pygments syntax
+highlighting theme to `/pygments.css`. Code blocks are highlighted at build
+time — no JavaScript in the browser.
 
 ### Tests
 
-I practice TDD, mainly because it's faster and easier than constantly running your code by hand.
-The tests (in `src/test_build.py`) also serve as some of the documentation.
-
-Run all commands from `src/`.
-
-```shell
-> pytest
-```
-
-Watch:
+I practice TDD, mainly because it's faster and easier than constantly running
+your code by hand. The tests (in `src/test/`) also serve as some of the
+documentation.
 
 ```shell
-> ptw --ext=sass,html,md,py -- -vv
+> cd src/
+> uv run pytest
 ```
 
 Coverage:
 
 ```shell
-> pytest --cov=src --cov-branch --cov-report=html
+> uv run pytest --cov=builder --cov-branch --cov-report=html
 ```
-
-The HTML report is in `src/htmlcov`.
-
-## Dev Tools
-
-### `ipython`
-
-Good god, I have no words for how awesome an environment this is to work with. I miss it every day
-I do Javascript. Some of its killer features include amazing command completion, inspection, and
-a built-in editor for executing scripts or long commands.
-
-### `ipdb`
-
-This is the `ipython` debugger, installed separately. Just put this anywhere to breakpoint:
-
-[//]: # (@formatter:off)
-```python
-import ipdb; ipdb.set_trace()
-```
-[//]: # (@formatter:on)
 
 ### Pre-Commit hook
 
-```
-/src/pre-commit
-```
+`src/pre-commit` just runs the tests. Install it manually:
 
-This get installed by `setup.sh`. It just runs the tests, since Python requires well-formatted
-code to run (although I'm using SonarLint in PyCharm for linting). Of course, if you modify it
-you'll have to move it into `.git/hooks` manually.
+```shell
+> cp src/pre-commit .git/hooks/ && chmod +x .git/hooks/pre-commit
+```
 
 ## Deployment
 
-Since this is a simple site, that's literally it for the build process, and since it's hosted on
-GitHub Pages once it's good locally it's just a git commit-push away from being live.
+The site is hosted on GitHub Pages: once it's good locally it's just a git
+commit-push away from being live.
 
 ## Code Style
 

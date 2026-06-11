@@ -6,8 +6,8 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <meta content="Andy's biographical site for projects and random thoughts." name="description"/>
-<meta content="default-src 'self'; script-src-elem 'unsafe-inline' *.getclicky.com localhost:5500; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src *.getclicky.com ws://localhost:5500" http-equiv="Content-Security-Policy"/>
-<title>Andy Stanish</title>
+<meta content="default-src 'self'; script-src-elem 'self' 'unsafe-inline' *.getclicky.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src *.getclicky.com" http-equiv="Content-Security-Policy"/>
+<title>Vim Config With YouCompleteMe — Andy Stanish</title>
 <link href="/icons/favicon.ico" rel="icon" type="image/ico"/>
 <link as="font" crossorigin="" href="/fonts/B612-Regular/B612-Regular.woff" rel="preload" type="font/woff"/>
 <link as="font" crossorigin="" href="/fonts/Inter/InterVariable.woff2" rel="preload" type="font/woff2"/>
@@ -29,16 +29,15 @@
     </style>
 <link as="style" href="/styles.css" rel="preload"/>
 <link href="/styles.css" rel="stylesheet"/>
-<link href="/projects/vim-config-with-YouCompleteMe/vim-config-with-YouCompleteMe.css" rel="stylesheet"/></head>
+<link rel="stylesheet" href="/projects/projects.css">
+<link rel="stylesheet" href="/pygments.css">
+<script type="module" src="/components.js"></script></head>
 <body>
-<header>
-<h1><a href="/">Andy Stanish</a></h1>
-<nav aria-label="Main"><a href="/about">About</a><a href="/blog">Blog</a><a class="current" href="/projects">Projects</a></nav>
-</header>
-<section id="subnav">
+<site-header></site-header>
+<sub-nav>
 <label>Posts</label>
-<nav><a --data-categories="tech|how-to" --data-date="2024-08-16" class="current" href="/projects/vim-config-with-YouCompleteMe">Vim Config With Youcompleteme</a></nav>
-</section>
+<nav><a data-categories="tech|how-to" data-date="2024-08-16" class="current" href="/projects/vim-config-with-YouCompleteMe">Vim Config With YouCompleteMe</a></nav>
+</sub-nav>
 <main><p><em>August 16, 2024</em></p>
 <h2>Vim and YouCompleteMe: A Love Story</h2>
 <p>I made learning vim a priority when I first got into linux, and eventually got to the point where I wrote an entire 
@@ -100,27 +99,6 @@ back at some point and see!</p>
 <div>
 <img alt="vim with monokai pro theme and YCM" height="474" src="/images/vim-YCM.webp" width="600"/>
 </div></main>
-<footer>
-<div id="social-media-links">
-<a href="https://github.com/andybp85" target="_blank" title="Andy's Github (opens in new tab)">
-<img alt="Andy's Github" height="32" id="github" src="/icons/GitHub-Mark-32px.png" width="32"/>
-</a>
-<a href="https://www.facebook.com/andrew.stanish" target="_blank" title="Andy's Facebook (opens in new tab)">
-<img alt="Andy's Facebook" height="32" src="/icons/f_logo_RGB-Blue_1024.png" width="32"/>
-</a>
-<a href="https://twitter.com/andybp85" target="_blank" title="Andy's Twitter (opens in new tab)">
-<img alt="Andy's Twitter" height="32" src="/icons/Twitter_Social_Icon_Rounded_Square_Color.png" width="32"/>
-</a>
-<a href="https://www.linkedin.com/in/andrewstanish/" target="_blank" title="Andy's LinkedIn (opens in new tab)">
-<img alt="Andy's LinkedIn" height="32" src="/icons/In-Blue-34.png" width="32"/>
-</a>
-</div>
-<div id="clicky">
-<a href="https://clicky.com/101459580" target="_blank" title="Web Analytics (opens in new tab)">
-<img alt="Clicky" height="15" src="/icons/click-badge.gif" width="80"/></a>
-<script async="" data-id="101459580" src="//static.getclicky.com/js"></script>
-<noscript><p><img alt="Clicky" height="1" src="//in.getclicky.com/101459580ns.gif" width="1"/></p></noscript>
-</div>
-</footer>
+<site-footer></site-footer>
 </body>
 </html>
