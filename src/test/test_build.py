@@ -21,6 +21,12 @@ def test__posts_raises_on_missing_date(tmp_path):
         build._posts(tmp_path)
 
 
+def test__posts_raises_on_invalid_date(tmp_path):
+    _write_post(tmp_path, 'bad-date', '10/22/2016')
+    with pytest.raises(ValueError):
+        build._posts(tmp_path)
+
+
 def test__posts_reads_meta_and_content(tmp_path):
     (tmp_path / 'a-post.md').write_text('date: 2016-10-22\ncategories: life|sleep\n\n## Hi\n')
     posts = build._posts(tmp_path)
