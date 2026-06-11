@@ -3,6 +3,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from threading import Thread
 from time import sleep
+from traceback import print_exc
 
 from builder.build import SRC_PATH, build_all
 
@@ -21,7 +22,10 @@ def _watch() -> None:
         if now != seen:
             seen = now
             print('rebuilding blog...')
-            build_all()
+            try:
+                build_all()
+            except Exception:
+                print_exc()
 
 
 def main() -> None:
