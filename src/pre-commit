@@ -1,3 +1,2 @@
-#/bin/sh!
-cd src
-pytest
+#!/bin/sh
+cd src && uv run pytest
