@@ -1,4 +1,5 @@
 from pathlib import Path
+from string import Template
 
 import markdown
 from markdown.extensions.codehilite import CodeHiliteExtension
@@ -40,3 +41,36 @@ def _subnav(posts: list[dict[str, str]]) -> str:
 
 def _title(slug: str) -> str:
     return slug.replace('-', ' ').title()
+
+
+def build_all(blog_index_template_path: Path = SRC_PATH / 'blog_index_template.html',
+              out_path: Path = SRC_PATH.parent,
+              post_template_path: Path = SRC_PATH / 'post_template.html',
+              posts_path: Path = SRC_PATH / 'posts') -> None:
+    """
+    :param Path blog_index_template_path: template for /blog/index.html
+    :param Path out_path: site root to write into
+    :param Path post_template_path: template for /blog/<slug>/index.html
+    :param Path posts_path: directory of post markdown sources
+    :return: None
+    """
+    posts = _posts(posts_path)
+    subnav = _subnav(posts)
+    blog_path = Path(out_path, 'blog')
+    blog_path.mkdir(parents=True, exist_ok=True)
+
+    post_template = Template(Path(post_template_path).read_text())
+    for post in posts:
+        post_path = blog_path / post['slug'] / 'index.html'
+        post_path.parent.mkdir(exist_ok=True)
+        post_path.write_text(post_template.substitute(
+            content=post['content'], subnav=subnav, title=post['title']))
+
+    (blog_path / 'index.html').write_text(
+        Template(Path(blog_index_template_path).read_text()).substitute(subnav=subnav))
+    Path(out_path, 'pygments.css').write_text(_pygments_css())
+
+
+def main() -> None:
+    build_all()
+    print('blog built')

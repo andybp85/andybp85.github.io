@@ -54,3 +54,36 @@ def test__subnav_omits_empty_categories():
 
 def test__title_turns_slug_into_title_case():
     assert build._title('tips-for-waking-up') == 'Tips For Waking Up'
+
+
+@pytest.fixture
+def site(tmp_path):
+    posts_path = tmp_path / 'posts'
+    posts_path.mkdir()
+    _write_post(posts_path, 'first-post', '2016-10-22')
+    out_path = tmp_path / 'out'
+    out_path.mkdir()
+    post_template_path = tmp_path / 'post_template.html'
+    post_template_path.write_text('<title>$title</title><nav>$subnav</nav><main>$content</main>')
+    blog_index_template_path = tmp_path / 'blog_index_template.html'
+    blog_index_template_path.write_text('<nav>$subnav</nav>')
+    return {'blog_index_template_path': blog_index_template_path, 'out_path': out_path,
+            'post_template_path': post_template_path, 'posts_path': posts_path}
+
+
+def test_build_all_writes_blog_index(site):
+    build.build_all(**site)
+    assert 'href="/blog/first-post"' in (site['out_path'] / 'blog' / 'index.html').read_text()
+
+
+def test_build_all_writes_post_pages(site):
+    build.build_all(**site)
+    post_html = (site['out_path'] / 'blog' / 'first-post' / 'index.html').read_text()
+    assert '<title>First Post</title>' in post_html
+    assert '<h2>first-post</h2>' in post_html
+    assert 'href="/blog/first-post"' in post_html
+
+
+def test_build_all_writes_pygments_css(site):
+    build.build_all(**site)
+    assert '.codehilite' in (site['out_path'] / 'pygments.css').read_text()

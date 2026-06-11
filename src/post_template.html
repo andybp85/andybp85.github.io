@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="darkreader-lock">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Andy's biographical site for projects and random thoughts.">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'self'; script-src-elem 'self' 'unsafe-inline' *.getclicky.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src *.getclicky.com">
+    <title>$title — Andy Stanish</title>
+    <link href="/icons/favicon.ico" rel="icon" type="image/ico">
+    <link rel="preload" href="/fonts/B612-Regular/B612-Regular.woff" as="font" type="font/woff" crossorigin>
+    <link rel="preload" href="/fonts/Inter/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/Inter/InterVariable-Italic.woff2" as="font" type="font/woff2" crossorigin>
+    <style>
+        body {
+            visibility: hidden;
+        }
+
+        html {
+            background-image: linear-gradient(270deg, #222 90%, #2A2A2A 100%);
+        }
+
+        @media (prefers-color-scheme: light) {
+            html {
+                background-image: linear-gradient(90deg, #f9f9f9 95%, #BBB 100%);
+            }
+        }
+    </style>
+    <link as="style" href="/styles.css" rel="preload">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/blog/blog.css">
+    <link rel="stylesheet" href="/pygments.css">
+    <script type="module" src="/components.js"></script>
+</head>
+<body>
+<site-header></site-header>
+<sub-nav>
+    <label>Posts</label>
+    <nav>$subnav</nav>
+</sub-nav>
+<main>$content</main>
+<site-footer></site-footer>
+</body>
+</html>
