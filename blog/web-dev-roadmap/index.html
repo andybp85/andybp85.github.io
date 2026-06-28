@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <meta name="darkreader-lock">
+    <meta name="description" content="Andy's biographical site for projects and random thoughts.">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'self'; script-src-elem 'self' 'unsafe-inline' *.getclicky.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src *.getclicky.com">
+    <title>Web Dev Roadmap — Andy Stanish</title>
+    <link rel="preload" href="/fonts/B612-Regular/B612-Regular.woff" as="font" type="font/woff" crossorigin>
+    <link rel="preload" href="/fonts/Inter/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/Inter/InterVariable-Italic.woff2" as="font" type="font/woff2" crossorigin>
+    <style>
+        body {
+            visibility: hidden;
+        }
+
+        html {
+            background-image: linear-gradient(270deg, #222 90%, #2A2A2A 100%);
+        }
+
+        @media (prefers-color-scheme: light) {
+            html {
+                background-image: linear-gradient(90deg, #f9f9f9 95%, #BBB 100%);
+            }
+        }
+    </style>
+    <link as="style" href="/styles.css" rel="preload">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/blog/blog.css">
+    <link rel="stylesheet" href="/pygments.css">
+    <link href="/icons/favicon.ico" rel="icon" type="image/ico">
+    <script type="module" src="/components.js"></script>
+</head>
+<body>
+<site-header></site-header>
+<sub-nav>
+    <label>Posts</label>
+    <nav><a href="/blog/web-dev-roadmap" data-date="2026-06-28" data-categories="web|learning" class="current">Web Dev Roadmap</a><a href="/blog/tips-for-waking-up-far-far-too-early" data-date="2016-10-22" data-categories="life|sleep">Tips For Waking Up Far Far Too Early</a></nav>
+</sub-nav>
+<main><p><em>June 28, 2026</em></p>
+<p><em>Someone asked me how to get into making websites, and I put this together for them.</em></p>
+<h2>Web Dev Roadmap</h2>
+<p>A learning roadmap for getting into web development — roughly in order. 🚀</p>
+<h3>Phase 1 — Your tools: VS Code + Git basics</h3>
+<p>Start here before writing a single line of code. Getting comfortable with your environment first saves a lot of frustration later.</p>
+<ul>
+<li><strong><a href="https://code.visualstudio.com">VS Code</a></strong> — download this, it'll be your home base. Do the built-in Interactive Playground (Help →
+  Interactive Editor Playground) on day one. Learn the Command Palette (<code>Cmd+Shift+P</code>) early — it lets you find anything without memorizing
+  shortcuts.</li>
+<li><strong><a href="https://learngitbranching.js.org">learngitbranching.js.org</a></strong> — the best way to understand Git without your eyes glazing over. It
+  visualizes what's actually happening as you type commands.</li>
+<li><strong><a href="https://skills.github.com">GitHub Skills</a></strong> — GitHub's own interactive intro. Gets you making real commits and pull requests in an
+  actual repo.</li>
+<li><strong><a href="https://ohshitgit.com">Oh Shit, Git!?!</a></strong> — bookmark this now. You'll need it when something goes sideways (it will).</li>
+</ul>
+<h3>Phase 2 — HTML, CSS, and your first taste of programming</h3>
+<p>This is where it starts getting fun. You'll build real things you can open in a browser.</p>
+<ul>
+<li><strong><a href="https://theodinproject.com">The Odin Project</a></strong> — this is the backbone of your whole journey. Free, project-based, takes you from zero
+  to full-stack. Start at the Foundations path. Don't skip the projects — that's the whole point.</li>
+<li><strong><a href="https://developer.mozilla.org">MDN Web Docs</a></strong> — keep this open in a tab always. It's the authoritative reference for HTML, CSS, and
+  JavaScript. Ignore W3Schools.</li>
+<li><strong><a href="https://css-tricks.com">CSS-Tricks Flexbox &amp; Grid guides</a></strong> — CSS is where most beginners get stuck. These two guides specifically
+  are the clearest explanations on the internet.</li>
+<li><strong><a href="https://scrimba.com">Scrimba</a></strong> — interactive screencasts where you can edit the instructor's code inline. Really good for visual
+  learners.</li>
+<li><strong>Your first project:</strong> build a personal portfolio page. It'll use everything you're learning, and you'll actually care how it looks.</li>
+</ul>
+<h3>Phase 3 — The command line and going deeper with Git</h3>
+<p>Once you're comfortable in VS Code and have some HTML/CSS under your belt, the terminal stops being scary.</p>
+<ul>
+<li><strong><a href="https://missing.csail.mit.edu">The Missing Semester of Your CS Education</a></strong> — MIT course, free. Lecture 1 alone is worth your time.
+  Best on-ramp to the shell that exists.</li>
+<li><strong><a href="https://tldr.sh">tldr.sh</a></strong> — simplified command references. Way more approachable than <code>man</code> pages for beginners.</li>
+<li><strong><a href="https://explainshell.com">explainshell.com</a></strong> — paste any command and it breaks down every flag. Invaluable for stuff you copy-paste
+  from Stack Overflow without knowing what it does.</li>
+<li><strong><a href="https://git-scm.com/book">Pro Git Ch. 1–3</a></strong> — free book, goes deeper on Git now that you have context. The first three chapters cover
+  90% of what you'll use day-to-day.</li>
+<li><strong>Bonus hook:</strong> once you're comfortable in the terminal, try <code>ffmpeg</code> for batch video processing. One-liners that do in seconds what takes
+  minutes in a GUI. You'll get why the CLI matters fast.</li>
+</ul>
+<h3>Phase 4 — Building a real web app with React</h3>
+<p>This is where everything clicks into place. Don't rush here — solid HTML/CSS/JS fundamentals first makes React make sense.</p>
+<ul>
+<li><strong><a href="https://javascript.info">javascript.info</a></strong> — before touching React, spend time here. Best standalone JavaScript resource on the
+  internet. Modern, thorough, well-paced.</li>
+<li><strong>The Odin Project — Full Stack JavaScript path</strong> — continues naturally from Foundations into React. Stay on the same track you started.</li>
+<li><strong><a href="https://react.dev">React's official docs</a></strong> — the new docs are excellent and tutorial-first. The "Tic Tac Toe" tutorial is the
+  canonical starting point.</li>
+<li><strong><a href="https://freecodecamp.org">freeCodeCamp</a></strong> — good for drilling syntax and filling gaps alongside Odin. Use it as a supplement, not your
+  primary track.</li>
+</ul>
+<p><strong>The most important thing:</strong> avoid tutorial purgatory — the trap of watching and reading forever without building anything. Every phase
+above has you making real things. When in doubt, build something, even if it's ugly. That's how it sticks.</p></main>
+<site-footer></site-footer>
+</body>
+</html>
