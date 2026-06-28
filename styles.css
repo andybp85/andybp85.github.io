@@ -6,8 +6,14 @@
     color-scheme: light dark; /* theme native UI (scrollbars, canvas) to match prefers-color-scheme */
 
     --dark-red: darkred;
-    --oasis-blue: rgb(46 184 255);
-    --text-color: #f0f0f0;
+    --github-invert: 1; /* GitHub mark is dark-on-transparent; invert it on the dark theme */
+    --oasis-blue: var(--oasis-blue-dark);
+    --oasis-blue-dark: rgb(46 184 255);
+    --oasis-blue-light: rgb(0 120 180);
+    --pjhd-invert: 0;
+    --text-color: var(--text-color-dark);
+    --text-color-dark: #f0f0f0;
+    --text-color-light: #444;
 }
 
 body {
@@ -106,6 +112,7 @@ header {
     }
 
     & nav {
+        align-items: center;
         align-self: center;
         display: flex;
         font-family: B612-Regular, serif;
@@ -119,6 +126,20 @@ header {
             text-decoration-color: darkred;
             text-decoration-thickness: 3px;
             text-underline-offset: 10px;
+        }
+
+        & .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+            display: inline-flex;
+            padding: 0;
+
+            & svg {
+                height: 1.5rem;
+                width: 1.5rem;
+            }
         }
     }
 
@@ -171,7 +192,11 @@ footer {
 }
 
 #github {
-    filter: invert(1);
+    filter: invert(var(--github-invert));
+}
+
+#pjhd-logo {
+    filter: invert(var(--pjhd-invert));
 }
 
 sub-nav {
@@ -217,17 +242,30 @@ body:has(sub-nav) main {
     }
 }
 
+/*
+ * Theme = system preference unless the toggle (components.js) pins one via
+ * html[data-theme]. "auto" removes the attribute and falls back to this media
+ * query. The light tokens are repeated for the unpinned-light and pinned-light
+ * cases because a media query and an attribute selector can't share a rule.
+ */
 @media (prefers-color-scheme: light) {
-    :root {
-        --oasis-blue: rgb(0 120 180);
-        --text-color: #444;
+    :root:not([data-theme]) {
+        --github-invert: 0;
+        --oasis-blue: var(--oasis-blue-light);
+        --pjhd-invert: 1;
+        --text-color: var(--text-color-light);
     }
+}
 
-    #github {
-        filter: invert(0);
-    }
+:root[data-theme="light"] {
+    color-scheme: light;
 
-    #pjhd-logo {
-        filter: invert(1);
-    }
+    --github-invert: 0;
+    --oasis-blue: var(--oasis-blue-light);
+    --pjhd-invert: 1;
+    --text-color: var(--text-color-light);
+}
+
+:root[data-theme="dark"] {
+    color-scheme: dark;
 }

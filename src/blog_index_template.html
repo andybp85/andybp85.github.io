@@ -12,6 +12,14 @@
     <link rel="preload" href="/fonts/B612-Regular/B612-Regular.woff" as="font" type="font/woff" crossorigin>
     <link rel="preload" href="/fonts/Inter/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/fonts/Inter/InterVariable-Italic.woff2" as="font" type="font/woff2" crossorigin>
+    <script>
+        /* Apply a pinned theme before first paint to avoid a flash; auto defers
+           to color-scheme: light dark (system). Kept in sync with components.js. */
+        {
+            const theme = localStorage.getItem("theme")
+            if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme
+        }
+    </script>
     <style>
         body {
             visibility: hidden;
@@ -21,8 +29,17 @@
             background-image: linear-gradient(270deg, #222 90%, #2A2A2A 100%);
         }
 
+        html[data-theme="light"] {
+            background-image: linear-gradient(90deg, #f9f9f9 95%, #BBB 100%);
+            color-scheme: light;
+        }
+
+        html[data-theme="dark"] {
+            color-scheme: dark;
+        }
+
         @media (prefers-color-scheme: light) {
-            html {
+            html:not([data-theme]) {
                 background-image: linear-gradient(90deg, #f9f9f9 95%, #BBB 100%);
             }
         }

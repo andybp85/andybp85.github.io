@@ -4,6 +4,29 @@ const navLink = (href, text) => {
     return `<a href="${href}"${current}>${text}</a>`
 }
 
+// Theme toggle: cycles auto -> light -> dark. "auto" removes html[data-theme] so
+// CSS falls back to prefers-color-scheme; light/dark pin it. The inline <head>
+// script applies a stored choice before first paint; this keeps them in sync.
+const THEME_CYCLE = ["auto", "light", "dark"]
+
+const THEME_ICON = {
+    auto: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor" stroke="none"/></svg>`,
+    dark: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>`,
+    light: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="4"/>
+                <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/></svg>`,
+}
+
+const storedTheme = () => localStorage.getItem("theme") || "auto"
+
+const applyTheme = theme => {
+    const root = document.documentElement
+    if (theme === "auto") delete root.dataset.theme
+    else root.dataset.theme = theme
+}
+
 customElements.define("site-header", class extends HTMLElement {
     connectedCallback() {
         this.innerHTML = `
@@ -13,8 +36,25 @@ customElements.define("site-header", class extends HTMLElement {
                     ${navLink("/about", "About")}
                     ${navLink("/blog", "Blog")}
                     ${navLink("/projects", "Projects")}
+                    <button class="theme-toggle" type="button"></button>
                 </nav>
             </header>`
+        this.themeButton = this.querySelector(".theme-toggle")
+        this.showTheme(storedTheme())
+        this.themeButton.addEventListener("click", () => this.cycleTheme())
+    }
+
+    showTheme(theme) {
+        applyTheme(theme)
+        this.themeButton.innerHTML = THEME_ICON[theme]
+        this.themeButton.title = `Theme: ${theme}`
+        this.themeButton.setAttribute("aria-label", `Theme: ${theme}. Activate to change.`)
+    }
+
+    cycleTheme() {
+        const next = THEME_CYCLE[(THEME_CYCLE.indexOf(storedTheme()) + 1) % THEME_CYCLE.length]
+        localStorage.setItem("theme", next)
+        this.showTheme(next)
     }
 })
 
