@@ -194,10 +194,10 @@ sub-nav {
 
         &.current {
             color: var(--text-color);
-            text-decoration: underline;
-            text-decoration-color: darkred;
-            text-decoration-thickness: 3px;
-            text-underline-offset: 6px;
+
+            &::before {
+                content: "› ";
+            }
         }
     }
 
