@@ -1,4 +1,5 @@
 from datetime import date
+from functools import partial
 from pathlib import Path
 from string import Template
 
@@ -10,8 +11,11 @@ SRC_PATH = Path(__file__).parent.parent
 
 
 def _markdown(md_text: str) -> tuple[str, dict[str, list[str]]]:
+    # linespans wraps each source line in its own <span> so a CSS counter can
+    # number the lines and soft-wrap them with a hanging indent (see projects.css).
     md = markdown.Markdown(extensions=['attr_list', 'fenced_code', 'meta',
-                                       CodeHiliteExtension(pygments_formatter=HtmlFormatter,
+                                       CodeHiliteExtension(pygments_formatter=partial(HtmlFormatter,
+                                                                                      linespans='line'),
                                                            wrapcode=True)])
     return md.convert(md_text), md.Meta
 
