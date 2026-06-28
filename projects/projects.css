@@ -13,16 +13,25 @@ main div {
  * /projects/teaching-claude-to-code-like-me renders general.md and CLAUDE.md as
  * their own source: fenced markdown blocks (Pygments) themed to read like an
  * editor. Loaded alongside pygments.css; these token colors beat monokai on
- * specificity. Stays dark in both page themes — a code editor reads as dark.
+ * specificity. The palette follows the page theme (toggle/system) — dark by
+ * default, light variants in the selectors below; headings and body text reuse
+ * the site's --oasis-blue / --text-color so they track the theme for free.
  * Line numbers come from a CSS counter on the per-line spans (build.py sets
  * linespans), so lines soft-wrap with a hanging indent and never scroll sideways.
  */
 main > .codehilite {
-    background: #1c1c1e;
-    border: 1px solid #333;
+    --editor-bg: #1c1c1e;
+    --editor-border: #333;
+    --editor-chip: rgb(255 255 255 / 0.09);
+    --editor-code: #e6db74;
+    --editor-emphasis: #cfd2d6;
+    --editor-gutter: #555;
+    --editor-marker: indianred;
+
+    background: var(--editor-bg);
+    border: 1px solid var(--editor-border);
     border-radius: 8px;
-    color: #e6e6e6;
-    color-scheme: dark;
+    color: var(--text-color);
     font-family: "Berkeley Mono Variable", monospace;
     font-size: 0.8rem;
     line-height: 1.6;
@@ -49,7 +58,7 @@ main > .codehilite {
         white-space: pre-wrap;
 
         &::before {
-            color: #555;
+            color: var(--editor-gutter);
             content: counter(line);
             left: 0;
             position: absolute;
@@ -59,25 +68,52 @@ main > .codehilite {
         }
     }
 
-    /* markdown tokens in the site palette — fixed dark-theme values, block stays dark */
+    /* markdown tokens in the site palette */
     & .gh,
     & .gu {
-        color: rgb(46 184 255); /* --oasis-blue: # and ## headings */
+        color: var(--oasis-blue); /* # and ## headings track the site link color */
         font-weight: bold;
     }
 
     & .ge {
-        color: #cfd2d6;
+        color: var(--editor-emphasis);
         font-style: italic; /* *emphasis* */
     }
 
     & .k {
-        color: indianred; /* * list markers — a legible lift of the site's darkred */
+        color: var(--editor-marker); /* * list markers */
     }
 
     & .sb {
-        background: rgb(255 255 255 / 0.09);
+        background: var(--editor-chip);
         border-radius: 3px;
+        color: var(--editor-code); /* override monokai yellow — unreadable on the light panel */
         padding: 0.05em 0.3em; /* `inline code` chip */
+    }
+}
+
+/*
+ * Light editor palette — repeated for the pinned-light and unpinned-system-light
+ * (auto) cases because a media query and an attribute selector can't share a rule.
+ */
+:root[data-theme="light"] main > .codehilite {
+    --editor-bg: #f7f7f8;
+    --editor-border: #d8d8dc;
+    --editor-chip: rgb(0 0 0 / 0.06);
+    --editor-code: #8a5a00;
+    --editor-emphasis: #666;
+    --editor-gutter: #b3b3b3;
+    --editor-marker: firebrick;
+}
+
+@media (prefers-color-scheme: light) {
+    :root:not([data-theme]) main > .codehilite {
+        --editor-bg: #f7f7f8;
+        --editor-border: #d8d8dc;
+        --editor-chip: rgb(0 0 0 / 0.06);
+        --editor-code: #8a5a00;
+        --editor-emphasis: #666;
+        --editor-gutter: #b3b3b3;
+        --editor-marker: firebrick;
     }
 }
