@@ -8,3 +8,76 @@ main div {
         max-width: 100%;
     }
 }
+
+/*
+ * /projects/teaching-claude-to-code-like-me renders general.md and CLAUDE.md as
+ * their own source: fenced markdown blocks (Pygments) themed to read like an
+ * editor. Loaded alongside pygments.css; these token colors beat monokai on
+ * specificity. Stays dark in both page themes — a code editor reads as dark.
+ * Line numbers come from a CSS counter on the per-line spans (build.py sets
+ * linespans), so lines soft-wrap with a hanging indent and never scroll sideways.
+ */
+main > .codehilite {
+    background: #1c1c1e;
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: #e6e6e6;
+    color-scheme: dark;
+    font-family: "Berkeley Mono Variable", monospace;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    overflow-x: hidden; /* belt-and-suspenders: wrapping already prevents overflow */
+    padding: 0.9rem 1rem 0.9rem 0.6rem;
+
+    & pre {
+        margin: 0;
+        white-space: normal; /* line spans below own the wrapping */
+    }
+
+    & code {
+        counter-reset: line;
+        display: block;
+    }
+
+    /* one block per source line: number in the gutter, text hang-indents past it */
+    & code > span {
+        counter-increment: line;
+        display: block;
+        overflow-wrap: break-word;
+        padding-left: 2.6em;
+        position: relative;
+        white-space: pre-wrap;
+
+        &::before {
+            color: #555;
+            content: counter(line);
+            left: 0;
+            position: absolute;
+            text-align: right;
+            user-select: none; /* keep line numbers out of copied text */
+            width: 1.6em;
+        }
+    }
+
+    /* markdown tokens in the site palette — fixed dark-theme values, block stays dark */
+    & .gh,
+    & .gu {
+        color: rgb(46 184 255); /* --oasis-blue: # and ## headings */
+        font-weight: bold;
+    }
+
+    & .ge {
+        color: #cfd2d6;
+        font-style: italic; /* *emphasis* */
+    }
+
+    & .k {
+        color: indianred; /* * list markers — a legible lift of the site's darkred */
+    }
+
+    & .sb {
+        background: rgb(255 255 255 / 0.09);
+        border-radius: 3px;
+        padding: 0.05em 0.3em; /* `inline code` chip */
+    }
+}

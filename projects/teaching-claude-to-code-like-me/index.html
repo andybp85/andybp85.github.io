@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta name="darkreader-lock"/>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="Andy's biographical site for projects and random thoughts." name="description"/>
+<meta content="default-src 'self'; script-src-elem 'self' 'unsafe-inline' *.getclicky.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src *.getclicky.com" http-equiv="Content-Security-Policy"/>
+<title>Teaching Claude To Code Like Me — Andy Stanish</title>
+<link href="/icons/favicon.ico" rel="icon" type="image/ico"/>
+<link as="font" crossorigin="" href="/fonts/B612-Regular/B612-Regular.woff" rel="preload" type="font/woff"/>
+<link as="font" crossorigin="" href="/fonts/Inter/InterVariable.woff2" rel="preload" type="font/woff2"/>
+<link as="font" crossorigin="" href="/fonts/Inter/InterVariable-Italic.woff2" rel="preload" type="font/woff2"/>
+<style>
+        body {
+            visibility: hidden;
+        }
+
+        html {
+            background-image: linear-gradient(270deg, #222 90%, #2A2A2A 100%);
+        }
+
+        @media (prefers-color-scheme: light) {
+            html {
+                background-image: linear-gradient(90deg, #f9f9f9 95%, #BBB 100%);
+            }
+        }
+    </style>
+<link as="style" href="/styles.css" rel="preload"/>
+<link href="/styles.css" rel="stylesheet"/>
+<link rel="stylesheet" href="/projects/projects.css">
+<link rel="stylesheet" href="/pygments.css">
+<script type="module" src="/components.js"></script></head>
+<body>
+<site-header></site-header>
+<sub-nav>
+<label>Posts</label>
+<nav><a data-categories="code|craft" data-date="2026-06-28" class="current" href="/projects/teaching-claude-to-code-like-me">Teaching Claude To Code Like Me</a><a data-categories="tech|how-to" data-date="2024-08-16" href="/projects/vim-config-with-YouCompleteMe">Vim Config With YouCompleteMe</a></nav>
+</sub-nav>
+<main><p><em>June 28, 2026</em></p>
+<h2>Teaching Claude to Code Like Me</h2>
+<p>After 15 years as a programmer, I've got a pretty good sense of what I like and what works. So when I started having Claude write code
+alongside me, I wanted to make sure it built things the way I would — not the generic average of everything on the internet, but my way.</p>
+<p>The only way to get there was to write it all down: a rules file Claude reads automatically on every task. That turned out to be the
+valuable part — a lot of what I'd carried around as "this just feels cleaner" had to get concrete enough for a machine to actually
+follow. Hand-waving doesn't compile.</p>
+<p>It starts big-picture, in <code>CLAUDE.md</code> — here's the relevant parts:</p>
+<div class="codehilite"><pre><span></span><code><span id="line-1"><span class="gh"># System Protocols</span>
+</span><span id="line-2">
+</span><span id="line-3"><span class="gu">## Workflow &amp; Planning</span>
+</span><span id="line-4">Complex features → design spec first. Small fixes/features → code directly.
+</span><span id="line-5">Commit per logical unit; terse subject + a &quot;why&quot; body when the change isn&#39;t obvious.
+</span><span id="line-6">Never rewrite history on a shared branch; if a force-push is unavoidable, use <span class="sb">`--force-with-lease`</span>.
+</span><span id="line-7">Update README and relevant docs at each breakpoint.
+</span><span id="line-8">
+</span><span id="line-9"><span class="gu">## Environment &amp; File Rules</span>
+</span><span id="line-10">4 spaces for new files; match existing indentation when editing. Follow language conventions (Makefile tabs, YAML 2-space).
+</span><span id="line-11">Max line length 140 columns (code only); defer to any project formatter/.editorconfig.
+</span><span id="line-12">Generate README if missing.
+</span><span id="line-13">Create <span class="sb">`.claudeignore`</span> using @.claudeignore rules.
+</span><span id="line-14">Create <span class="sb">`.gitignore`</span> with reasonable defaults. Enforce: <span class="sb">`.idea`</span>, <span class="sb">`.memsearch`</span>, <span class="sb">`.firecrawl`</span>.
+</span><span id="line-15">
+</span><span id="line-16"><span class="gu">## Architectural Principles</span>
+</span><span id="line-17">Modular and DRY (modularity wins ties).
+</span><span id="line-18">Prefer functional paradigms: pure functions, immutability, composition over inheritance.
+</span><span id="line-19">Twelve-Factor App methodologies (environment config, isolation, statelessness).
+</span><span id="line-20">SOLID principles.
+</span><span id="line-21">YAGNI: add abstraction, layers, or config only for a present need, never speculation. Match rigor to value; don&#39;t gold-plate.
+</span><span id="line-22">Web/browser: prefer the platform (vanilla HTML/CSS/JS, Web APIs) over frameworks and runtime deps; add a dep only when it earns its place. Let modern-web-guidance pick the native feature.
+</span><span id="line-23">Default to boring tech: when a dep/tool is warranted, prefer mature (good docs, track record, community) over new/shiny — maturity, not age.
+</span><span id="line-24">Rob Pike&#39;s Five Rules of Programming:
+</span><span id="line-25"><span class="w">  </span><span class="k">1.</span> Do not assume bottlenecks; measure first.
+</span><span id="line-26"><span class="w">  </span><span class="k">2.</span> Do not tune for speed until measured and one part dominates.
+</span><span id="line-27"><span class="w">  </span><span class="k">3.</span> Fancy algorithms are slow when n is small (n usually is). Keep it simple.
+</span><span id="line-28"><span class="w">  </span><span class="k">4.</span> Fancy algorithms are buggy and hard to implement. Use simple data structures.
+</span><span id="line-29"><span class="w">  </span><span class="k">5.</span> Data dominates. Well-organized data structures make algorithms self-evident.
+</span></code></pre></div>
+
+<p>Then the nitty-gritty, in <code>general.md</code>:</p>
+<div class="codehilite"><pre><span></span><code><span id="line-1"><span class="gh"># General code style</span>
+</span><span id="line-2">
+</span><span id="line-3">Cross-language principles. Language rules stack on top; CLAUDE.md holds architecture (functional paradigms, YAGNI, Pike, DRY).
+</span><span id="line-4">
+</span><span id="line-5"><span class="gu">## Mindset</span>
+</span><span id="line-6"><span class="k">*</span><span class="w"> </span>brevity is readability — optimize for the reader, who is often you in six months
+</span><span id="line-7"><span class="k">*</span><span class="w"> </span>optimize for <span class="ge">*readability over writability*</span>; do the hard thinking at write-time so reading is cheap
+</span><span id="line-8"><span class="k">*</span><span class="w"> </span>prefer <span class="ge">*simple*</span> (cheap to reason about correctly) over <span class="ge">*easy*</span> (cheap to write) — &quot;hard and simple&quot; beats &quot;easy and complex&quot;
+</span><span id="line-9"><span class="k">*</span><span class="w"> </span>minimize accidental complexity (what the code imposes); spend the budget on the problem itself
+</span><span id="line-10"><span class="k">*</span><span class="w"> </span>code is read in small chunks — structure every unit to fit in working memory: small, labeled, composable pieces
+</span><span id="line-11"><span class="k">*</span><span class="w"> </span>keep code continuously clean — fix small messes before they rot
+</span><span id="line-12">
+</span><span id="line-13"><span class="gu">## Functions</span>
+</span><span id="line-14"><span class="k">*</span><span class="w"> </span>one concept per function; do exactly what the name says, nothing more — if the name feels dumb to type, it shouldn&#39;t be a function
+</span><span id="line-15"><span class="k">*</span><span class="w"> </span>build a vocabulary of small, composable functions
+</span><span id="line-16"><span class="k">*</span><span class="w"> </span>aim short; split when over ~20 lines or high cognitive complexity — but never split a single concept just to hit a number
+</span><span id="line-17"><span class="k">*</span><span class="w"> </span>entry points (<span class="sb">`main`</span>, scripts) may stay long once pure logic is factored out — locality wins there
+</span><span id="line-18"><span class="k">*</span><span class="w"> </span>limit heterogeneous positional params (≤3, hard max 4); beyond that use named/keyword args — meaningful names over meaningless positions
+</span><span id="line-19"><span class="k">*</span><span class="w"> </span>prefer explicit inputs and outputs over hidden state mutation — you understand a unit by what goes in and comes out
+</span><span id="line-20">
+</span><span id="line-21"><span class="gu">## Control flow &amp; shape</span>
+</span><span id="line-22"><span class="k">*</span><span class="w"> </span>flatten — deep nesting is a smell; use guard clauses / early returns, and isolate unavoidably deep logic in its own function
+</span><span id="line-23"><span class="k">*</span><span class="w"> </span>keep conditionals short; don&#39;t mix <span class="sb">`&amp;&amp;`</span> and <span class="sb">`||`</span> in one test — extract or split
+</span><span id="line-24"><span class="k">*</span><span class="w"> </span>prefer declarative (<span class="ge">*what*</span>) over imperative (<span class="ge">*how*</span>); prefer <span class="sb">`map`</span>/<span class="sb">`filter`</span>/<span class="sb">`reduce`</span> (pure, produce output) over <span class="sb">`forEach`</span>/loops (side-effecting)
+</span><span id="line-25"><span class="k">*</span><span class="w"> </span>break long call/method chains into well-named intermediate variables or helpers
+</span><span id="line-26"><span class="k">*</span><span class="w"> </span>favor familiar, consistent patterns (least surprise); don&#39;t reach for exotic syntax/sugar that taxes the reader
+</span><span id="line-27">
+</span><span id="line-28"><span class="gu">## State &amp; effects</span>
+</span><span id="line-29"><span class="k">*</span><span class="w"> </span>treat data as immutable — code as if you can copy but not change it (mutate during construction, then freeze)
+</span><span id="line-30"><span class="k">*</span><span class="w"> </span>no action-at-a-distance: no global mutable state; behavior should be understandable by reading locally
+</span><span id="line-31"><span class="k">*</span><span class="w"> </span>isolate side effects (I/O) at the edges; keep core logic pure
+</span><span id="line-32"><span class="k">*</span><span class="w"> </span>keep variable liveness short — declare near first use, minimize the span; avoid long-lived cross-function mutable vars (use an object or refactor)
+</span><span id="line-33">
+</span><span id="line-34"><span class="gu">## Naming</span>
+</span><span id="line-35"><span class="k">*</span><span class="w"> </span>name by purpose — never meaningless names (<span class="sb">`value`</span>, <span class="sb">`data`</span>, <span class="sb">`temp`</span>)
+</span><span id="line-36"><span class="k">*</span><span class="w"> </span>functions are verbs; variables are nouns; pluralize collections; single-letter names only in tight iteration
+</span><span id="line-37"><span class="k">*</span><span class="w"> </span>use visually distinct names (avoid <span class="sb">`i`</span>/<span class="sb">`j`</span>, <span class="sb">`item`</span>/<span class="sb">`items`</span> confusion); never shadow
+</span><span id="line-38"><span class="k">*</span><span class="w"> </span>descriptive names don&#39;t excuse bad design — and over-long names are bloat too
+</span><span id="line-39"><span class="k">*</span><span class="w"> </span><span class="sb">`_`</span>-prefix marks module-private
+</span><span id="line-40"><span class="k">*</span><span class="w"> </span>sort alphabetically wherever order is otherwise arbitrary
+</span><span id="line-41">
+</span><span id="line-42"><span class="gu">## Abstractions</span>
+</span><span id="line-43"><span class="k">*</span><span class="w"> </span>build composable, <span class="ge">*trustworthy*</span> abstractions — ones that obey the laws they imply (consistent equality, no surprising special cases)
+</span><span id="line-44"><span class="k">*</span><span class="w"> </span>a leaky or misleading abstraction or type explodes cognitive load; a lawful one reduces it
+</span><span id="line-45">
+</span><span id="line-46"><span class="gu">## Errors</span>
+</span><span id="line-47"><span class="k">*</span><span class="w"> </span>errors should never pass silently, unless explicitly silenced
+</span><span id="line-48"><span class="k">*</span><span class="w"> </span>throw to let the caller decide — don&#39;t swallow at the point of occurrence
+</span><span id="line-49"><span class="k">*</span><span class="w"> </span>catch only the specific condition you can handle; re-throw the rest
+</span><span id="line-50"><span class="k">*</span><span class="w"> </span>don&#39;t return empty/`undefined` for an essential missing value — throw
+</span><span id="line-51">
+</span><span id="line-52"><span class="gu">## Comments &amp; docs</span>
+</span><span id="line-53"><span class="k">*</span><span class="w"> </span>comment the <span class="ge">*why*</span>, not the <span class="ge">*what*</span> — if a &quot;what&quot; feels needed, first make the code clearer (hard math/algorithms/perf excepted)
+</span><span id="line-54"><span class="k">*</span><span class="w"> </span>comment the non-obvious: anything a reader would ask about, anything you had to re-derive, non-specific catch blocks, and especially a hack you hadn&#39;t time to refactor
+</span><span id="line-55"><span class="k">*</span><span class="w"> </span>don&#39;t omit comments out of staleness-fear — names go stale too; prefer assertions over comments documenting assumptions
+</span><span id="line-56"><span class="k">*</span><span class="w"> </span>colocate docs with what they describe; read nearby commentary before editing
+</span><span id="line-57"><span class="k">*</span><span class="w"> </span>cite sources (say what a URL is <span class="ge">*for*</span>); mark temporary/workaround code with removal criteria; flag non-obvious cross-file coupling on both sides
+</span><span id="line-58"><span class="k">*</span><span class="w"> </span>generate API docs from source, don&#39;t hand-maintain a parallel copy; tests are documentation
+</span><span id="line-59">
+</span><span id="line-60"><span class="gu">## Testing</span>
+</span><span id="line-61"><span class="k">*</span><span class="w"> </span>new and refactored code gets meaningful tests; every production bug gets a regression test
+</span><span id="line-62"><span class="k">*</span><span class="w"> </span>a bug is a signal of excess complexity — fix the root cause and structure, not just the symptom
+</span><span id="line-63"><span class="k">*</span><span class="w"> </span>set up mocks/spies in the test that uses them (locality over DRY)
+</span><span id="line-64">
+</span><span id="line-65"><span class="gu">## Hygiene</span>
+</span><span id="line-66"><span class="k">*</span><span class="w"> </span>no dead or vestigial code (unused imports, params, variables)
+</span><span id="line-67"><span class="k">*</span><span class="w"> </span>no stray debug output in committed code (<span class="sb">`console.log`</span>, <span class="sb">`print`</span>); error logging is fine
+</span><span id="line-68"><span class="k">*</span><span class="w"> </span>LF line endings
+</span></code></pre></div>
+
+<p>None of this is law. It's a set of defaults I trust enough to follow without re-litigating every time — which is the whole point.</p>
+<h3>Influences</h3>
+<p>Some things that've influenced my thinking over the years:</p>
+<ul>
+<li><a href="https://hissp.readthedocs.io/en/latest/style_guide.html">Hissp Style Guide</a></li>
+<li><a href="https://rpeszek.github.io/posts/2022-08-30-code-cognitiveload.html">Code Cognitive Load</a></li>
+<li><a href="https://github.com/hmemcpy/milewski-ctfp-pdf/">Category Theory for Programmers</a></li>
+<li><a href="https://medium.com/@yiyisun/elm-architecture-in-8-lines-of-typescript-d5a33aca75c1">Elm Architecture in 8 Lines of TypeScript</a></li>
+<li><a href="https://www.kernel.org/doc/html/v4.10/process/coding-style.html">Linux Kernel Coding Style</a></li>
+<li><a href="https://groups.google.com/g/net.jokes/c/k2JVKQzJSpY?pli=1">The Story of Mel</a></li>
+<li><a href="https://medium.com/@hinchman_amanda/null-pointer-references-the-billion-dollar-mistake-1e616534d485">Null References: The Billion Dollar Mistake</a></li>
+</ul></main>
+<site-footer></site-footer>
+</body>
+</html>
