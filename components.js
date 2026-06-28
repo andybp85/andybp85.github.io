@@ -1,8 +1,8 @@
 const navLink = (href, text) => {
-    const isCurrent = location.pathname === href || location.pathname.startsWith(href + '/');
-    const current = isCurrent ? ' class="current" aria-current="page"' : "";
-    return `<a href="${href}"${current}>${text}</a>`;
-};
+    const isCurrent = location.pathname === href || location.pathname.startsWith(href + '/')
+    const current = isCurrent ? ' class="current" aria-current="page"' : ""
+    return `<a href="${href}"${current}>${text}</a>`
+}
 
 customElements.define("site-header", class extends HTMLElement {
     connectedCallback() {
@@ -14,9 +14,9 @@ customElements.define("site-header", class extends HTMLElement {
                     ${navLink("/blog", "Blog")}
                     ${navLink("/projects", "Projects")}
                 </nav>
-            </header>`;
+            </header>`
     }
-});
+})
 
 customElements.define("site-footer", class extends HTMLElement {
     connectedCallback() {
@@ -40,11 +40,11 @@ customElements.define("site-footer", class extends HTMLElement {
                     <a title="Web Analytics (opens in new tab)" href="https://clicky.com/101459580" target="_blank" rel="noopener">
                         <img alt="Clicky" src="/icons/click-badge.gif" height="15" width="80"></a>
                 </div>
-            </footer>`;
-        const clicky = document.createElement("script");
-        clicky.async = true;
-        clicky.dataset.id = "101459580";
-        clicky.src = "//static.getclicky.com/js";
-        this.querySelector("#clicky").append(clicky);
+            </footer>`
+        const clicky = document.createElement("script")
+        clicky.async = true
+        clicky.dataset.id = "101459580"
+        clicky.src = "//static.getclicky.com/js"
+        this.querySelector("#clicky").append(clicky)
     }
-});
+})
