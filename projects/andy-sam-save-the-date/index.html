@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta name="darkreader-lock"/>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="light dark" name="color-scheme"/>
+<meta content="Andy's autobiographical site for projects and random thoughts." name="description"/>
+<meta content="default-src 'self'; script-src-elem 'self' 'unsafe-inline' *.getclicky.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src *.getclicky.com" http-equiv="Content-Security-Policy"/>
+<title>Andy &amp; Sam's Save the Date — Andy Stanish</title>
+<link href="/icons/favicon.ico" rel="icon" type="image/ico"/>
+<link as="font" crossorigin="" href="/fonts/B612-Regular/B612-Regular.woff" rel="preload" type="font/woff"/>
+<link as="font" crossorigin="" href="/fonts/Inter/InterVariable.woff2" rel="preload" type="font/woff2"/>
+<link as="font" crossorigin="" href="/fonts/Inter/InterVariable-Italic.woff2" rel="preload" type="font/woff2"/>
+<script>
+    /* Apply a pinned theme before first paint to avoid a flash; auto defers
+       to color-scheme: light dark (system). Kept in sync with components.js. */
+    {
+        const theme = localStorage.getItem("theme")
+        if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme
+    }
+</script>
+<style>
+        body {
+            visibility: hidden;
+        }
+
+        html {
+            background-image: linear-gradient(270deg, #222 90%, #2A2A2A 100%);
+        }
+
+        html[data-theme="light"] {
+            background-image: linear-gradient(90deg, #f9f9f9 95%, #BBB 100%);
+            color-scheme: light;
+        }
+
+        html[data-theme="dark"] {
+            color-scheme: dark;
+        }
+
+        @media (prefers-color-scheme: light) {
+            html:not([data-theme]) {
+                background-image: linear-gradient(90deg, #f9f9f9 95%, #BBB 100%);
+            }
+        }
+    </style>
+<link as="style" href="/styles.css" rel="preload"/>
+<link href="/styles.css" rel="stylesheet"/>
+<link rel="stylesheet" href="/projects/projects.css">
+<link rel="stylesheet" href="/pygments.css">
+<script type="module" src="/components.js"></script></head>
+<body>
+<site-header></site-header>
+<sub-nav>
+<label>Posts</label>
+<nav><a data-categories="code|craft" data-date="2026-06-28" href="/projects/teaching-claude-to-code-like-me">Teaching Claude To Code Like Me</a><a data-categories="web|project" data-date="2026-02-17" class="current" href="/projects/andy-sam-save-the-date">Andy &amp; Sam's Save the Date</a><a data-categories="tech|how-to" data-date="2024-08-16" href="/projects/vim-config-with-YouCompleteMe">Vim Config With YouCompleteMe</a></nav>
+</sub-nav>
+<main>
+<p><em>February 17, 2026</em></p>
+<h2>Andy &amp; Sam's Save the Date</h2>
+<p>When Sam and I were planning our wedding, I did the engineer thing and built our own save-the-date site instead of
+renting one — a digital save-the-date behind a little password gate, where guests told us whether they planned to come
+and where to send the real invitation later.</p>
+<div>
+<img alt="The wedding site's art-deco login gate" height="729" src="/images/wedding-login.webp" width="800"/>
+</div>
+
+<h3>Serverless, on a wedding budget</h3>
+<p>No backend to run and no monthly bill. The whole thing is static HTML, CSS, and JavaScript on GitHub Pages, with a
+Google Apps Script web app standing in for a server. That script reads and writes a Google Sheet — our guest list and
+everyone's responses — and the front end just talks to it over <code>fetch</code>. Free to host, and my in-laws could
+read the responses straight out of a spreadsheet.</p>
+<p>Guests "logged in" with the bride's or groom's last name. The front end POSTs the form straight to the script and, when
+the reply comes back <code>success</code>, stashes the token it's handed and follows the redirect:</p>
+<div class="codehilite"><pre><span></span><code><span class="nx">loginForm</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">&#39;submit&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">e</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">()</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">formData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">FormData</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="p">)</span>
+
+<span class="w">    </span><span class="nx">fetch</span><span class="p">(</span><span class="nx">SCRIPT_URL</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">method</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;POST&#39;</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">body</span><span class="o">:</span><span class="w"> </span><span class="nx">formData</span>
+<span class="w">    </span><span class="p">}).</span><span class="nx">then</span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">json</span><span class="p">())</span>
+<span class="w">        </span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">status</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s1">&#39;success&#39;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nx">localStorage</span><span class="p">.</span><span class="nx">setItem</span><span class="p">(</span><span class="s1">&#39;token&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">token</span><span class="p">)</span>
+<span class="w">                </span><span class="nx">localStorage</span><span class="p">.</span><span class="nx">setItem</span><span class="p">(</span><span class="s1">&#39;redirect&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">redirect</span><span class="p">)</span>
+<span class="w">                </span><span class="nb">window</span><span class="p">.</span><span class="nx">location</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">redirect</span>
+<span class="w">            </span><span class="p">}</span><span class="w"> </span><span class="k">else</span>
+<span class="w">                </span><span class="k">throw</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">message</span><span class="p">)</span>
+<span class="w">        </span><span class="p">})</span>
+<span class="w">        </span><span class="p">.</span><span class="k">catch</span><span class="p">(</span><span class="nx">e</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">errorMsg</span><span class="p">.</span><span class="nx">innerText</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">message</span><span class="w"> </span><span class="p">})</span>
+<span class="p">})</span>
+</code></pre></div>
+<p>The script checked that name against the guest list and minted a token, which the page stashed in
+<code>localStorage</code> along with where to send you next. Every save-the-date submission then carried that token back,
+so the script could tell a real guest's response from a stray POST, and submitting cleared it from storage on the way
+out. Show up at the gate with a token still saved and it waved you straight through — so you signed in once and never
+again.</p>
+<p>Which is to say it's a half-baked OAuth: authenticate once, get a bearer token, present it on every request that
+touches the data. Just without everything that actually makes OAuth OAuth — no authorization server, no scopes, no
+refresh, no expiry, and a "password" that's one last name the whole guest list shares. For keeping a wedding list out of
+public view, this was plenty.</p>
+
+<h3>The fun parts</h3>
+<p>The form rewires itself around one question — are you coming? Picking an answer flips which fieldset is required
+and which is disabled, so each guest only fills out the half that applies to them:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1">// flip which fieldset is required/enabled around the &quot;are you coming?&quot; answer</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">changeForm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nx">attending</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">going</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;is-attending-info&#39;</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">going</span><span class="p">.</span><span class="nx">classList</span><span class="p">[</span><span class="nx">attending</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s1">&#39;yes&#39;</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s1">&#39;remove&#39;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;add&#39;</span><span class="p">](</span><span class="s1">&#39;disabled-fields&#39;</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">going</span><span class="p">.</span><span class="nx">querySelectorAll</span><span class="p">(</span><span class="s1">&#39;input&#39;</span><span class="p">).</span><span class="nx">forEach</span><span class="p">(</span><span class="nx">i</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">i</span><span class="p">.</span><span class="nx">required</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">attending</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s1">&#39;yes&#39;</span>
+<span class="w">        </span><span class="nx">i</span><span class="p">.</span><span class="nx">disabled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">attending</span><span class="w"> </span><span class="o">!==</span><span class="w"> </span><span class="s1">&#39;yes&#39;</span>
+<span class="w">    </span><span class="p">})</span>
+<span class="w">    </span><span class="c1">// ...the not-attending fieldset mirrors this, inverted</span>
+<span class="p">}</span>
+</code></pre></div>
+<div>
+<img alt="The save-the-date form — picking yes reveals the guest fields" height="729" src="/images/wedding-save-the-date.webp" width="800"/>
+</div>
+<ul>
+<li>The text inputs grow to fit what you type — a little helper measures the text in a hidden element and resizes the
+field, so a long name never gets clipped in a fixed-width box.</li>
+<li>No framework and no build step. Just the platform: a couple hundred lines of vanilla JS, a pair of art-deco display
+fonts, and <code>noindex</code> to keep the whole thing off the search engines.</li>
+</ul>
+
+<p>The site's retired now — we've moved on to the next stage of our journey — but it was a great excuse to build
+something real with nothing more than a browser and a spreadsheet.</p>
+</main>
+<site-footer></site-footer>
+</body>
+</html>

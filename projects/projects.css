@@ -19,7 +19,7 @@ main div {
  * Line numbers come from a CSS counter on the per-line spans (build.py sets
  * linespans), so lines soft-wrap with a hanging indent and never scroll sideways.
  */
-main > .codehilite {
+main > .codehilite.source {
     --editor-bg: #1c1c1e;
     --editor-border: #333;
     --editor-chip: rgb(255 255 255 / 0.09);
@@ -96,7 +96,7 @@ main > .codehilite {
  * Light editor palette — repeated for the pinned-light and unpinned-system-light
  * (auto) cases because a media query and an attribute selector can't share a rule.
  */
-:root[data-theme="light"] main > .codehilite {
+:root[data-theme="light"] main > .codehilite.source {
     --editor-bg: #f7f7f8;
     --editor-border: #d8d8dc;
     --editor-chip: rgb(0 0 0 / 0.06);
@@ -107,7 +107,7 @@ main > .codehilite {
 }
 
 @media (prefers-color-scheme: light) {
-    :root:not([data-theme]) main > .codehilite {
+    :root:not([data-theme]) main > .codehilite.source {
         --editor-bg: #f7f7f8;
         --editor-border: #d8d8dc;
         --editor-chip: rgb(0 0 0 / 0.06);
