@@ -5,7 +5,7 @@
 <meta name="darkreader-lock"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<meta content="light dark" name="color-scheme"/>
+<smeta content="light dark" name="color-scheme"/>
 <meta content="Andy's autobiographical site for projects and random thoughts." name="description"/>
 <meta content="default-src 'self'; script-src-elem 'self' 'unsafe-inline' *.getclicky.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src *.getclicky.com" http-equiv="Content-Security-Policy"/>
 <title>Andy &amp; Sam's Save the Date — Andy Stanish</title>
@@ -59,7 +59,7 @@
 <nav><a data-categories="code|craft" data-date="2026-06-28" href="/projects/teaching-claude-to-code-like-me">Teaching Claude To Code Like Me</a><a data-categories="web|project" data-date="2026-02-17" class="current" href="/projects/andy-sam-save-the-date">Andy &amp; Sam's Save the Date</a><a data-categories="tech|how-to" data-date="2024-08-16" href="/projects/vim-config-with-YouCompleteMe">Vim Config With YouCompleteMe</a></nav>
 </sub-nav>
 <main>
-<p><em>February 17, 2026</em></p>
+<p><em>June 28, 2026</em></p>
 <h2>Andy &amp; Sam's Save the Date</h2>
 <p>When Sam and I were planning our wedding, I did the engineer thing and built our own save-the-date site instead of
 renting one — a digital save-the-date behind a little password gate, where guests told us whether they planned to come
@@ -71,7 +71,7 @@ and where to send the real invitation later.</p>
 <h3>Serverless, on a wedding budget</h3>
 <p>No backend to run and no monthly bill. The whole thing is static HTML, CSS, and JavaScript on GitHub Pages, with a
 Google Apps Script web app standing in for a server. That script reads and writes a Google Sheet — our guest list and
-everyone's responses — and the front end just talks to it over <code>fetch</code>. Free to host, and my in-laws could
+everyone's responses — and the front end just talks to it over <code>fetch</code>. Free to host, and we... okay, Sam could
 read the responses straight out of a spreadsheet.</p>
 <p>Guests "logged in" with the bride's or groom's last name. The front end POSTs the form straight to the script and, when
 the reply comes back <code>success</code>, stashes the token it's handed and follows the redirect:</p>
