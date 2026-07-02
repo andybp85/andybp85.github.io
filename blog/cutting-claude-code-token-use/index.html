@@ -61,18 +61,25 @@
 </sub-nav>
 <main><p><em>July 2, 2026</em></p>
 <h2>Compress the output, rewrite the commands: cutting Claude Code's token use</h2>
-<p>Every time an agent reads a file, greps a repo, or runs a test, the whole output lands in the context window — and you
-pay for it on <em>every</em> turn after that, right up until it gets summarized away. Most of it is noise the model glanced at
-once and never needed again: the 200-line <code>ls -la</code>, the stack trace it read the top of, the <code>ps aux</code> dump it wanted one
-process out of. It all just sits there, costing tokens, forever.</p>
-<p>So I put two little Rust tools in the pipe between me and the model. <code>rtk</code> rewrites verbose commands into compact ones
-before their output ever reaches the context; <code>sqz</code> compresses and de-duplicates whatever's left. Both hang off Claude
-Code's <a href="https://docs.claude.com/en/docs/claude-code/hooks">PreToolUse hooks</a> so it's completely transparent — I don't
-type anything different, the output just shows up smaller. As of this writing rtk has rewritten <strong>5,708 commands and
-saved 2.6M tokens</strong> — about 27% of everything it touched — and sqz has compressed <strong>1,335 payloads for another 125K</strong>.
-That's real money and, more to the point, real context I get to spend on the actual problem instead of on log spam.</p>
-<p>Why bother? Because the raw output is wildly over-detailed for whatever the model is actually doing, and the
-per-command receipts are almost comical:</p>
+<p>My Claude Code token usage had been creeping up, so I dug into where it was all going. The culprit was obvious once I
+looked: every file the agent reads, every repo it greps, every test it runs dumps its whole output into the context
+window — and you pay for that on <em>every</em> turn after, right up until it gets summarized away. Most of it is noise the
+model glanced at once and never needed again: the 200-line <code>ls -la</code>, the stack trace it read the top of, the <code>ps aux</code>
+dump it wanted one process out of. It all just sits there, costing tokens, forever.</p>
+<p>So I looked into cutting it, and settled on a multi-pronged approach:</p>
+<ul>
+<li><strong>Rewrite noisy command output</strong> into something compact before it ever reaches the context.</li>
+<li><strong>Compress and de-duplicate</strong> whatever text is left over.</li>
+<li><strong>Handle compaction deliberately</strong>, instead of turning the default summarizer loose on a long session.</li>
+<li><strong>Trim the model's own output</strong>, since everything it writes costs tokens too — and lingers in the context after.</li>
+</ul>
+<p>Two little Rust tools do most of the work — <a href="https://github.com/rtk-ai/rtk"><code>rtk</code></a> and
+<a href="https://github.com/ojuschugh1/sqz"><code>sqz</code></a> — hanging off Claude Code's
+<a href="https://docs.claude.com/en/docs/claude-code/hooks">hooks</a> so it's transparent; I don't type anything different, the
+output just shows up smaller. A bit of <code>CLAUDE.md</code> steering ties them together. First, the numbers.</p>
+<p>As of this writing rtk has rewritten <strong>5,708 commands and saved 2.6M tokens</strong> — about 27% of everything it touched — and
+sqz has compressed <strong>1,335 payloads for another 125K</strong>. That's real money, and more to the point real context I get to
+spend on the actual problem instead of on log spam. The per-command receipts are almost comical:</p>
 <ul>
 <li><code>ps aux</code> — <strong>98.8%</strong> smaller. The model wanted one process, not every daemon on the box.</li>
 <li>A <code>vitest</code> run — <strong>93.5%</strong>. Green checkmarks compress to nothing; only the failures carry information.</li>
@@ -80,10 +87,7 @@ per-command receipts are almost comical:</p>
 </ul>
 <p>By sheer volume the workhorse is <code>rtk read</code> — 408 file reads, nearly a million tokens saved on its own. Every
 unfiltered read is output you rent for the rest of the session.</p>
-<p>So here's the whole setup, top to bottom. Install the two tools and let them wire their own hooks; register the
-compressing MCP tools and steer the model to actually reach for them; tune when compaction fires; and trim the model's
-own output while you're at it. Then the same moves ported to any other agent. None of it is much code — most of the work
-is convincing the model to lean on what you've installed.</p>
+<p>Now here's how I set it up, top to bottom.</p>
 <h3>Install and wire the hooks</h3>
 <p>Both are single binaries — <a href="https://github.com/rtk-ai/rtk">rtk</a> and <a href="https://github.com/ojuschugh1/sqz">sqz</a>; grab them
 from their repos (mine came off Homebrew). The wiring is one command each, because both ship an <code>init</code> that writes the
