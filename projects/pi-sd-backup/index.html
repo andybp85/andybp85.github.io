@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta name="darkreader-lock"/>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="light dark" name="color-scheme"/>
+<meta content="Andy's autobiographical site for projects and random thoughts." name="description"/>
+<meta content="default-src 'self'; script-src-elem 'self' 'unsafe-inline' *.getclicky.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src *.getclicky.com" http-equiv="Content-Security-Policy"/>
+<title>Pi SD Card Backup — Andy Stanish</title>
+<link href="/icons/favicon.svg" rel="icon" type="image/svg+xml"/>
+<link href="/icons/favicon.ico" rel="icon" sizes="32x32"/>
+<link href="/icons/apple-touch-icon.png" rel="apple-touch-icon"/>
+<link as="font" crossorigin="" href="/fonts/B612-Regular/B612-Regular.woff" rel="preload" type="font/woff"/>
+<link as="font" crossorigin="" href="/fonts/Inter/InterVariable.woff2" rel="preload" type="font/woff2"/>
+<link as="font" crossorigin="" href="/fonts/Inter/InterVariable-Italic.woff2" rel="preload" type="font/woff2"/>
+<script>
+    /* Apply a pinned theme before first paint to avoid a flash; auto defers
+       to color-scheme: light dark (system). Kept in sync with components.js. */
+    {
+        const theme = localStorage.getItem("theme")
+        if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme
+    }
+</script>
+<style>
+        body {
+            visibility: hidden;
+        }
+
+        html {
+            background-image: linear-gradient(270deg, #222 90%, #2A2A2A 100%);
+        }
+
+        html[data-theme="light"] {
+            background-image: linear-gradient(90deg, #f9f9f9 95%, #BBB 100%);
+            color-scheme: light;
+        }
+
+        html[data-theme="dark"] {
+            color-scheme: dark;
+        }
+
+        @media (prefers-color-scheme: light) {
+            html:not([data-theme]) {
+                background-image: linear-gradient(90deg, #f9f9f9 95%, #BBB 100%);
+            }
+        }
+    </style>
+<link as="style" href="/styles.css" rel="preload"/>
+<link href="/styles.css" rel="stylesheet"/>
+<link href="/projects/projects.css" rel="stylesheet"/>
+<link href="/pygments.css" rel="stylesheet"/>
+<script type="module" src="/components.js"></script></head>
+<body>
+<site-header></site-header>
+<sub-nav>
+<label>Posts</label>
+<nav><a data-categories="linux|raspberry-pi" data-date="2026-07-02" class="current" href="/projects/pi-sd-backup">Pi SD Card Backup</a><a data-categories="code|craft" data-date="2026-06-28" href="/projects/teaching-claude-to-code-like-me">Teaching Claude To Code Like Me</a><a data-categories="web|project" data-date="2026-02-17" href="/projects/andy-sam-save-the-date">Andy &amp; Sam's Save the Date</a><a data-categories="tech|how-to" data-date="2024-08-16" href="/projects/vim-config-with-YouCompleteMe">Vim Config With YouCompleteMe</a></nav>
+</sub-nav>
+<main>
+<p><em>July 2, 2026</em></p>
+<h2>Backing Up a Live Raspberry Pi SD Card</h2>
+<p>I've got a Raspberry Pi that runs around the clock, and its entire world lives on one SD card. SD cards don't fail
+gracefully — it's a question of when, not if. So I wanted a hands-off nightly backup. The catch: the Pi needs to stay up,
+so I can't unmount the card to copy it cleanly. <code>backup.sh</code> clones the live card, block-for-block, onto a
+second SD card with <code>dd</code> — no unmount required.</p>
+<p>The script and full README live on <a href="https://github.com/andybp85/pi-sd-backup">GitHub</a>.</p>
+<h3>How it works</h3>
+<p>A <code>sync</code> flushes filesystem buffers first, then <code>dd</code> copies the source device to the destination
+device with <code>conv=noerror,sync</code> — <code>noerror</code> so a flaky read doesn't abort the whole run, and
+<code>sync</code> so bad blocks get padded and every partition offset stays aligned.</p>
+<p>Because the source is never unmounted, the result is a <em>crash-consistent</em> snapshot — the equivalent of yanking
+the power — not a clean one. In practice that means the backup card may want an <code>fsck</code> on first boot, which the
+Pi's kernel runs automatically. Good enough to get back on my feet if the primary card dies.</p>
+<h3>The scary part: pointing dd at the right disk</h3>
+<p><code>dd</code> is a loaded gun. It overwrites the destination unconditionally, and kernel names like
+<code>/dev/sdb</code> are <strong>not stable</strong> — a re-plug or a reboot can quietly reassign them. Point it at the
+wrong disk and that disk is gone. Same lesson I wrote up for
+<a href="/blog/stop-hardcoding-dev-paths-in-crypttab">my encrypted drive</a>: never trust <code>/dev/sdX</code>.</p>
+<p>So the script pins each card by its filesystem <strong>UUID</strong> and resolves that UUID to the correct whole-disk
+device at run time — the UUID always wins over any device name. The real UUIDs live in a gitignored <code>.env</code> on
+the Pi, never in the repo:</p>
+<div class="codehilite"><pre><span></span><code>SOURCE_UUID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+DEST_UUID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+</code></pre></div>
+<h3>Guard rails</h3>
+<p>Since one wrong device means data loss, the script refuses to write a single byte if any of these fail:</p>
+<ul>
+<li>Not run as root.</li>
+<li>Source or destination is missing, or isn't a block device.</li>
+<li>The destination is smaller than the source.</li>
+<li>Any partition on the destination is currently mounted (that would mean it's a live filesystem, not a spare card).</li>
+<li>A pinned UUID can't be resolved, or source and destination resolve to the <em>same</em> disk.</li>
+</ul>
+<p>And there's a dry run that prints the exact <code>dd</code> it would execute and writes nothing:</p>
+<div class="codehilite"><pre><span></span><code>sudo bash backup.sh --dry-run   # prints the dd, writes nothing
+sudo bash backup.sh             # the real thing
+</code></pre></div>
+<h3>Scheduling</h3>
+<p>It runs from root's crontab, nightly at 3 AM when the box is quiet:</p>
+<div class="codehilite"><pre><span></span><code>0 3 * * * /path/to/backup.sh &gt;&gt; /var/log/pi-sd-backup.log 2&gt;&amp;1
+</code></pre></div>
+<p>Not fancy, but it means a dead SD card costs me a card swap and a reboot instead of a weekend of reinstalling and
+reconfiguring from memory. This is living documentation, so it'll grow as the setup does.</p>
+</main>
+<site-footer></site-footer>
+</body>
+</html>
