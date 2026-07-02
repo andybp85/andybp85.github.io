@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <meta name="darkreader-lock">
+    <meta name="description" content="Andy's autobiographical site for projects and random thoughts.">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'self'; script-src-elem 'self' 'unsafe-inline' *.getclicky.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src *.getclicky.com">
+    <title>Cutting Claude Code Token Use — Andy Stanish</title>
+    <link rel="preload" href="/fonts/B612-Regular/B612-Regular.woff" as="font" type="font/woff" crossorigin>
+    <link rel="preload" href="/fonts/Inter/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/Inter/InterVariable-Italic.woff2" as="font" type="font/woff2" crossorigin>
+    <script>
+        /* Apply a pinned theme before first paint to avoid a flash; auto defers
+           to color-scheme: light dark (system). Kept in sync with components.js. */
+        {
+            const theme = localStorage.getItem("theme")
+            if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme
+        }
+    </script>
+    <style>
+        body {
+            visibility: hidden;
+        }
+
+        html {
+            background-image: linear-gradient(270deg, #222 90%, #2A2A2A 100%);
+        }
+
+        html[data-theme="light"] {
+            background-image: linear-gradient(90deg, #f9f9f9 95%, #BBB 100%);
+            color-scheme: light;
+        }
+
+        html[data-theme="dark"] {
+            color-scheme: dark;
+        }
+
+        @media (prefers-color-scheme: light) {
+            html:not([data-theme]) {
+                background-image: linear-gradient(90deg, #f9f9f9 95%, #BBB 100%);
+            }
+        }
+    </style>
+    <link as="style" href="/styles.css" rel="preload">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/pygments.css">
+    <link rel="stylesheet" href="/blog/blog.css">
+    <link href="/icons/favicon.svg" rel="icon" type="image/svg+xml">
+<link href="/icons/favicon.ico" rel="icon" sizes="32x32">
+<link href="/icons/apple-touch-icon.png" rel="apple-touch-icon">
+    <script type="module" src="/components.js"></script>
+</head>
+<body>
+<site-header></site-header>
+<sub-nav>
+    <label>Posts</label>
+    <nav><a href="/blog/cutting-claude-code-token-use" data-date="2026-07-02" data-categories="claude-code|tokens" class="current">Cutting Claude Code Token Use</a><a href="/blog/stop-hardcoding-dev-paths-in-crypttab" data-date="2026-07-02" data-categories="linux|raspberry-pi">Stop Hardcoding Dev Paths In Crypttab</a><a href="/blog/thoughts-after-two-weeks-with-until-the-sun-explodes" data-date="2026-06-28" data-categories="music|review">Thoughts After Two Weeks With Until The Sun Explodes</a><a href="/blog/web-dev-roadmap" data-date="2026-06-28" data-categories="web|learning">Web Dev Roadmap</a><a href="/blog/tips-for-waking-up-far-far-too-early" data-date="2016-10-22" data-categories="life|sleep">Tips For Waking Up Far Far Too Early</a></nav>
+</sub-nav>
+<main><p><em>July 2, 2026</em></p>
+<h2>Compress the output, rewrite the commands: cutting Claude Code's token use</h2>
+<p>Every time an agent reads a file, greps a repo, or runs a test, the whole output lands in the context window — and you
+pay for it on <em>every</em> turn after that, right up until it gets summarized away. Most of it is noise the model glanced at
+once and never needed again: the 200-line <code>ls -la</code>, the stack trace it read the top of, the <code>ps aux</code> dump it wanted one
+process out of. It all just sits there, costing tokens, forever.</p>
+<p>So I put two little Rust tools in the pipe between me and the model. <code>rtk</code> rewrites verbose commands into compact ones
+before their output ever reaches the context; <code>sqz</code> compresses and de-duplicates whatever's left. Both hang off Claude
+Code's <a href="https://docs.claude.com/en/docs/claude-code/hooks">PreToolUse hooks</a> so it's completely transparent — I don't
+type anything different, the output just shows up smaller. As of this writing rtk has rewritten <strong>5,708 commands and
+saved 2.6M tokens</strong> — about 27% of everything it touched — and sqz has compressed <strong>1,335 payloads for another 125K</strong>.
+That's real money and, more to the point, real context I get to spend on the actual problem instead of on log spam.</p>
+<p>Why bother? Because the raw output is wildly over-detailed for whatever the model is actually doing, and the
+per-command receipts are almost comical:</p>
+<ul>
+<li><code>ps aux</code> — <strong>98.8%</strong> smaller. The model wanted one process, not every daemon on the box.</li>
+<li>A <code>vitest</code> run — <strong>93.5%</strong>. Green checkmarks compress to nothing; only the failures carry information.</li>
+<li><code>git commit</code> — <strong>60.7%</strong>, across 300-odd commits. That's a lot of boilerplate nobody reads.</li>
+</ul>
+<p>By sheer volume the workhorse is <code>rtk read</code> — 408 file reads, nearly a million tokens saved on its own. Every
+unfiltered read is output you rent for the rest of the session.</p>
+<p>Here's how to set it up, top to bottom.</p>
+<h3>Install and wire the hooks</h3>
+<p>Both are single binaries — <a href="https://github.com/rtk-ai/rtk">rtk</a> and <a href="https://github.com/ojuschugh1/sqz">sqz</a>; grab them
+from their repos (mine came off Homebrew). The wiring is one command each, because both ship an <code>init</code> that writes the
+Claude Code hooks for you:</p>
+<div class="codehilite"><pre><span></span><code><span id="line-1">rtk<span class="w"> </span>init<span class="w"> </span>--global
+</span><span id="line-2">sqz<span class="w"> </span>init<span class="w"> </span>--global
+</span></code></pre></div>
+
+<p><code>--global</code> writes to <code>~/.claude/settings.json</code> so the hooks fire in every project, not just the current directory — the
+foot-gun is running <code>init</code> bare inside one repo and wondering why nothing happens anywhere else. What lands is a pair of
+<code>PreToolUse</code> hooks on the <code>Bash</code> tool, so every shell command Claude Code runs gets routed through the tools first:</p>
+<div class="codehilite"><pre><span></span><code><span id="line-1"><span class="nt">&quot;PreToolUse&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="line-2"><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;matcher&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Bash&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;hooks&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;command&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sqz hook claude&quot;</span><span class="w"> </span><span class="p">}]</span><span class="w"> </span><span class="p">},</span>
+</span><span id="line-3"><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;matcher&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Bash&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;hooks&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;command&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;rtk hook claude&quot;</span><span class="w"> </span><span class="p">}]</span><span class="w"> </span><span class="p">}</span>
+</span><span id="line-4"><span class="p">]</span>
+</span></code></pre></div>
+
+<p>That's the whole transparent layer. If you'd rather see it before you trust it, that block is exactly what <code>init</code> writes
+— you can paste it by hand instead.</p>
+<h3>Register the MCP tools — then actually tell the model to use them</h3>
+<p><code>sqz init</code> also registers its MCP server (the <code>sqz</code>-managed entry in your MCP config), which hands the model a set of
+compressing file-read, grep, and list tools. Here's the step everyone skips: installing them changes nothing on its own,
+because left alone the model reaches for the built-in <code>Read</code> and <code>Grep</code> every single time. You have to say otherwise, in
+<code>CLAUDE.md</code>:</p>
+<div class="codehilite"><pre><span></span><code><span id="line-1"><span class="k">-</span><span class="w"> </span>Prefer <span class="sb">`sqz_read_file`</span> over <span class="sb">`Read`</span> and <span class="sb">`sqz_grep`</span> over <span class="sb">`Grep`</span> for anything non-trivial.
+</span><span id="line-2"><span class="k">-</span><span class="w"> </span>Output may include a <span class="sb">`§ref:HASH§`</span> token — a pointer to content already in context.
+</span><span id="line-3">  Resolve it with <span class="sb">`sqz expand`</span> when you need the full text.
+</span></code></pre></div>
+
+<p>The hooks fire on their own; the MCP tools need that rule. Half of getting this working is plumbing — the other half is
+convincing the model to use the plumbing.</p>
+<h3>Compaction, and one env tweak</h3>
+<p><code>sqz init</code> wires two more hooks for long sessions — one on <code>PreCompact</code>, one on session resume — so when Claude Code
+compacts a long conversation it's handled deliberately instead of by the blunt default. Nothing to configure there; init
+sets it up. The only knob I turn by hand is the auto-compact window, so it fires less often:</p>
+<div class="codehilite"><pre><span></span><code><span id="line-1"><span class="nt">&quot;env&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;CLAUDE_CODE_AUTO_COMPACT_WINDOW&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;400000&quot;</span><span class="w"> </span><span class="p">}</span>
+</span></code></pre></div>
+
+<p>Fewer compaction cycles, and the ones that do fire are working on a context that's already been tidied.</p>
+<h3>Trim the output side too</h3>
+<p>Everything so far works on what comes <em>into</em> the context — command output, file reads. But the model's own responses
+cost tokens as well, both when it writes them and on every turn after, and that's just as tunable with a few lines of
+<code>CLAUDE.md</code>:</p>
+<div class="codehilite"><pre><span></span><code><span id="line-1"><span class="gu">## Output Style</span>
+</span><span id="line-2">Fragment-first. Drop filler (just/really/basically/actually/simply), pleasantries, hedging.
+</span><span id="line-3">Short synonyms over verbose. Technical terms exact. Code blocks unchanged.
+</span><span id="line-4">Clarity &gt; brevity when they conflict (e.g., articles in docstrings and error messages).
+</span></code></pre></div>
+
+<p>Fragments over full sentences, no "Great question!", no hedging throat-clearing. The one guard rail is that last line:
+clarity wins when it fights brevity, so it doesn't start dropping the articles that make an error message or a docstring
+readable. It's the cheapest measure here — no install, no binary, just telling the model to talk like it's paying by the
+word. Which it is.</p>
+<h3>Doing the same in another agent</h3>
+<p>Neither tool is really Claude-only. Both <code>init</code> commands can target agents besides Claude — run <code>rtk init --help</code> and
+<code>sqz init --help</code> and you'll see the flags — so for the tools themselves, porting can be as small as a different one. For
+anything without a turnkey installer, here are the four hooks-into-the-workflow to go looking for, roughly in order of
+how universally they exist:</p>
+<ul>
+<li><strong>A shell you can shim.</strong> Free and universal, because it needs no cooperation from the agent — it just hits your shell.
+  Alias <code>ls</code>→<code>rtk ls</code>, <code>grep</code>→<code>rtk grep</code>, or drop a wrapper on the <code>PATH</code>, and every command gets leaner. Blunter than a
+  real hook that can inspect the command first, but it works no matter what you're running.</li>
+<li><strong>MCP support.</strong> Most agentic coders speak <a href="https://modelcontextprotocol.io">MCP</a> now. Register the same sqz server and
+  the compressing reads come along unchanged — same code, same job, new front-end. Highest-leverage piece to copy first.</li>
+<li><strong>A steering file.</strong> Whatever the local equivalent of <code>CLAUDE.md</code> is — a rules file, an <code>AGENTS.md</code>, a "custom
+  instructions" doc — that's where the <em>prefer the compressing tools</em> nudge goes. Skip it and your MCP server sits idle.</li>
+<li><strong>Hooks, skills, or a plugin system.</strong> The one that varies most. The transparent command-rewrite needs a genuine
+  pre-execution hook, and not every agent exposes one. So check for it by name: lifecycle hooks? a skills or plugin
+  mechanism you can hang behavior off? If yes, that's where the rewrite lives. If no, fall back to the shell aliases —
+  or wait for sqz's forthcoming HTTP proxy, which sits between the app and the API and needs no per-agent wiring at all.</li>
+</ul>
+<p>That's the whole setup: install two binaries, run <code>init</code> twice, add a steering block, turn one knob. It's living
+plumbing, so it'll keep shifting — the numbers climb every session, and the day that HTTP proxy lands I'll rip half of
+this out and be glad to.</p></main>
+<site-footer></site-footer>
+</body>
+</html>
