@@ -49,13 +49,13 @@
     </style>
 <link as="style" href="/styles.css" rel="preload"/>
 <link href="/styles.css" rel="stylesheet"/>
-<link rel="stylesheet" href="/projects/projects.css">
-<link rel="stylesheet" href="/pygments.css">
+<link href="/projects/projects.css" rel="stylesheet"/>
+<link href="/pygments.css" rel="stylesheet"/>
 <script type="module" src="/components.js"></script></head>
 <body>
 <site-header></site-header>
 <sub-nav>
-<label>Posts</label>
+<label>Projects</label>
 <nav><a data-categories="linux|raspberry-pi" data-date="2026-07-02" href="/projects/pi-sd-backup">Pi SD Card Backup</a><a data-categories="code|craft" data-date="2026-06-28" href="/projects/teaching-claude-to-code-like-me">Teaching Claude To Code Like Me</a><a data-categories="web|project" data-date="2026-02-17" class="current" href="/projects/andy-sam-save-the-date">Andy &amp; Sam's Save the Date</a><a data-categories="tech|how-to" data-date="2024-08-16" href="/projects/vim-config-with-YouCompleteMe">Vim Config With YouCompleteMe</a></nav>
 </sub-nav>
 <main>
@@ -71,7 +71,7 @@ and where to send the real invitation later.</p>
 <h3>Serverless, on a wedding budget</h3>
 <p>No backend to run and no monthly bill. The whole thing is static HTML, CSS, and JavaScript on GitHub Pages, with a
 Google Apps Script web app standing in for a server. That script reads and writes a Google Sheet — our guest list and
-everyone's responses — and the front end just talks to it over <code>fetch</code>. Free to host, and we... okay, Sam could
+everyone's responses — and the front end just talks to it over <code>fetch</code>. Free to host, and... okay, Sam could
 read the responses straight out of a spreadsheet.</p>
 <p>Guests "logged in" with the bride's or groom's last name. The front end POSTs the form straight to the script and, when
 the reply comes back <code>success</code>, stashes the token it's handed and follows the redirect:</p>
