@@ -86,6 +86,14 @@ code {
     font-weight: lighter;
 }
 
+/* Inline code chip. Semi-transparent gray reads as a subtle box on both themes
+   from one rule; :not(pre) leaves code-block styling to pygments. */
+:not(pre) > code {
+    background-color: rgb(128 128 128 / 18%);
+    border-radius: 4px;
+    padding: 0.1em 0.35em;
+}
+
 pre {
     line-height: 125%;
     white-space: pre-wrap;
