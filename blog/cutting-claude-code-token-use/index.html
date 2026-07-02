@@ -80,7 +80,10 @@ per-command receipts are almost comical:</p>
 </ul>
 <p>By sheer volume the workhorse is <code>rtk read</code> — 408 file reads, nearly a million tokens saved on its own. Every
 unfiltered read is output you rent for the rest of the session.</p>
-<p>Here's how to set it up, top to bottom.</p>
+<p>So here's the whole setup, top to bottom. Install the two tools and let them wire their own hooks; register the
+compressing MCP tools and steer the model to actually reach for them; tune when compaction fires; and trim the model's
+own output while you're at it. Then the same moves ported to any other agent. None of it is much code — most of the work
+is convincing the model to lean on what you've installed.</p>
 <h3>Install and wire the hooks</h3>
 <p>Both are single binaries — <a href="https://github.com/rtk-ai/rtk">rtk</a> and <a href="https://github.com/ojuschugh1/sqz">sqz</a>; grab them
 from their repos (mine came off Homebrew). The wiring is one command each, because both ship an <code>init</code> that writes the

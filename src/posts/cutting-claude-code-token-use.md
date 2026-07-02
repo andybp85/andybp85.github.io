@@ -27,7 +27,10 @@ per-command receipts are almost comical:
 By sheer volume the workhorse is `rtk read` — 408 file reads, nearly a million tokens saved on its own. Every
 unfiltered read is output you rent for the rest of the session.
 
-Here's how to set it up, top to bottom.
+So here's the whole setup, top to bottom. Install the two tools and let them wire their own hooks; register the
+compressing MCP tools and steer the model to actually reach for them; tune when compaction fires; and trim the model's
+own output while you're at it. Then the same moves ported to any other agent. None of it is much code — most of the work
+is convincing the model to lean on what you've installed.
 
 ### Install and wire the hooks
 
