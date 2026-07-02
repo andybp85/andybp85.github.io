@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <meta name="darkreader-lock">
+    <meta name="description" content="Andy's autobiographical site for projects and random thoughts.">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'self'; script-src-elem 'self' 'unsafe-inline' *.getclicky.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src *.getclicky.com">
+    <title>Stop Hardcoding Dev Paths In Crypttab — Andy Stanish</title>
+    <link rel="preload" href="/fonts/B612-Regular/B612-Regular.woff" as="font" type="font/woff" crossorigin>
+    <link rel="preload" href="/fonts/Inter/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/Inter/InterVariable-Italic.woff2" as="font" type="font/woff2" crossorigin>
+    <script>
+        /* Apply a pinned theme before first paint to avoid a flash; auto defers
+           to color-scheme: light dark (system). Kept in sync with components.js. */
+        {
+            const theme = localStorage.getItem("theme")
+            if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme
+        }
+    </script>
+    <style>
+        body {
+            visibility: hidden;
+        }
+
+        html {
+            background-image: linear-gradient(270deg, #222 90%, #2A2A2A 100%);
+        }
+
+        html[data-theme="light"] {
+            background-image: linear-gradient(90deg, #f9f9f9 95%, #BBB 100%);
+            color-scheme: light;
+        }
+
+        html[data-theme="dark"] {
+            color-scheme: dark;
+        }
+
+        @media (prefers-color-scheme: light) {
+            html:not([data-theme]) {
+                background-image: linear-gradient(90deg, #f9f9f9 95%, #BBB 100%);
+            }
+        }
+    </style>
+    <link as="style" href="/styles.css" rel="preload">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/pygments.css">
+    <link rel="stylesheet" href="/blog/blog.css">
+    <link href="/icons/favicon.svg" rel="icon" type="image/svg+xml">
+<link href="/icons/favicon.ico" rel="icon" sizes="32x32">
+<link href="/icons/apple-touch-icon.png" rel="apple-touch-icon">
+    <script type="module" src="/components.js"></script>
+</head>
+<body>
+<site-header></site-header>
+<sub-nav>
+    <label>Posts</label>
+    <nav><a href="/blog/stop-hardcoding-dev-paths-in-crypttab" data-date="2026-07-02" data-categories="linux|raspberry-pi" class="current">Stop Hardcoding Dev Paths In Crypttab</a><a href="/blog/thoughts-after-two-weeks-with-until-the-sun-explodes" data-date="2026-06-28" data-categories="music|review">Thoughts After Two Weeks With Until The Sun Explodes</a><a href="/blog/web-dev-roadmap" data-date="2026-06-28" data-categories="web|learning">Web Dev Roadmap</a><a href="/blog/tips-for-waking-up-far-far-too-early" data-date="2016-10-22" data-categories="life|sleep">Tips For Waking Up Far Far Too Early</a></nav>
+</sub-nav>
+<main><p><em>July 2, 2026</em></p>
+<h2>Point crypttab at a UUID, not /dev/sdX</h2>
+<p>If you're LUKS-encrypting an external drive on a Raspberry Pi and want it to unlock at boot, the setup to start from is
+<a href="https://medium.com/@xcxwcqctcb/raspberry-pi-external-hdd-encryption-and-auto-mount-tutorial-894390e15acc">this tutorial</a>,
+which walks through encrypting the drive and wiring up auto-mount via <code>/etc/crypttab</code> and <code>/etc/fstab</code>. It's a solid
+guide and I'd recommend it — this is just the one thing I'd do differently.</p>
+<p>The tutorial references the drive by its device node — <code>/dev/sdX</code> — in <code>crypttab</code>. That works right up until it doesn't.
+<code>/dev/sdX</code> names are assigned in order of discovery, not pinned to a physical port or to a particular device. So the
+moment you plug in another USB device, or the kernel enumerates things in a different order on the next boot, <code>sda</code> can
+become <code>sdb</code>, and your <code>crypttab</code> entry is now pointing at the wrong disk — or nothing. I hit exactly this after
+unplugging an SD-card reader and rebooting: the mapper entry was gone and the boot-time unlock had nothing to grab.</p>
+<p>The fix is to key the unlock off the LUKS partition's <strong>UUID</strong> instead. The UUID lives in the partition's crypto
+metadata, so it's the same no matter where the drive lands in the enumeration order.</p>
+<p>Find it with <code>blkid</code>:</p>
+<div class="codehilite"><pre><span></span><code><span id="line-1">sudo<span class="w"> </span>blkid
+</span></code></pre></div>
+
+<p>Look for the partition whose <code>TYPE</code> is <code>crypto_LUKS</code> and copy its <code>UUID</code>. Then in <code>/etc/crypttab</code>, swap the device path
+for <code>UUID=…</code>:</p>
+<div class="codehilite"><pre><span></span><code><span id="line-1"># before
+</span><span id="line-2">thevault  /dev/sda1  none  luks
+</span><span id="line-3">
+</span><span id="line-4"># after
+</span><span id="line-5">thevault  UUID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx  none  luks
+</span></code></pre></div>
+
+<p>That's the whole change. <code>fstab</code> can stay exactly as it was: it mounts <code>/dev/mapper/thevault</code>, and that mapper name is
+stable because <em>you</em> chose it in <code>crypttab</code> — it never depended on <code>/dev/sdX</code> once the unlock is keyed off the UUID.</p>
+<p>Reboot to confirm the drive comes up cleanly, and from then on it mounts at the same place every time, regardless of what
+else happens to be plugged in.</p></main>
+<site-footer></site-footer>
+</body>
+</html>
