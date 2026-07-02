@@ -64,20 +64,22 @@
 <p>I've got a Raspberry Pi that runs around the clock, and its entire world lives on one SD card. SD cards don't fail
 gracefully — it's a question of when, not if. So I wanted a hands-off nightly backup. The catch: the Pi needs to stay up,
 so I can't unmount the card to copy it cleanly. <code>backup.sh</code> clones the live card, block-for-block, onto a
-second SD card with <code>dd</code> — no unmount required.</p>
+second SD card with <a href="https://man7.org/linux/man-pages/man1/dd.1.html"><code>dd</code></a> — no unmount required.</p>
 <p>The script and full README live on <a href="https://github.com/andybp85/pi-sd-backup">GitHub</a>.</p>
 <h3>How it works</h3>
-<p>A <code>sync</code> flushes filesystem buffers first, then <code>dd</code> copies the source device to the destination
+<p>A <a href="https://man7.org/linux/man-pages/man1/sync.1.html"><code>sync</code></a> flushes filesystem buffers first, then <code>dd</code> copies the source device to the destination
 device with <code>conv=noerror,sync</code> — <code>noerror</code> so a flaky read doesn't abort the whole run, and
 <code>sync</code> so bad blocks get padded and every partition offset stays aligned.</p>
 <p>Because the source is never unmounted, the result is a <em>crash-consistent</em> snapshot — the equivalent of yanking
-the power — not a clean one. In practice that means the backup card may want an <code>fsck</code> on first boot, which the
+the power — not a clean one. In practice that means the backup card may want an <a href="https://man7.org/linux/man-pages/man8/fsck.8.html"><code>fsck</code></a> on first boot, which the
 Pi's kernel runs automatically. Good enough to get back on my feet if the primary card dies.</p>
 <h3>The scary part: pointing dd at the right disk</h3>
 <p><code>dd</code> is a loaded gun. It overwrites the destination unconditionally, and kernel names like
 <code>/dev/sdb</code> are <strong>not stable</strong> — a re-plug or a reboot can quietly reassign them. Point it at the
 wrong disk and that disk is gone. Same lesson I wrote up for
-<a href="/blog/stop-hardcoding-dev-paths-in-crypttab">my encrypted drive</a>: never trust <code>/dev/sdX</code>.</p>
+<a href="/blog/stop-hardcoding-dev-paths-in-crypttab">my encrypted drive</a>, where I learned it the hard way — I
+unplugged an SD-card reader, rebooted, and the boot-time unlock came up with nothing to grab because <code>sda</code> had
+quietly become <code>sdb</code>. Never trust <code>/dev/sdX</code>.</p>
 <p>So the script pins each card by its filesystem <strong>UUID</strong> and resolves that UUID to the correct whole-disk
 device at run time — the UUID always wins over any device name. The real UUIDs live in a gitignored <code>.env</code> on
 the Pi, never in the repo:</p>
@@ -93,12 +95,13 @@ DEST_UUID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 <li>Any partition on the destination is currently mounted (that would mean it's a live filesystem, not a spare card).</li>
 <li>A pinned UUID can't be resolved, or source and destination resolve to the <em>same</em> disk.</li>
 </ul>
+<p>Paranoid? Sure. But <code>dd</code> doesn't do second chances.</p>
 <p>And there's a dry run that prints the exact <code>dd</code> it would execute and writes nothing:</p>
 <div class="codehilite"><pre><span></span><code>sudo bash backup.sh --dry-run   # prints the dd, writes nothing
 sudo bash backup.sh             # the real thing
 </code></pre></div>
 <h3>Scheduling</h3>
-<p>It runs from root's crontab, nightly at 3 AM when the box is quiet:</p>
+<p>It runs from root's <a href="https://man7.org/linux/man-pages/man5/crontab.5.html">crontab</a>, nightly at 3 AM when the box is quiet:</p>
 <div class="codehilite"><pre><span></span><code>0 3 * * * /path/to/backup.sh &gt;&gt; /var/log/pi-sd-backup.log 2&gt;&amp;1
 </code></pre></div>
 <p>Not fancy, but it means a dead SD card costs me a card swap and a reboot instead of a weekend of reinstalling and
