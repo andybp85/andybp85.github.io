@@ -168,7 +168,43 @@ follow. Hand-waving doesn't compile.</p>
 </span><span id="line-68"><span class="k">*</span><span class="w"> </span>LF line endings
 </span></code></pre></div>
 
-<p>None of this is law. It's a set of defaults I trust enough to follow without re-litigating every time — which is the whole point.</p>
+<h3>Scoped by language</h3>
+<p>The two files above are the always-on layer — Claude reads them on every programming task, whatever I'm working on. But most of what I
+care about is language-specific, and I don't want the Python rules sitting in the context while I'm editing a stylesheet. So
+the language rules live in their own files under <code>~/.claude/rules/</code>, each gated by a <code>paths:</code> glob in its
+frontmatter. Claude Code only pulls a file in when I actually touch something that matches — which keeps the context lean and
+the token bill down as a nice side effect, but mostly just keeps the guidance relevant to the code in front of it. Here's the
+Python one:</p>
+<div class="codehilite source"><pre><span></span><code><span id="line-1">---
+</span><span id="line-2">paths:
+</span><span id="line-3"><span class="w">  </span><span class="k">-</span><span class="w"> </span>&quot;**/*.py&quot;
+</span><span id="line-4"><span class="gu">  - &quot;**/*.pyi&quot;</span>
+</span><span id="line-5"><span class="gu">---</span>
+</span><span id="line-6"><span class="k">*</span><span class="w"> </span>always use uv
+</span><span id="line-7"><span class="k">*</span><span class="w"> </span>ruff for format + lint
+</span><span id="line-8"><span class="k">*</span><span class="w"> </span>annotate every function signature — all params + return (incl. <span class="sb">`-&gt; None`</span>)
+</span><span id="line-9"><span class="k">*</span><span class="w"> </span>avoid <span class="sb">`Any`</span> — prefer precise types, protocols, or generics; assume a strict checker (mypy/pyright)
+</span><span id="line-10"><span class="k">*</span><span class="w"> </span>modern typing: built-in generics (<span class="sb">`list[str]`</span>, <span class="sb">`dict[str, int]`</span>) and <span class="sb">`X | None`</span>, not <span class="sb">`List`</span>/<span class="sb">`Optional`</span>
+</span></code></pre></div>
+
+<p>They stack, too. TypeScript inherits the JavaScript and object-shape rules by sharing their globs, then layers its own on
+top — so opening a <code>.ts</code> file loads the general principles, the JS rules, and these, and not a word about Python or
+CSS:</p>
+<div class="codehilite source"><pre><span></span><code><span id="line-1">---
+</span><span id="line-2">paths:
+</span><span id="line-3"><span class="w">  </span><span class="k">-</span><span class="w"> </span>&quot;**/*.ts&quot;
+</span><span id="line-4"><span class="w">  </span><span class="k">-</span><span class="w"> </span>&quot;**/*.mts&quot;
+</span><span id="line-5"><span class="gu">  - &quot;**/*.cts&quot;</span>
+</span><span id="line-6"><span class="gu">---</span>
+</span><span id="line-7"><span class="k">*</span><span class="w"> </span>inherits js.md/objects.md (shared globs); TS-only additions below
+</span><span id="line-8"><span class="k">*</span><span class="w"> </span>never <span class="sb">`any`</span> — default to <span class="sb">`unknown`</span>, then narrow
+</span><span id="line-9"><span class="k">*</span><span class="w"> </span>lean on inference for locals; annotate boundaries (exported signatures, public APIs)
+</span><span id="line-10"><span class="k">*</span><span class="w"> </span>never cast (<span class="sb">`as`</span>, <span class="sb">`&lt;T&gt;`</span>, <span class="sb">`!`</span>) to paper over a type — narrow, guard, or fix the source type
+</span></code></pre></div>
+
+<p>None of this is law. It's a set of defaults I trust enough to follow without re-litigating every time — which is the whole
+point. And to be clear, this is a post about teaching Claude, not about my semantics: I know full well that half of these are
+religious wars with no winner. I won't argue any of them with you — unless you're picking up the bar tab.</p>
 <h3>Influences</h3>
 <p>Some things that've influenced my thinking over the years:</p>
 <ul>

@@ -1,6 +1,7 @@
 .claude/
 .coverage
 .DS_Store
+.firecrawl/
 .idea
 .memsearch/
 .pytest_cache/

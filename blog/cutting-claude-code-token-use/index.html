@@ -60,13 +60,44 @@
     <nav><a href="/blog/cutting-claude-code-token-use" data-date="2026-07-02" data-categories="claude-code|tokens" class="current">Cutting Claude Code Token Use</a><a href="/blog/stop-hardcoding-dev-paths-in-crypttab" data-date="2026-07-02" data-categories="linux|raspberry-pi">Stop Hardcoding Dev Paths In Crypttab</a><a href="/blog/thoughts-after-two-weeks-with-until-the-sun-explodes" data-date="2026-06-28" data-categories="music|review">Thoughts After Two Weeks With Until The Sun Explodes</a><a href="/blog/web-dev-roadmap" data-date="2026-06-28" data-categories="web|learning">Web Dev Roadmap</a><a href="/blog/tips-for-waking-up-far-far-too-early" data-date="2016-10-22" data-categories="life|sleep">Tips For Waking Up Far Far Too Early</a></nav>
 </sub-nav>
 <main><p><em>July 2, 2026</em></p>
-<h2>Compress the output, rewrite the commands: cutting Claude Code's token use</h2>
-<p>My Claude Code token usage had been creeping up, so I dug into where it was all going. The culprit was obvious once I
-looked: every file the agent reads, every repo it greps, every test it runs dumps its whole output into the context
-window — and you pay for that on <em>every</em> turn after, right up until it gets summarized away. Most of it is noise the
-model glanced at once and never needed again: the 200-line <code>ls -la</code>, the stack trace it read the top of, the <code>ps aux</code>
-dump it wanted one process out of. It all just sits there, costing tokens, forever.</p>
-<p>So I looked into cutting it, and settled on a multi-pronged approach:</p>
+<h2>How I cut Claude Code's token use: build right, stay lean, compress the rest</h2>
+<p>I got into coding with Claude in earnest the week Fable came out. Something about that model clicked — I went from poking at
+it between tasks to building alongside it every day, and the bill for that enthusiasm showed up fast. I was blowing through
+tokens at a rate that made me stop and look at where they were all going. My natural inclination, with something nagging at me
+like that, is to go searching high and low for anything I can do about it — every lever I can find, however small. It turned
+out there were a lot of them.</p>
+<p>They sort into a few buckets. The biggest sits upstream of all the others: not building the wrong thing in the first place,
+because the most expensive tokens are the ones you burn unwinding a bad guess. Then there's cutting what comes <em>into</em> the
+context — the command output, file reads, and web pages the agent slurps up — and trimming what the model writes back out.
+There's keeping the config itself lean, since every line of <code>CLAUDE.md</code> gets paid for on <em>every</em> turn. There's managing the
+context that piles up over a long session — compacting it, clearing it, stashing the parts worth keeping somewhere durable.
+And there's a bit of tooling to make the whole effort visible and repeatable: skills, and a statusline that shows me the meter.</p>
+<p>The first one starts well before the first log line is ever written.</p>
+<h3>The cheapest token is the one you never spend</h3>
+<p>Before any compression trick, the biggest lever is upstream of all of them: don't build the wrong thing. A model that writes
+the wrong module, gets corrected, half-fixes it, gets corrected again, and finally lands the right design has burned all of
+it — the false starts, the corrections, the re-reads — and every one of those turns then sits in the context bloating every
+turn after. My most expensive tokens aren't log spam. They're the ones I spend unwinding a bad first attempt.</p>
+<p>So the first thing I reach for is <a href="https://claude.com/plugins/superpowers">Superpowers</a> — obra's framework of process skills
+that make the model work like a disciplined engineer instead of an eager one. Its <code>/brainstorming</code> skill runs a Socratic
+back-and-forth to pin down what I actually want <em>before</em> a line of code exists; there's a test-driven-development skill where
+the test has to fail first, a systematic-debugging one that demands a root cause before a fix, and a subagent-driven flow with
+code review baked in. It sounds like ceremony right up until you price out the alternative. Twenty minutes of brainstorming is
+a rounding error next to a wrong build you throw away and re-read fifty times on the way to the right one.</p>
+<p>Holding the work together is <a href="https://github.com/hmans/beans">beans</a> — "a CLI-based, flat-file issue tracker for humans and
+robots," which is exactly what it says on the tin. Tasks live as plain Markdown in a <code>.beans/</code> directory right next to the
+code, version-controlled, and the agent reads and writes them through a GraphQL query engine that pulls only the fields it
+needs — so it gets a full picture of the project while keeping token use to a minimum. The plan lives on disk, not in the
+context, so the model isn't re-deriving "what were we doing again" from scratch every session. I wired it in with a little
+<code>SessionStart</code> hook — <code>beans-gate.sh</code> — that fires when I open a project: no git repo, it offers to <code>git init</code>; no <code>.beans/</code>
+dir, it offers to <code>beans init</code>; already set up, it just runs <code>beans prime</code> to load the board. Deterministic detection, the
+yes/no in chat, and a <code>.beans-declined</code> sentinel so it shuts up if I say no once.</p>
+<h3>The runtime leak, and two little tools</h3>
+<p>That's the build side. The rest is runtime, and here the leak is mechanical: every file the agent reads, every repo it greps,
+every test it runs dumps its whole output into the context window — and you pay for that on <em>every</em> turn after, right up until
+it gets summarized away. Most of it is noise the model glanced at once and never needed again: the 200-line <code>ls -la</code>, the stack
+trace it read the top of, the <code>ps aux</code> dump it wanted one process out of. It all just sits there, costing tokens, forever. I
+went at that from a few directions:</p>
 <ul>
 <li><strong>Rewrite noisy command output</strong> into something compact before it ever reaches the context.</li>
 <li><strong>Compress and de-duplicate</strong> whatever text is left over.</li>
@@ -75,23 +106,23 @@ dump it wanted one process out of. It all just sits there, costing tokens, forev
 </ul>
 <p>Two little Rust tools do most of the work — <a href="https://github.com/rtk-ai/rtk"><code>rtk</code></a> and
 <a href="https://github.com/ojuschugh1/sqz"><code>sqz</code></a> — hanging off Claude Code's
-<a href="https://docs.claude.com/en/docs/claude-code/hooks">hooks</a> so it's transparent; I don't type anything different, the
-output just shows up smaller. A bit of <code>CLAUDE.md</code> steering ties them together. First, the numbers.</p>
-<p>As of this writing rtk has rewritten <strong>5,708 commands and saved 2.6M tokens</strong> — about 27% of everything it touched — and
-sqz has compressed <strong>1,335 payloads for another 125K</strong>. That's real money, and more to the point real context I get to
-spend on the actual problem instead of on log spam. The per-command receipts are almost comical:</p>
+<a href="https://docs.claude.com/en/docs/claude-code/hooks">hooks</a> so it's transparent; I don't type anything different, the output
+just shows up smaller. A bit of <code>CLAUDE.md</code> steering ties them together. First, the numbers.</p>
+<p>As of this writing rtk has rewritten <strong>5,708 commands and saved 2.6M tokens</strong> — about 27% of everything it touched — and sqz
+has compressed <strong>1,335 payloads for another 125K</strong>. That's real money, and more to the point real context I get to spend on
+the actual problem instead of on log spam. The per-command receipts are almost comical:</p>
 <ul>
 <li><code>ps aux</code> — <strong>98.8%</strong> smaller. The model wanted one process, not every daemon on the box.</li>
 <li>A <code>vitest</code> run — <strong>93.5%</strong>. Green checkmarks compress to nothing; only the failures carry information.</li>
 <li><code>git commit</code> — <strong>60.7%</strong>, across 300-odd commits. That's a lot of boilerplate nobody reads.</li>
 </ul>
-<p>By sheer volume the workhorse is <code>rtk read</code> — 408 file reads, nearly a million tokens saved on its own. Every
-unfiltered read is output you rent for the rest of the session.</p>
+<p>By sheer volume the workhorse is <code>rtk read</code> — 408 file reads, nearly a million tokens saved on its own. Every unfiltered read
+is output you rent for the rest of the session.</p>
 <p>Now here's how I set it up, top to bottom.</p>
 <h3>Install and wire the hooks</h3>
-<p>Both are single binaries — <a href="https://github.com/rtk-ai/rtk">rtk</a> and <a href="https://github.com/ojuschugh1/sqz">sqz</a>; grab them
-from their repos (mine came off Homebrew). The wiring is one command each, because both ship an <code>init</code> that writes the
-Claude Code hooks for you:</p>
+<p>Both are single binaries — <a href="https://github.com/rtk-ai/rtk">rtk</a> and <a href="https://github.com/ojuschugh1/sqz">sqz</a>; grab them from
+their repos (mine came off Homebrew). The wiring is one command each, because both ship an <code>init</code> that writes the Claude Code
+hooks for you:</p>
 <div class="codehilite"><pre><span></span><code><span id="line-1">rtk<span class="w"> </span>init<span class="w"> </span>--global
 </span><span id="line-2">sqz<span class="w"> </span>init<span class="w"> </span>--global
 </span></code></pre></div>
@@ -105,8 +136,8 @@ foot-gun is running <code>init</code> bare inside one repo and wondering why not
 </span><span id="line-4"><span class="p">]</span>
 </span></code></pre></div>
 
-<p>That's the whole transparent layer. If you'd rather see it before you trust it, that block is exactly what <code>init</code> writes
-— you can paste it by hand instead.</p>
+<p>That's the whole transparent layer. If you'd rather see it before you trust it, that block is exactly what <code>init</code> writes —
+you can paste it by hand instead.</p>
 <h3>Register the MCP tools — then actually tell the model to use them</h3>
 <p><code>sqz init</code> also registers its MCP server (the <code>sqz</code>-managed entry in your MCP config), which hands the model a set of
 compressing file-read, grep, and list tools. Here's the step everyone skips: installing them changes nothing on its own,
@@ -119,18 +150,85 @@ because left alone the model reaches for the built-in <code>Read</code> and <cod
 
 <p>The hooks fire on their own; the MCP tools need that rule. Half of getting this working is plumbing — the other half is
 convincing the model to use the plumbing.</p>
-<h3>Compaction, and one env tweak</h3>
-<p><code>sqz init</code> wires two more hooks for long sessions — one on <code>PreCompact</code>, one on session resume — so when Claude Code
-compacts a long conversation it's handled deliberately instead of by the blunt default. Nothing to configure there; init
-sets it up. The only knob I turn by hand is the auto-compact window, so it fires less often:</p>
+<p>The same idea works on the web, not just the disk. When Claude needs something off a page, the naive path is to fetch raw
+HTML — nav bars, script tags, tracking pixels, the whole DOM — and let the model dig the actual content out of the soup,
+paying for every byte of markup on the way. I run <a href="https://www.firecrawl.dev/">Firecrawl</a> instead, which returns clean
+Markdown: same page, <a href="https://www.firecrawl.dev/blog/claude-code-token-efficiency">roughly 94% fewer input tokens</a>. It's the
+disk-read lesson pointed at the network — hand the model the content, not the container.</p>
+<h3>Keep the config itself lean</h3>
+<p>Here's the trap I walked into early: I plugged all this leaking tool output, then quietly re-created the problem in my own
+config. <code>CLAUDE.md</code> is loaded into the context on <em>every</em> turn, forever — it's part of the system prompt. So is every rule
+file that applies. A bloated config is a tax you pay on every message of every session, and it's the easiest one to stop
+noticing, because you wrote it yourself.</p>
+<p>Anthropic's own <a href="https://claude.com/blog/using-claude-md-files">guidance on <code>CLAUDE.md</code></a> is blunt about it: "It's tempting to
+create a comprehensive <code>CLAUDE.md</code> right away. Resist that urge." Start simple, expand deliberately, and only add a rule that
+solves a real problem you actually hit — not a theoretical one. When it gets long, the fix isn't to cram harder; it's to
+"break up information into separate markdown files and reference them." Which is what I did, but with a twist that makes it
+nearly free.</p>
+<p>The twist is path scoping. My language rules don't live in <code>CLAUDE.md</code> — they live in <code>~/.claude/rules/</code>, one file per
+language, each with a <code>paths:</code> glob in its frontmatter:</p>
+<div class="codehilite"><pre><span></span><code><span id="line-1">---
+</span><span id="line-2">paths:
+</span><span id="line-3"><span class="w">  </span><span class="k">-</span><span class="w"> </span>&quot;**/*.py&quot;
+</span><span id="line-4"><span class="gu">  - &quot;**/*.pyi&quot;</span>
+</span><span id="line-5"><span class="gu">---</span>
+</span><span id="line-6"><span class="k">*</span><span class="w"> </span>always use uv
+</span><span id="line-7"><span class="k">*</span><span class="w"> </span>ruff for format + lint
+</span><span id="line-8"><span class="k">*</span><span class="w"> </span>annotate every function signature — all params + return (incl. <span class="sb">`-&gt; None`</span>)
+</span><span id="line-9"><span class="k">*</span><span class="w"> </span>avoid <span class="sb">`Any`</span> — prefer precise types, protocols, or generics
+</span></code></pre></div>
+
+<p>Claude Code only loads a rule file when I actually touch a file that matches. Edit a stylesheet and <code>css.md</code> comes in; the
+Python, TypeScript, and Swift rules stay on disk, where they cost nothing. A shared <code>general.md</code> (globbed to every source
+extension) carries the cross-language principles, and each language file stacks its specifics on top only when relevant. So
+the context holds exactly the rules for the code I'm looking at and not a byte more — the Firecrawl folks measured this pattern
+at <a href="https://www.firecrawl.dev/blog/claude-code-token-efficiency">a 41% cut</a> in rules overhead, and it tracks.</p>
+<p>Then there's the stuff I never want the agent to read at all, and two lists handle it — one advisory, one enforced.
+<code>.claudeignore</code> keeps generated junk out of context by convention — <code>node_modules/</code>, <code>dist/</code>, <code>build/</code>, <code>*.min.js</code>, <code>*.lock</code>,
+everything that's compiled output or a dependency I'll never hand-edit. And the <code>permissions.deny</code> block in <code>settings.json</code> is
+the version with teeth, doing double duty:</p>
+<div class="codehilite"><pre><span></span><code><span id="line-1"><span class="nt">&quot;deny&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="line-2"><span class="w">  </span><span class="s2">&quot;Read(~/.ssh)&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Write(~/.ssh)&quot;</span><span class="p">,</span>
+</span><span id="line-3"><span class="w">  </span><span class="s2">&quot;Read(./.env)&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Read(./.env.*)&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Read(./secrets/**)&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Read(./config/credentials.json)&quot;</span><span class="p">,</span>
+</span><span id="line-4"><span class="w">  </span><span class="s2">&quot;Read(node_modules/**)&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Read(dist/**)&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Read(build/**)&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Read(*.lock)&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Read(./.idea/**)&quot;</span>
+</span><span id="line-5"><span class="p">]</span>
+</span></code></pre></div>
+
+<p>Half of that is security — there's no version of "the agent reads my <code>.ssh</code> keys or my <code>.env</code>" that ends well, so it simply
+can't. The other half is the same token hygiene as the ignore file, but enforced: a <code>.lock</code> file is 10,000 lines of pinned
+hashes no human reads and no model needs, and denying the read means it can never accidentally slurp one into the context to
+answer some unrelated question.</p>
+<h3>Keep the context clean</h3>
+<p>No matter how lean the input, a long session accumulates. The single best thing you can do about it is boring: clean the
+context, aggressively. That's almost verbatim the advice from <a href="https://mydataschool.com/blog/how-to-save-tokens/">this token-saving
+writeup</a> — its fourth trick is literally titled "Clean the context.
+Aggressively." — and the reasoning is worth internalizing. Every turn you keep, the model re-reads the entire conversation, so
+token counts grow almost quadratically. The instinct is to hoard context in case the model forgets something. Resist it. A
+focused short session beats a sprawling long one every time.</p>
+<p>In practice that's two habits: <code>/compact</code> right after an exploration phase, once the useful conclusion has crystallized and
+the forty file reads that got me there are just ballast; and a brand-new session whenever I switch tasks, rather than dragging
+the old one along. Thariq's notes push this into a real discipline — his sharpest single test for any pile of tool output is
+also the whole argument for handing work to a subagent:</p>
+<blockquote>
+<p>Will I need this tool output again, or just the conclusion?</p>
+<p><em>— from <a href="https://github.com/shanraisshan/claude-code-best-practice/blob/main/tips/claude-thariq-tips-16-apr-26.md">Thariq's notes on session management and 1M context</a></em></p>
+</blockquote>
+<p>The mechanics of compaction I mostly automate. <code>sqz init</code> wired two hooks for it — one on <code>PreCompact</code>, one on session
+resume — so when Claude Code does compact a long conversation, it's handled deliberately instead of by the blunt default.
+Nothing to configure there; init sets it up. The only knob I turn by hand is the auto-compact window, so it fires less often:</p>
 <div class="codehilite"><pre><span></span><code><span id="line-1"><span class="nt">&quot;env&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;CLAUDE_CODE_AUTO_COMPACT_WINDOW&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;400000&quot;</span><span class="w"> </span><span class="p">}</span>
 </span></code></pre></div>
 
 <p>Fewer compaction cycles, and the ones that do fire are working on a context that's already been tidied.</p>
+<p>The last piece is remembering across the clears. Wiping a session to save tokens is a great idea right up until you throw away
+the one fact you needed. So I lean on Claude Code's own <a href="https://docs.claude.com/en/docs/claude-code/memory">memory</a> — a small
+index file plus one fact per file, written deliberately — and on <a href="https://github.com/zilliztech/memsearch">memsearch</a> for
+semantic recall over past sessions, so the durable stuff (a decision I made, a gotcha I hit, who the project is even for)
+survives a <code>/clear</code> and gets pulled back in on demand instead of living rent-free in every context window. Clearing hard only
+works if the things worth keeping have somewhere to land.</p>
 <h3>Trim the output side too</h3>
-<p>Everything so far works on what comes <em>into</em> the context — command output, file reads. But the model's own responses
-cost tokens as well, both when it writes them and on every turn after, and that's just as tunable with a few lines of
-<code>CLAUDE.md</code>:</p>
+<p>Everything so far works on what comes <em>into</em> the context — command output, file reads. But the model's own responses cost
+tokens as well, both when it writes them and on every turn after, and that's just as tunable with a few lines of <code>CLAUDE.md</code>:</p>
 <div class="codehilite"><pre><span></span><code><span id="line-1"><span class="gu">## Output Style</span>
 </span><span id="line-2">Fragment-first. Drop filler (just/really/basically/actually/simply), pleasantries, hedging.
 </span><span id="line-3">Short synonyms over verbose. Technical terms exact. Code blocks unchanged.
@@ -139,13 +237,13 @@ cost tokens as well, both when it writes them and on every turn after, and that'
 
 <p>Fragments over full sentences, no "Great question!", no hedging throat-clearing. The one guard rail is that last line:
 clarity wins when it fights brevity, so it doesn't start dropping the articles that make an error message or a docstring
-readable. It's the cheapest measure here — no install, no binary, just telling the model to talk like it's paying by the
-word. Which it is.</p>
+readable. It's the cheapest measure here — no install, no binary, just telling the model to talk like it's paying by the word.
+Which it is.</p>
 <h3>Doing the same in another agent</h3>
 <p>Neither tool is really Claude-only. Both <code>init</code> commands can target agents besides Claude — run <code>rtk init --help</code> and
 <code>sqz init --help</code> and you'll see the flags — so for the tools themselves, porting can be as small as a different one. For
-anything without a turnkey installer, here are the four hooks-into-the-workflow to go looking for, roughly in order of
-how universally they exist:</p>
+anything without a turnkey installer, here are the four hooks-into-the-workflow to go looking for, roughly in order of how
+universally they exist:</p>
 <ul>
 <li><strong>A shell you can shim.</strong> Free and universal, because it needs no cooperation from the agent — it just hits your shell.
   Alias <code>ls</code>→<code>rtk ls</code>, <code>grep</code>→<code>rtk grep</code>, or drop a wrapper on the <code>PATH</code>, and every command gets leaner. Blunter than a
@@ -159,9 +257,54 @@ how universally they exist:</p>
   mechanism you can hang behavior off? If yes, that's where the rewrite lives. If no, fall back to the shell aliases —
   or wait for sqz's forthcoming HTTP proxy, which sits between the app and the API and needs no per-agent wiring at all.</li>
 </ul>
-<p>That's the whole setup: install two binaries, run <code>init</code> twice, add a steering block, turn one knob. It's living
-plumbing, so it'll keep shifting — the numbers climb every session, and the day that HTTP proxy lands I'll rip half of
-this out and be glad to.</p></main>
+<h3>Just starting to make my own skills</h3>
+<p>All of this — Superpowers, the rules files, even the little site-voice skill I wrote to keep this blog from sounding like a
+press release — has me sold on skills as the real unlock, and I'm only just starting to build my own. The token argument for
+them is almost unfair. At session start Claude reads only each skill's name and one-line description, something like 30 to 100
+tokens each; the full body loads only when the model decides it's relevant. As the Firecrawl writeup puts it: "Everything
+added to <code>CLAUDE.md</code> is paid every session forever. Skills with correct descriptions are paid only when needed." That's
+progressive disclosure applied to capability — I can have dozens installed and pay for exactly the ones a given task touches.
+The catch is that the description has to be precise enough for the model to pattern-match against, or the skill never fires.</p>
+<p>The first real one I built wraps the <a href="https://en.wikipedia.org/wiki/4%2B1_architectural_view_model">4+1 architecture</a>
+model — Kruchten's old idea of describing a system as five separate views (logical, process, development, physical, and
+scenarios to tie them together) instead of one overloaded diagram trying to show classes, deployment, and runtime all at once.
+It's the kind of thing I know how to do but do inconsistently, which is exactly what a skill is for: encode the discipline
+once, trigger it when I'm actually writing an architecture doc. The next one I'll probably make wraps
+<a href="https://github.com/yamadashy/repomix">repomix</a> — it "packs your entire repository into a single, AI-friendly file," with
+token counting and a Tree-sitter <code>--compress</code> mode, which is the right tool for pointing Claude at an existing codebase and
+asking real questions about it.</p>
+<p>Which, honestly, I haven't needed much yet — because so far it's been almost all greenfield. I've spent this whole stretch
+building out ideas I've had kicking around for years and finally have the leverage to knock out in an afternoon. Scanning and
+understanding big existing repos is the next frontier; for now I've been happily catching up on my own backlog.</p>
+<h3>The dashboard that keeps me honest</h3>
+<p>You can't manage what you can't see, and the token windows that actually bite — the 5-hour session limit and the weekly one —
+are invisible until you slam into them. So I built the numbers into my statusline. Claude Code hands your statusline command a
+JSON blob on every tick — model, context percentage, git state, and crucially <code>rate_limits.five_hour</code> and <code>.seven_day</code> — and
+whatever your script prints becomes the line. Mine is a bash script styled after my old
+<a href="https://github.com/sorin-ionescu/prezto">Prezto Sorin</a> shell prompt so it feels like home: blue folder, git branch with the
+Sorin status glyphs (ahead, behind, staged, modified, untracked, stashed), and then the Claude-specific stuff — the model, a
+ten-cell context bar with a percentage, session age, and both rate-limit windows with a countdown to reset.</p>
+<p>That last part is the one that changed my behavior. Seeing <code>5h:62%(↺1h20m)</code> parked in the corner turns an abstract limit into
+a gauge I glance at, the way you watch a fuel needle. I cribbed the approach from two writeups worth reading if you want to
+roll your own — <a href="https://www.dandoescode.com/blog/claude-code-custom-statusline">Daniel Mackay's walkthrough</a> of the
+JSON-to-shell contract, and <a href="https://github.com/GordonBeeming/claude-statusline">Gordon Beeming's multi-line version</a> for the
+fancier layout ideas — and then bent it to look like the prompt I've stared at for a decade.</p>
+<h3>Where it landed me</h3>
+<p>The funny part is where all this ended up. I run Opus 4.8 almost exclusively now — the biggest, most capable model on
+offer — which a year ago would have been a reckless way to torch a plan. But between building the right thing the first time,
+keeping the config lean, cleaning the context hard, and compressing everything that's left, I have a genuinely hard time
+hitting the 5-hour session limit anymore, never mind the weekly one. That's the whole game: spend the savings on a smarter
+model doing the actual work, not on log spam nobody reads.</p>
+<p>It's living plumbing, so it'll keep shifting — the numbers climb every session and I keep finding new places to trim. But the
+shape holds: don't build the wrong thing, don't load what you don't need, don't keep what you're done with, and compress the
+rest.</p>
+<h3>Sources</h3>
+<ul>
+<li><a href="https://www.firecrawl.dev/blog/claude-code-token-efficiency">12 Ways to Cut Token Consumption in Claude Code</a> — Firecrawl</li>
+<li><a href="https://claude.com/blog/using-claude-md-files">Using CLAUDE.md files</a> — Anthropic</li>
+<li><a href="https://github.com/shanraisshan/claude-code-best-practice/tree/main/best-practice">claude-code-best-practice</a> — a
+  continuously-updated reference collection</li>
+</ul></main>
 <site-footer></site-footer>
 </body>
 </html>
