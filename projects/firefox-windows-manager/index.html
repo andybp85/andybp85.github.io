@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <meta content="light dark" name="color-scheme" />
+    <meta content="Andy's autobiographical site for projects and random thoughts." name="description" />
+    <meta name="darkreader-lock" />
+    <meta
+        content="default-src 'self'; script-src-elem 'self' 'unsafe-inline' *.getclicky.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src *.getclicky.com"
+        http-equiv="Content-Security-Policy" />
+    <title>Firefox Tab &amp; Window Manager — Andy Stanish</title>
+    <link href="/icons/favicon.svg" rel="icon" type="image/svg+xml" />
+    <link href="/icons/favicon.ico" rel="icon" sizes="32x32" />
+    <link href="/icons/apple-touch-icon.png" rel="apple-touch-icon" />
+    <link
+        as="font"
+        crossorigin
+        href="/fonts/B612-Regular/B612-Regular.woff"
+        rel="preload"
+        type="font/woff" />
+    <link
+        as="font"
+        crossorigin
+        href="/fonts/Inter/InterVariable.woff2"
+        rel="preload"
+        type="font/woff2" />
+    <link
+        as="font"
+        crossorigin
+        href="/fonts/Inter/InterVariable-Italic.woff2"
+        rel="preload"
+        type="font/woff2" />
+    <script>
+        /* Apply a pinned theme before first paint to avoid a flash; auto defers
+           to color-scheme: light dark (system). Kept in sync with components.js. */
+        {
+            const theme = localStorage.getItem("theme")
+            if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme
+        }
+    </script>
+    <style>
+        body {
+            visibility: hidden;
+        }
+
+        html {
+            background-image: linear-gradient(270deg, #222 90%, #2A2A2A 100%);
+        }
+
+        html[data-theme="light"] {
+            background-image: linear-gradient(90deg, #f9f9f9 95%, #BBB 100%);
+            color-scheme: light;
+        }
+
+        html[data-theme="dark"] {
+            color-scheme: dark;
+        }
+
+        @media (prefers-color-scheme: light) {
+            html:not([data-theme]) {
+                background-image: linear-gradient(90deg, #f9f9f9 95%, #BBB 100%);
+            }
+        }
+    </style>
+    <link as="style" href="/styles.css" rel="preload" />
+    <link href="/styles.css" rel="stylesheet" />
+    <link href="/projects/projects.css" rel="stylesheet" />
+    <style>
+        /* Screenshots are illustrative, not the content — keep them modest and
+           centered so they don't swamp the prose. Portrait close-up is capped
+           tighter than the landscape overviews. */
+        main figure {
+            margin: 1.75rem auto;
+            max-width: 440px;
+        }
+
+        main figure.portrait {
+            max-width: 280px;
+        }
+
+        main figure img {
+            display: block;
+            height: auto;
+            width: 100%;
+        }
+
+        main figcaption {
+            color: #888; /* mid-grey reads on both the dark and light grounds */
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+
+        /* Click a screenshot to enlarge it in a native popover lightbox — top
+           layer, backdrop, Esc/click-outside dismiss, no JavaScript. */
+        main figure .zoom {
+            background: none;
+            border: 0;
+            cursor: zoom-in;
+            display: block;
+            padding: 0;
+            width: 100%;
+        }
+
+        .lightbox {
+            background: none;
+            border: 0;
+            max-height: 92vh;
+            max-width: 92vw;
+            padding: 0;
+        }
+
+        .lightbox img {
+            display: block;
+            height: auto;
+            max-height: 92vh;
+            max-width: 92vw;
+            width: auto;
+        }
+
+        .lightbox::backdrop {
+            background: rgb(0 0 0 / 0.8);
+        }
+
+        /* Progressive enhancement: hide the enlarged copy where the Popover API
+           is unsupported, so it never renders inline. */
+        @supports not selector(:popover-open) {
+            .lightbox {
+                display: none;
+            }
+        }
+    </style>
+    <script src="/components.js" type="module"></script>
+</head>
+<body>
+    <site-header></site-header>
+    <sub-nav>
+        <label>Projects</label>
+        <nav>
+            <a class="current" data-categories="firefox|extension" data-date="2026-07-05" href="/projects/firefox-windows-manager">Firefox Tab &amp; Window Manager</a>
+            <a data-categories="linux|raspberry-pi" data-date="2026-07-02" href="/projects/pi-sd-backup">Pi SD Card Backup</a>
+            <a data-categories="code|craft" data-date="2026-06-28" href="/projects/teaching-claude-to-code-like-me">Teaching Claude To Code Like Me</a>
+            <a data-categories="web|project" data-date="2026-02-17" href="/projects/andy-sam-save-the-date">Andy &amp; Sam's Save the Date</a>
+            <a data-categories="tech|how-to" data-date="2024-08-16" href="/projects/vim-config-with-YouCompleteMe">Vim Config With YouCompleteMe</a>
+        </nav>
+    </sub-nav>
+    <main>
+        <p><em>July 5, 2026</em></p>
+        <h2>A Full-Page Overview for Every Firefox Window</h2>
+        <p>I keep too many Firefox windows open — one per thing I'm in the middle of, each stuffed
+        with <a href="https://support.mozilla.org/kb/tab-groups">tab groups</a> I set up and then forgot. Firefox shows you one
+        window's tabs at a time, but it has no single view where every window, group, and tab sits side by side so you can
+        actually <em>reorganize</em> the pile. So I built one: a toolbar button toggles a single overview tab — an "exploded" layout of the whole browser — and re-toggling
+        focuses that tab instead of piling up copies. The code's on
+        <a href="https://github.com/andybp85/firefox-windows-manager">GitHub</a>.</p>
+        <h3>What it does</h3>
+        <p>Each panel is one window; tab groups show up as colored sub-sections, and every tab is a favicon–title–host tile.
+        From here, without digging through right-click menus, you can:</p>
+        <ul>
+            <li><strong>Rename a window</strong> — double-click its name. Firefox has no notion of a named window, so the name is
+            stashed as a <a href="https://developer.mozilla.org/docs/Mozilla/Add-ons/WebExtensions/API/sessions">session value</a>
+            and rides back in on Firefox's own session restore after a restart.</li>
+            <li><strong>Reorder tabs by dragging</strong> — drop a tile inside a group to join that group, or into loose space to
+            leave it. It moves the <em>real</em> tab, not a picture of one.</li>
+            <li><strong>Move tabs and groups between windows</strong> — drag onto another window's panel, or onto the bottom zone to
+            pop it out into a brand-new window.</li>
+            <li><strong>Reorder the window panels</strong> — drag the <code>⠿</code> grip in a header. That order is saved per
+            window too, so the layout you arrange is still there after a restart.</li>
+            <li><strong>Unload or close</strong> — discard a tab (or every tab but the active one, per window or across all windows
+            from the masthead) to hand memory back without losing your place; or close a tab, a group, or a whole window
+            outright.</li>
+        </ul>
+        <figure>
+            <button class="zoom" popovertarget="shot-overview-dark" type="button">
+                <img alt="The overview: three Firefox windows laid out side by side, each showing its tab groups and tabs as tiles, above a header counting 3 windows, 4 groups, 16 tabs." height="1048" src="overview-dark.png" width="1600" />
+            </button>
+            <figcaption><em>Every window at once. The masthead counts windows · groups · tabs; the focused window gets the
+            glow. Click to enlarge.</em></figcaption>
+        </figure>
+        <div class="lightbox" id="shot-overview-dark" popover>
+            <img alt="" loading="lazy" src="overview-dark.png" />
+        </div>
+        <figure class="portrait">
+            <button class="zoom" popovertarget="shot-window-detail" type="button">
+                <img alt="Close-up of one window panel: a blue 'MDN' tab group and a green 'Repo' group, each tab a favicon-title-host tile with unload and close buttons. The active tab has an orange keyline; a discarded tab is dimmed with an italic host." height="1106" loading="lazy" src="window-detail.png" width="864" />
+            </button>
+            <figcaption><em>One panel up close: group keylines in each group's own color, the active tab keylined in accent, a
+            discarded (unloaded) tab dimmed with an italic host.</em></figcaption>
+        </figure>
+        <div class="lightbox" id="shot-window-detail" popover>
+            <img alt="" loading="lazy" src="window-detail.png" />
+        </div>
+        <h3>Dressed in Art Deco, keyed to Firefox's mascot</h3>
+        <p>Confession: I'm a sucker for cute. So when Mozilla's new Firefox mascot <a href="https://blog.mozilla.org/en/firefox/meet-kit/">Kit</a> turned up and I watched a bunch of people on
+        Hacker News grumble that Mozilla shouldn't be "wasting their time" on a mascot, it stuck with me. Anything that makes
+        somebody's day a little brighter is worth doing — full stop — and if your first instinct is to tell people they're wasting their time doing that, then I certainly don't have time to waste on you. I bought a Kit <a href="https://www.firefox.com/en-US/kit/">T-shirt</a>.</p>
+        <p>The little fox is adorable, so I keyed
+        this whole overview to this <a href="https://addons.mozilla.org/en-US/firefox/addon/kit/">theme</a> a <a href="https://www.reddit.com/r/firefox/comments/1ox1l7d/i_made_a_kit_theme/">fellow fan made</a>.</p>
+        <figure>
+            <img alt="The Kit Mascot Firefox theme applied to the browser toolbar: deep aubergine chrome, vivid orange accents, a lavender tab strip, and the little fox mascot at the right." height="92" loading="lazy" src="kit-theme.png" width="680" />
+            <figcaption><em>The source palette — the <a href="https://addons.mozilla.org/en-US/firefox/addon/kit/">Kit Mascot</a>
+            theme by Afterglow, which the overview's colors are keyed to.</em></figcaption>
+        </figure>
+        <p>The other half of it: I'm so sick of flat, <a href="https://m3.material.io/">Material-Design</a>-looking everything. I
+        want beautiful, complex things. Art Deco is one of my favorite styles on earth. I'm lucky enough to work in New York City,
+        surrounded by some of the most classic Deco buildings ever built. Before I go on too much of a rant here:
+        <a href="https://www.youtube.com/watch?v=tWYxrowovts">How Did the World Get So Ugly</a> sums up the feeling better than I
+        can.</p>
+        <p>So the look leans all the way into the ornament — an engraved trellis wall covering, a chevron frieze on the same
+        rhythm, corner brackets on every panel, lozenge-chain rules, and <a href="https://en.wikipedia.org/wiki/Futura_(typeface)">Futura</a>
+        carrying the uppercase, letter-spaced Deco voice — over deep aubergine grounds, that vivid mascot orange on every
+        accent, lavender text. Every color is a <a href="https://developer.mozilla.org/docs/Web/CSS/color_value/light-dark"><code>light-dark()</code></a>
+        pair, so the page follows your OS theme with no JavaScript at all — the shot below is the same overview in light mode.
+        Retheming is CSS-only: the whole look lives in custom properties at the top of one stylesheet, so a fork reskins it
+        without touching a line of logic.</p>
+        <figure>
+            <button class="zoom" popovertarget="shot-overview-light" type="button">
+                <img alt="The same three-window overview rendered in light mode: a pale lavender ground with the same orange Art-Deco ornament and purple-keyed tab groups." height="1048" loading="lazy" src="overview-light.png" width="1600" />
+            </button>
+            <figcaption><em>The same overview in light mode — one <code>light-dark()</code> swap, no JS.</em></figcaption>
+        </figure>
+        <div class="lightbox" id="shot-overview-light" popover>
+            <img alt="" loading="lazy" src="overview-light.png" />
+        </div>
+        <p>Is it a loud, divisive palette? Sure. I like bright colors and they suit the adorable little fox, so I don't much
+        care — and if my color choices personally offend you, well, you suck, and I'm delighted to have made your day a touch
+        worse.</p>
+        <p>I won't pretend this is <em>truly</em> beautiful — I'm not a designer, and it's about as close to what I love as I
+        could get with a few prompts to Fable. But I'd take it over anything Apple or Google has shipped in a heartbeat.</p>
+        <h3>How it's built</h3>
+        <p>The data flows one way: read the browser, fold it into a <em>pure</em> model, render, and let drag-and-drop and the
+        action buttons mutate the browser — whose own events kick off the next render. The model holds the only real logic, and
+        because it's pure it's the only part that needs unit tests (Node's built-in runner, zero dependencies). There's no build
+        step for day-to-day work; <code>npm run package</code> zips the installable <code>.xpi</code> when I want one.</p>
+        <p>It asks for exactly three permissions — <code>tabs</code>, <code>tabGroups</code>, <code>sessions</code> — and no host
+        permissions whatsoever. No <code>fetch</code>, no XHR, nothing phoning home; the only things pulled off the network are
+        the tab favicons, straight from each site. Tab groups do need
+        <a href="https://developer.mozilla.org/docs/Mozilla/Add-ons/WebExtensions/API/tabGroups">Firefox 139+</a> for the
+        <code>tabGroups</code> API — on anything older the overview still shows windows and tabs, with a notice that groups want
+        the newer build.</p>
+        <p>Right now it lives unsigned in my Developer Edition, which is happy to run it; getting Mozilla to sign it so it sticks
+        on release Firefox is the next thing on the list. This is living documentation, so the page grows as the add-on does. And,
+        if you'd like to use it but would like to put your own spin on it, don't worry: there's a <a href="https://github.com/andybp85/firefox-windows-manager/#theming-for-forks">theming guide</a>
+        in the README.</p>
+    </main>
+    <site-footer></site-footer>
+</body>
+</html>
