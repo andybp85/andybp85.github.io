@@ -1,29 +1,45 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-<meta name="darkreader-lock"/>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
-<meta content="light dark" name="color-scheme"/>
-<meta content="Andy's autobiographical site for projects and random thoughts." name="description"/>
-<meta content="default-src 'self'; script-src-elem 'self' 'unsafe-inline' *.getclicky.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src *.getclicky.com" http-equiv="Content-Security-Policy"/>
-<title>Projects — Andy Stanish</title>
-<link href="/icons/favicon.svg" rel="icon" type="image/svg+xml"/>
-<link href="/icons/favicon.ico" rel="icon" sizes="32x32"/>
-<link href="/icons/apple-touch-icon.png" rel="apple-touch-icon"/>
-<link as="font" crossorigin="" href="/fonts/B612-Regular/B612-Regular.woff" rel="preload" type="font/woff"/>
-<link as="font" crossorigin="" href="/fonts/Inter/InterVariable.woff2" rel="preload" type="font/woff2"/>
-<link as="font" crossorigin="" href="/fonts/Inter/InterVariable-Italic.woff2" rel="preload" type="font/woff2"/>
-<script>
-    /* Apply a pinned theme before first paint to avoid a flash; auto defers
-       to color-scheme: light dark (system). Kept in sync with components.js. */
-    {
-        const theme = localStorage.getItem("theme")
-        if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme
-    }
-</script>
-<style>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <meta content="light dark" name="color-scheme" />
+    <meta content="Andy's autobiographical site for projects and random thoughts." name="description" />
+    <meta name="darkreader-lock" />
+    <meta
+        content="default-src 'self'; script-src-elem 'self' 'unsafe-inline' *.getclicky.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src *.getclicky.com"
+        http-equiv="Content-Security-Policy" />
+    <title>Projects — Andy Stanish</title>
+    <link href="/icons/favicon.svg" rel="icon" type="image/svg+xml" />
+    <link href="/icons/favicon.ico" rel="icon" sizes="32x32" />
+    <link href="/icons/apple-touch-icon.png" rel="apple-touch-icon" />
+    <link
+        as="font"
+        crossorigin
+        href="/fonts/B612-Regular/B612-Regular.woff"
+        rel="preload"
+        type="font/woff" />
+    <link
+        as="font"
+        crossorigin
+        href="/fonts/Inter/InterVariable.woff2"
+        rel="preload"
+        type="font/woff2" />
+    <link
+        as="font"
+        crossorigin
+        href="/fonts/Inter/InterVariable-Italic.woff2"
+        rel="preload"
+        type="font/woff2" />
+    <script>
+        /* Apply a pinned theme before first paint to avoid a flash; auto defers
+           to color-scheme: light dark (system). Kept in sync with components.js. */
+        {
+            const theme = localStorage.getItem("theme")
+            if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme
+        }
+    </script>
+    <style>
         body {
             visibility: hidden;
         }
@@ -47,18 +63,27 @@
             }
         }
     </style>
-<link as="style" href="/styles.css" rel="preload"/>
-<link href="/styles.css" rel="stylesheet"/>
-<link href="/projects/projects.css" rel="stylesheet"/>
-<script type="module" src="/components.js"></script></head>
+    <link as="style" href="/styles.css" rel="preload" />
+    <link href="/styles.css" rel="stylesheet" />
+    <link href="/projects/projects.css" rel="stylesheet" />
+    <script src="/components.js" type="module"></script>
+</head>
 <body>
-<site-header></site-header>
-<sub-nav>
-<label>Projects</label>
-<nav><a data-categories="linux|raspberry-pi" data-date="2026-07-02" href="/projects/pi-sd-backup">Pi SD Card Backup</a><a data-categories="code|craft" data-date="2026-06-28" href="/projects/teaching-claude-to-code-like-me">Teaching Claude To Code Like Me</a><a data-categories="web|project" data-date="2026-02-17" href="/projects/andy-sam-save-the-date">Andy &amp; Sam's Save the Date</a><a data-categories="tech|how-to" data-date="2024-08-16" href="/projects/vim-config-with-YouCompleteMe">Vim Config With YouCompleteMe</a></nav>
-</sub-nav>
-<main><p>I do tons of side projects. This section serves as living documentation, so pages are liable to<br/>
-change.</p></main>
-<site-footer></site-footer>
+    <site-header></site-header>
+    <sub-nav>
+        <label>Projects</label>
+        <nav>
+            <a data-categories="firefox|extension" data-date="2026-07-05" href="/projects/firefox-windows-manager">Firefox Tab &amp; Window Manager</a>
+            <a data-categories="linux|raspberry-pi" data-date="2026-07-02" href="/projects/pi-sd-backup">Pi SD Card Backup</a>
+            <a data-categories="code|craft" data-date="2026-06-28" href="/projects/teaching-claude-to-code-like-me">Teaching Claude To Code Like Me</a>
+            <a data-categories="web|project" data-date="2026-02-17" href="/projects/andy-sam-save-the-date">Andy &amp; Sam's Save the Date</a>
+            <a data-categories="tech|how-to" data-date="2024-08-16" href="/projects/vim-config-with-YouCompleteMe">Vim Config With YouCompleteMe</a>
+        </nav>
+    </sub-nav>
+    <main>
+        <p>I do tons of side projects. This section serves as living documentation, so pages are liable to<br />
+        change.</p>
+    </main>
+    <site-footer></site-footer>
 </body>
 </html>

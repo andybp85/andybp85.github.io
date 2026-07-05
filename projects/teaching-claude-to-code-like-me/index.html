@@ -1,29 +1,45 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-<meta name="darkreader-lock"/>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
-<meta content="light dark" name="color-scheme"/>
-<meta content="Andy's autobiographical site for projects and random thoughts." name="description"/>
-<meta content="default-src 'self'; script-src-elem 'self' 'unsafe-inline' *.getclicky.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src *.getclicky.com" http-equiv="Content-Security-Policy"/>
-<title>Teaching Claude To Code Like Me — Andy Stanish</title>
-<link href="/icons/favicon.svg" rel="icon" type="image/svg+xml"/>
-<link href="/icons/favicon.ico" rel="icon" sizes="32x32"/>
-<link href="/icons/apple-touch-icon.png" rel="apple-touch-icon"/>
-<link as="font" crossorigin="" href="/fonts/B612-Regular/B612-Regular.woff" rel="preload" type="font/woff"/>
-<link as="font" crossorigin="" href="/fonts/Inter/InterVariable.woff2" rel="preload" type="font/woff2"/>
-<link as="font" crossorigin="" href="/fonts/Inter/InterVariable-Italic.woff2" rel="preload" type="font/woff2"/>
-<script>
-    /* Apply a pinned theme before first paint to avoid a flash; auto defers
-       to color-scheme: light dark (system). Kept in sync with components.js. */
-    {
-        const theme = localStorage.getItem("theme")
-        if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme
-    }
-</script>
-<style>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <meta content="light dark" name="color-scheme" />
+    <meta content="Andy's autobiographical site for projects and random thoughts." name="description" />
+    <meta name="darkreader-lock" />
+    <meta
+        content="default-src 'self'; script-src-elem 'self' 'unsafe-inline' *.getclicky.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src *.getclicky.com"
+        http-equiv="Content-Security-Policy" />
+    <title>Teaching Claude To Code Like Me — Andy Stanish</title>
+    <link href="/icons/favicon.svg" rel="icon" type="image/svg+xml" />
+    <link href="/icons/favicon.ico" rel="icon" sizes="32x32" />
+    <link href="/icons/apple-touch-icon.png" rel="apple-touch-icon" />
+    <link
+        as="font"
+        crossorigin
+        href="/fonts/B612-Regular/B612-Regular.woff"
+        rel="preload"
+        type="font/woff" />
+    <link
+        as="font"
+        crossorigin
+        href="/fonts/Inter/InterVariable.woff2"
+        rel="preload"
+        type="font/woff2" />
+    <link
+        as="font"
+        crossorigin
+        href="/fonts/Inter/InterVariable-Italic.woff2"
+        rel="preload"
+        type="font/woff2" />
+    <script>
+        /* Apply a pinned theme before first paint to avoid a flash; auto defers
+           to color-scheme: light dark (system). Kept in sync with components.js. */
+        {
+            const theme = localStorage.getItem("theme")
+            if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme
+        }
+    </script>
+    <style>
         body {
             visibility: hidden;
         }
@@ -47,26 +63,34 @@
             }
         }
     </style>
-<link as="style" href="/styles.css" rel="preload"/>
-<link href="/styles.css" rel="stylesheet"/>
-<link rel="stylesheet" href="/projects/projects.css">
-<link rel="stylesheet" href="/pygments.css">
-<script type="module" src="/components.js"></script></head>
+    <link as="style" href="/styles.css" rel="preload" />
+    <link href="/styles.css" rel="stylesheet" />
+    <link href="/projects/projects.css" rel="stylesheet" />
+    <link href="/pygments.css" rel="stylesheet" />
+    <script src="/components.js" type="module"></script>
+</head>
 <body>
-<site-header></site-header>
-<sub-nav>
-<label>Projects</label>
-<nav><a data-categories="linux|raspberry-pi" data-date="2026-07-02" href="/projects/pi-sd-backup">Pi SD Card Backup</a><a data-categories="code|craft" data-date="2026-06-28" class="current" href="/projects/teaching-claude-to-code-like-me">Teaching Claude To Code Like Me</a><a data-categories="web|project" data-date="2026-02-17" href="/projects/andy-sam-save-the-date">Andy &amp; Sam's Save the Date</a><a data-categories="tech|how-to" data-date="2024-08-16" href="/projects/vim-config-with-YouCompleteMe">Vim Config With YouCompleteMe</a></nav>
-</sub-nav>
-<main><p><em>June 28, 2026</em></p>
-<h2>Teaching Claude to Code Like Me</h2>
-<p>After 20+ years of writing code, I've got a pretty good sense of what I like and what works. So when I started having Claude write code
-alongside me, I wanted to make sure it built things the way I would — not the generic average of everything on the internet, but my way.</p>
-<p>The only way to get there was to write it all down: a rules file Claude reads automatically on every task. That turned out to be the
-valuable part — a lot of what I'd carried around as "this just feels cleaner" had to get concrete enough for a machine to actually
-follow. Hand-waving doesn't compile.</p>
-<p>It starts big-picture, in <code>CLAUDE.md</code> — here's the relevant parts:</p>
-<div class="codehilite source"><pre><span></span><code><span id="line-1"><span class="gh"># System Protocols</span>
+    <site-header></site-header>
+    <sub-nav>
+        <label>Projects</label>
+        <nav>
+            <a data-categories="firefox|extension" data-date="2026-07-05" href="/projects/firefox-windows-manager">Firefox Tab &amp; Window Manager</a>
+            <a data-categories="linux|raspberry-pi" data-date="2026-07-02" href="/projects/pi-sd-backup">Pi SD Card Backup</a>
+            <a class="current" data-categories="code|craft" data-date="2026-06-28" href="/projects/teaching-claude-to-code-like-me">Teaching Claude To Code Like Me</a>
+            <a data-categories="web|project" data-date="2026-02-17" href="/projects/andy-sam-save-the-date">Andy &amp; Sam's Save the Date</a>
+            <a data-categories="tech|how-to" data-date="2024-08-16" href="/projects/vim-config-with-YouCompleteMe">Vim Config With YouCompleteMe</a>
+        </nav>
+    </sub-nav>
+    <main>
+        <p><em>June 28, 2026</em></p>
+        <h2>Teaching Claude to Code Like Me</h2>
+        <p>After 20+ years of writing code, I've got a pretty good sense of what I like and what works. So when I started having Claude write code
+        alongside me, I wanted to make sure it built things the way I would — not the generic average of everything on the internet, but my way.</p>
+        <p>The only way to get there was to write it all down: a rules file Claude reads automatically on every task. That turned out to be the
+        valuable part — a lot of what I'd carried around as "this just feels cleaner" had to get concrete enough for a machine to actually
+        follow. Hand-waving doesn't compile.</p>
+        <p>It starts big-picture, in <code>CLAUDE.md</code> — here's the relevant parts:</p>
+        <div class="codehilite source"><pre><span></span><code><span id="line-1"><span class="gh"># System Protocols</span>
 </span><span id="line-2">
 </span><span id="line-3"><span class="gu">## Workflow &amp; Planning</span>
 </span><span id="line-4">Complex features → design spec first. Small fixes/features → code directly.
@@ -96,9 +120,8 @@ follow. Hand-waving doesn't compile.</p>
 </span><span id="line-28"><span class="w">  </span><span class="k">4.</span> Fancy algorithms are buggy and hard to implement. Use simple data structures.
 </span><span id="line-29"><span class="w">  </span><span class="k">5.</span> Data dominates. Well-organized data structures make algorithms self-evident.
 </span></code></pre></div>
-
-<p>Then the nitty-gritty, in <code>general.md</code>:</p>
-<div class="codehilite source"><pre><span></span><code><span id="line-1"><span class="gh"># General code style</span>
+        <p>Then the nitty-gritty, in <code>general.md</code>:</p>
+        <div class="codehilite source"><pre><span></span><code><span id="line-1"><span class="gh"># General code style</span>
 </span><span id="line-2">
 </span><span id="line-3">Cross-language principles. Language rules stack on top; CLAUDE.md holds architecture (functional paradigms, YAGNI, Pike, DRY).
 </span><span id="line-4">
@@ -167,15 +190,14 @@ follow. Hand-waving doesn't compile.</p>
 </span><span id="line-67"><span class="k">*</span><span class="w"> </span>no stray debug output in committed code (<span class="sb">`console.log`</span>, <span class="sb">`print`</span>); error logging is fine
 </span><span id="line-68"><span class="k">*</span><span class="w"> </span>LF line endings
 </span></code></pre></div>
-
-<h3>Scoped by language</h3>
-<p>The two files above are the always-on layer — Claude reads them on every programming task, whatever I'm working on. But most of what I
-care about is language-specific, and I don't want the Python rules sitting in the context while I'm editing a stylesheet. So
-the language rules live in their own files under <code>~/.claude/rules/</code>, each gated by a <code>paths:</code> glob in its
-frontmatter. Claude Code only pulls a file in when I actually touch something that matches — which keeps the context lean and
-the token bill down as a nice side effect, but mostly just keeps the guidance relevant to the code in front of it. Here's the
-Python one:</p>
-<div class="codehilite source"><pre><span></span><code><span id="line-1">---
+        <h3>Scoped by language</h3>
+        <p>The two files above are the always-on layer — Claude reads them on every programming task, whatever I'm working on. But most of what I
+        care about is language-specific, and I don't want the Python rules sitting in the context while I'm editing a stylesheet. So
+        the language rules live in their own files under <code>~/.claude/rules/</code>, each gated by a <code>paths:</code> glob in its
+        frontmatter. Claude Code only pulls a file in when I actually touch something that matches — which keeps the context lean and
+        the token bill down as a nice side effect, but mostly just keeps the guidance relevant to the code in front of it. Here's the
+        Python one:</p>
+        <div class="codehilite source"><pre><span></span><code><span id="line-1">---
 </span><span id="line-2">paths:
 </span><span id="line-3"><span class="w">  </span><span class="k">-</span><span class="w"> </span>&quot;**/*.py&quot;
 </span><span id="line-4"><span class="gu">  - &quot;**/*.pyi&quot;</span>
@@ -186,11 +208,10 @@ Python one:</p>
 </span><span id="line-9"><span class="k">*</span><span class="w"> </span>avoid <span class="sb">`Any`</span> — prefer precise types, protocols, or generics; assume a strict checker (mypy/pyright)
 </span><span id="line-10"><span class="k">*</span><span class="w"> </span>modern typing: built-in generics (<span class="sb">`list[str]`</span>, <span class="sb">`dict[str, int]`</span>) and <span class="sb">`X | None`</span>, not <span class="sb">`List`</span>/<span class="sb">`Optional`</span>
 </span></code></pre></div>
-
-<p>They stack, too. TypeScript inherits the JavaScript and object-shape rules by sharing their globs, then layers its own on
-top — so opening a <code>.ts</code> file loads the general principles, the JS rules, and these, and not a word about Python or
-CSS:</p>
-<div class="codehilite source"><pre><span></span><code><span id="line-1">---
+        <p>They stack, too. TypeScript inherits the JavaScript and object-shape rules by sharing their globs, then layers its own on
+        top — so opening a <code>.ts</code> file loads the general principles, the JS rules, and these, and not a word about Python or
+        CSS:</p>
+        <div class="codehilite source"><pre><span></span><code><span id="line-1">---
 </span><span id="line-2">paths:
 </span><span id="line-3"><span class="w">  </span><span class="k">-</span><span class="w"> </span>&quot;**/*.ts&quot;
 </span><span id="line-4"><span class="w">  </span><span class="k">-</span><span class="w"> </span>&quot;**/*.mts&quot;
@@ -201,21 +222,21 @@ CSS:</p>
 </span><span id="line-9"><span class="k">*</span><span class="w"> </span>lean on inference for locals; annotate boundaries (exported signatures, public APIs)
 </span><span id="line-10"><span class="k">*</span><span class="w"> </span>never cast (<span class="sb">`as`</span>, <span class="sb">`&lt;T&gt;`</span>, <span class="sb">`!`</span>) to paper over a type — narrow, guard, or fix the source type
 </span></code></pre></div>
-
-<p>None of this is law. It's a set of defaults I trust enough to follow without re-litigating every time — which is the whole
-point. And to be clear, this is a post about teaching Claude, not about my semantics: I know full well that half of these are
-religious wars with no winner. I won't argue any of them with you — unless you're picking up the bar tab.</p>
-<h3>Influences</h3>
-<p>Some things that've influenced my thinking over the years:</p>
-<ul>
-<li><a href="https://hissp.readthedocs.io/en/latest/style_guide.html">Hissp Style Guide</a></li>
-<li><a href="https://rpeszek.github.io/posts/2022-08-30-code-cognitiveload.html">Code Cognitive Load</a></li>
-<li><a href="https://github.com/hmemcpy/milewski-ctfp-pdf/">Category Theory for Programmers</a></li>
-<li><a href="https://medium.com/@yiyisun/elm-architecture-in-8-lines-of-typescript-d5a33aca75c1">Elm Architecture in 8 Lines of TypeScript</a></li>
-<li><a href="https://www.kernel.org/doc/html/v4.10/process/coding-style.html">Linux Kernel Coding Style</a></li>
-<li><a href="https://groups.google.com/g/net.jokes/c/k2JVKQzJSpY?pli=1">The Story of Mel</a></li>
-<li><a href="https://medium.com/@hinchman_amanda/null-pointer-references-the-billion-dollar-mistake-1e616534d485">Null References: The Billion Dollar Mistake</a></li>
-</ul></main>
-<site-footer></site-footer>
+        <p>None of this is law. It's a set of defaults I trust enough to follow without re-litigating every time — which is the whole
+        point. And to be clear, this is a post about teaching Claude, not about my semantics: I know full well that half of these are
+        religious wars with no winner. I won't argue any of them with you — unless you're picking up the bar tab.</p>
+        <h3>Influences</h3>
+        <p>Some things that've influenced my thinking over the years:</p>
+        <ul>
+            <li><a href="https://hissp.readthedocs.io/en/latest/style_guide.html">Hissp Style Guide</a></li>
+            <li><a href="https://rpeszek.github.io/posts/2022-08-30-code-cognitiveload.html">Code Cognitive Load</a></li>
+            <li><a href="https://github.com/hmemcpy/milewski-ctfp-pdf/">Category Theory for Programmers</a></li>
+            <li><a href="https://medium.com/@yiyisun/elm-architecture-in-8-lines-of-typescript-d5a33aca75c1">Elm Architecture in 8 Lines of TypeScript</a></li>
+            <li><a href="https://www.kernel.org/doc/html/v4.10/process/coding-style.html">Linux Kernel Coding Style</a></li>
+            <li><a href="https://groups.google.com/g/net.jokes/c/k2JVKQzJSpY?pli=1">The Story of Mel</a></li>
+            <li><a href="https://medium.com/@hinchman_amanda/null-pointer-references-the-billion-dollar-mistake-1e616534d485">Null References: The Billion Dollar Mistake</a></li>
+        </ul>
+    </main>
+    <site-footer></site-footer>
 </body>
 </html>
