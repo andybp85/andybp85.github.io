@@ -129,11 +129,8 @@ header {
         grid-column-end: 5;
         justify-content: end;
 
-        & .current {
-            text-decoration: underline;
-            text-decoration-color: darkred;
-            text-decoration-thickness: 3px;
-            text-underline-offset: 10px;
+        & .current::before {
+            content: "› "; /* matches the sub-nav current-page marker */
         }
 
         & .theme-toggle {
