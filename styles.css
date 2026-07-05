@@ -52,7 +52,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h1 {
-    font-size: 3.157rem;
+    /* Fluid so the one-line site title never overflows a narrow phone; caps at
+       the full size on viewports wide enough to fit it. */
+    font-size: clamp(2rem, 10.5vw, 3.157rem);
 }
 
 h2 {
@@ -134,7 +136,8 @@ header {
         }
 
         & .current::before {
-            content: "›\a0"; /* matches the sub-nav marker; NBSP so it can't wrap off the label */
+            content: "›";
+            margin-inline-end: 0.15em; /* small, non-breaking gap so the marker hugs its label */
         }
 
         & .theme-toggle {
@@ -223,7 +226,6 @@ sub-nav {
     }
 
     & nav a {
-        border-top: 1px solid var(--dark-red);
         display: block;
         padding: 0.7rem 0;
         text-wrap: balance;
