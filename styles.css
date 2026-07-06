@@ -1,11 +1,14 @@
 /* @font-face inlined here (not @import'd) so the faces register the moment
    styles.css parses — an @import adds a serialized fetch that lands the fonts
-   after first paint, which shows as a flash. Paired with the <head> preloads
-   and font-display: optional, the preloaded font is used on first paint with
-   no swap; if it somehow isn't ready, the fallback is kept for the page view
-   rather than swapped in (no reflow, no flash). */
+   after first paint, which shows as a flash. Paired with the <head> preloads,
+   the preloaded font is normally ready at first paint.
+   font-display: swap (not optional): text is never held invisible — optional's
+   ~100ms block period was itself a flash (a FOIT: heading painted, body text
+   blank for a beat, then popped in). swap paints the fallback immediately; the
+   font-size-adjust below scales that fallback to the web font's x-height so the
+   swap-in causes no reflow and no visible flash. */
 @font-face {
-    font-display: optional;
+    font-display: swap;
     font-family: B612-Regular;
     font-style: normal;
     font-weight: normal;
@@ -13,7 +16,7 @@
 }
 
 @font-face {
-    font-display: optional;
+    font-display: swap;
     font-family: InterVariable;
     font-style: normal;
     font-weight: 100 900;
@@ -21,7 +24,7 @@
 }
 
 @font-face {
-    font-display: optional;
+    font-display: swap;
     font-family: InterVariable;
     font-style: italic;
     font-weight: 100 900;
@@ -29,7 +32,7 @@
 }
 
 @font-face {
-    font-display: optional;
+    font-display: swap;
     font-family: "Berkeley Mono Variable";
     font-weight: 100 1000;
     src:
@@ -56,6 +59,11 @@ body {
     display: grid;
     font-family: InterVariable, sans-serif;
     font-optical-sizing: auto;
+    /* Scale the fallback to the web font's x-height (inherited as from-font, so it
+       resolves per element against that element's own font: Inter here, B612 for
+       headings, Berkeley Mono for code). Keeps the font-display: swap swap-in from
+       shifting or flashing. */
+    font-size-adjust: from-font;
     gap: 2rem;
     grid-template-columns: repeat(4, 1fr);
     margin: 0 auto;
@@ -173,7 +181,11 @@ header {
         & .current::before {
             content: "›";
             margin-inline-end: 0.15em; /* small, non-breaking gap so the marker hugs its label */
-            vertical-align: middle; /* center the marker to the line's middle, not its baseline */
+            /* Optically center the › on the caps. Measured from B612: cap-height
+               0.75em (center 0.375em above baseline), › glyph center 0.273em; raise
+               the difference. `middle` aligned the box to x-height/2, which sat low.
+               em unit scales the offset across every nav font-size. */
+            vertical-align: 0.1em;
         }
 
         & .theme-toggle {
@@ -272,7 +284,10 @@ sub-nav {
             &::before {
                 content: "›";
                 margin-inline-end: 0.2em;
-                vertical-align: middle; /* center on the first line; stays there when the title wraps */
+                /* Sub-nav inherits Inter (not B612), so the offset differs: cap-height
+                   0.7275em (center 0.364em), › glyph center 0.301em -> raise 0.063em.
+                   A length keeps the marker on the first line when the title wraps. */
+                vertical-align: 0.06em;
             }
         }
     }
