@@ -1,6 +1,41 @@
-@import url("/fonts/B612-Regular/B612.css");
-@import url("/fonts/Inter/inter.css");
-@import url("/fonts/Berkeley-Mono-Variable/Berkeley-Mono.css");
+/* @font-face inlined here (not @import'd) so the faces register the moment
+   styles.css parses — an @import adds a serialized fetch that lands the fonts
+   after first paint, which shows as a flash. Paired with the <head> preloads
+   and font-display: optional, the preloaded font is used on first paint with
+   no swap; if it somehow isn't ready, the fallback is kept for the page view
+   rather than swapped in (no reflow, no flash). */
+@font-face {
+    font-display: optional;
+    font-family: B612-Regular;
+    font-style: normal;
+    font-weight: normal;
+    src: url("/fonts/B612-Regular/B612-Regular.woff") format("woff");
+}
+
+@font-face {
+    font-display: optional;
+    font-family: InterVariable;
+    font-style: normal;
+    font-weight: 100 900;
+    src: url("/fonts/Inter/InterVariable.woff2") format("woff2-variations");
+}
+
+@font-face {
+    font-display: optional;
+    font-family: InterVariable;
+    font-style: italic;
+    font-weight: 100 900;
+    src: url("/fonts/Inter/InterVariable-Italic.woff2") format("woff2-variations");
+}
+
+@font-face {
+    font-display: optional;
+    font-family: "Berkeley Mono Variable";
+    font-weight: 100 1000;
+    src:
+        url("/fonts/Berkeley-Mono-Variable/BerkeleyMonoVariable-Regular.woff2") format("woff2-variations"),
+        url("/fonts/Berkeley-Mono-Variable/BerkeleyMonoVariable-Italic.woff2") format("woff2-variations");
+}
 
 :root {
     color-scheme: light dark; /* theme native UI (scrollbars, canvas) to match prefers-color-scheme */
@@ -138,6 +173,7 @@ header {
         & .current::before {
             content: "›";
             margin-inline-end: 0.15em; /* small, non-breaking gap so the marker hugs its label */
+            vertical-align: middle; /* center the marker to the line's middle, not its baseline */
         }
 
         & .theme-toggle {
@@ -234,7 +270,9 @@ sub-nav {
             color: var(--text-color);
 
             &::before {
-                content: "› ";
+                content: "›";
+                margin-inline-end: 0.2em;
+                vertical-align: middle; /* center on the first line; stays there when the title wraps */
             }
         }
     }
