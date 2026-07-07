@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <meta content="light dark" name="color-scheme" />
+    <meta content="Andy's autobiographical site for projects and random thoughts." name="description" />
+    <meta name="darkreader-lock" />
+    <meta
+        content="default-src 'self'; script-src-elem 'self' 'unsafe-inline' *.getclicky.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src *.getclicky.com"
+        http-equiv="Content-Security-Policy" />
+    <title>PandaJAM from HamsterDAM — Andy Stanish</title>
+    <link href="/icons/favicon.svg" rel="icon" type="image/svg+xml" />
+    <link href="/icons/favicon.ico" rel="icon" sizes="32x32" />
+    <link href="/icons/apple-touch-icon.png" rel="apple-touch-icon" />
+    <link
+        as="font"
+        crossorigin
+        href="/fonts/B612-Regular/B612-Regular.woff"
+        rel="preload"
+        type="font/woff" />
+    <link
+        as="font"
+        crossorigin
+        href="/fonts/Inter/InterVariable.woff2"
+        rel="preload"
+        type="font/woff2" />
+    <link
+        as="font"
+        crossorigin
+        href="/fonts/Inter/InterVariable-Italic.woff2"
+        rel="preload"
+        type="font/woff2" />
+    <script>
+        /* Apply a pinned theme before first paint to avoid a flash; auto defers
+           to color-scheme: light dark (system). Kept in sync with components.js. */
+        {
+            const theme = localStorage.getItem("theme")
+            if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme
+        }
+    </script>
+    <style>
+        body {
+            visibility: hidden;
+        }
+
+        html {
+            background-image: linear-gradient(270deg, #222 90%, #2A2A2A 100%);
+        }
+
+        html[data-theme="light"] {
+            background-image: linear-gradient(90deg, #f9f9f9 95%, #BBB 100%);
+            color-scheme: light;
+        }
+
+        html[data-theme="dark"] {
+            color-scheme: dark;
+        }
+
+        @media (prefers-color-scheme: light) {
+            html:not([data-theme]) {
+                background-image: linear-gradient(90deg, #f9f9f9 95%, #BBB 100%);
+            }
+        }
+    </style>
+    <link as="style" href="/styles.css" rel="preload" />
+    <link href="/styles.css" rel="stylesheet" />
+    <link href="/projects/projects.css" rel="stylesheet" />
+    <script src="/components.js" type="module"></script>
+</head>
+<body>
+    <header>
+        <h1><a href="/">Andy Stanish</a></h1>
+        <nav aria-label="Main">
+            <a href="/about">About</a>
+            <a href="/blog">Blog</a>
+            <a href="/projects" class="current" aria-current="page">Projects</a>
+            <button class="theme-toggle" type="button" aria-label="Theme"></button>
+        </nav>
+    </header>
+    <sub-nav>
+        <label>Projects</label>
+        <nav>
+            <a data-categories="raspberry-pi|automation" data-date="2026-07-08" href="/projects/lg-tv-enhancer">LG TV Eye Comfort</a>
+            <a class="current" data-categories="music|web" data-date="2026-07-07" href="/projects/pandajam-from-hamsterdam">PandaJAM from HamsterDAM</a>
+            <a data-categories="firefox|extension" data-date="2026-07-05" href="/projects/firefox-windows-manager">Firefox Tab &amp; Window Manager</a>
+            <a data-categories="linux|raspberry-pi" data-date="2026-07-02" href="/projects/pi-sd-backup">Pi SD Card Backup</a>
+            <a data-categories="code|craft" data-date="2026-06-28" href="/projects/teaching-claude-to-code-like-me">Teaching Claude To Code Like Me</a>
+            <a data-categories="web|project" data-date="2026-06-28" href="/projects/andy-sam-save-the-date">Andy &amp; Sam's Save the Date</a>
+            <a data-categories="tech|how-to" data-date="2024-08-16" href="/projects/vim-config-with-YouCompleteMe">Vim Config With YouCompleteMe</a>
+        </nav>
+    </sub-nav>
+    <main>
+        <p><em>July 7, 2026</em></p>
+        <h2>Archiving the PandaJAM from HamsterDAM</h2>
+        <p>For five years I ran a weekly open jam: Wednesday nights at Sticks &amp; Stones in Hawthorne, New Jersey. Anyone
+        could walk in, plug in, and take the next tune. We recorded damn near every one. The jam's over now, but the tapes aren't — and
+        <a href="https://pandajamfromhamsterdam.com">this site</a> is where they live.</p>
+        <p>Every week's recording went up on <a href="https://archive.org/details/PandaJAM">the Internet Archive</a> under
+        the band's name, so the audio has a permanent home that isn't my hosting bill or some platform that might fold and
+        take it all with it. The site is the front door to that pile: a browsable index of every jam, newest first, with the
+        Archive's own player embedded so you can listen without leaving.</p>
+        <h3>One call, then get out of the way</h3>
+        <p>The archive stores no data of its own — everything lives on archive.org. When the page loads it makes exactly one
+        request: a single <a href="https://archive.org/advancedsearch.php">advancedsearch</a> query for
+        <code>creator:"PandaJAM From HamsterDAM"</code>, sorted newest-first, asking for each jam's identifier, date, and
+        description in one shot.</p>
+        <p>That last field is the whole trick. Pulling the descriptions along in the <em>same</em> query means selecting a
+        jam needs <strong>no</strong> further network round-trip — the text is already in hand, keyed by identifier, ready to
+        drop in the instant you click. So the sidebar renders as the results stream in, instead of firing a metadata request
+        per jam and waiting. One fetch, and everything after it is just DOM.</p>
+        <pre><code>q    = creator:"PandaJAM From HamsterDAM"
+fl[] = identifier, date, description
+sort = date desc
+rows = 500</code></pre>
+        <h3>Hash routing, no framework</h3>
+        <p>Each jam is a URL fragment — <code>#</code> plus its Archive identifier — so the browser's back button and a
+        shared link both work without a router library. Clicking a jam swaps in an
+        <a href="https://archive.org/details/PandaJAM">archive.org</a> embed with <code>?playlist=1</code>, so the whole
+        night plays through; clearing the hash drops you back to the home view and its
+        <a href="https://www.youtube.com/playlist?list=PL6lC-uALf0Fsrqllucxx4nty1GWbXQpFI">YouTube playlist</a>. That's the
+        entire navigation model — a <code>hashchange</code> listener and about ten lines.</p>
+        <h3>It used to be Bootstrap</h3>
+        <p>The first cut leaned on Bootstrap and the wall of markup that comes with it. I tore that out and rewrote the whole
+        thing vanilla — hand-written HTML, one small <code>main.js</code>, plain CSS. No build step, no dependencies, nothing
+        to keep patched. For a site whose only job is to list some recordings and embed a player, a framework was weight with
+        no payoff; it loads faster now, and I can read every line of it. That matters more once a thing goes from
+        "I touch it every week" to "I touch it twice a year." The
+        <a href="https://github.com/andybp85/pandajamfromhamsterdam.com">source is on GitHub</a>.</p>
+        <p>It's served from <a href="https://pages.github.com/">GitHub Pages</a> on its own domain, which for a static
+        archive costs nothing and won't quietly go dark the year I forget it exists.</p>
+        <p>The room's gone and the amps are packed up, but the recordings are still up, still browsable, still one click from
+        playing. Every Wednesday we made a little noise in Hawthorne — this is where it keeps.</p>
+    </main>
+    <site-footer></site-footer>
+</body>
+</html>
