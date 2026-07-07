@@ -54,7 +54,15 @@
     <script type="module" src="/components.js"></script>
 </head>
 <body>
-<site-header></site-header>
+<header>
+    <h1><a href="/">Andy Stanish</a></h1>
+    <nav aria-label="Main">
+        <a href="/about">About</a>
+        <a href="/blog" class="current" aria-current="page">Blog</a>
+        <a href="/projects">Projects</a>
+        <button class="theme-toggle" type="button" aria-label="Theme"></button>
+    </nav>
+</header>
 <sub-nav>
     <label>Posts</label>
     <nav><a href="/blog/cutting-claude-code-token-use" data-date="2026-07-02" data-categories="claude-code|tokens">Cutting Claude Code Token Use</a><a href="/blog/stop-hardcoding-dev-paths-in-crypttab" data-date="2026-07-02" data-categories="linux|raspberry-pi">Stop Hardcoding Dev Paths In Crypttab</a><a href="/blog/thoughts-after-two-weeks-with-until-the-sun-explodes" data-date="2026-06-28" data-categories="music|review" class="current">Thoughts After Two Weeks With Until The Sun Explodes</a><a href="/blog/web-dev-roadmap" data-date="2026-06-28" data-categories="web|learning">Web Dev Roadmap</a><a href="/blog/tips-for-waking-up-far-far-too-early" data-date="2016-10-22" data-categories="life|sleep">Tips For Waking Up Far Far Too Early</a></nav>

@@ -1,9 +1,3 @@
-const navLink = (href, text) => {
-    const isCurrent = location.pathname === href || location.pathname.startsWith(href + '/')
-    const current = isCurrent ? ' class="current" aria-current="page"' : ""
-    return `<a href="${href}"${current}>${text}</a>`
-}
-
 // Theme toggle: cycles auto -> light -> dark. "auto" removes html[data-theme] so
 // CSS falls back to prefers-color-scheme; light/dark pin it. The inline <head>
 // script applies a stored choice before first paint; this keeps them in sync.
@@ -27,36 +21,29 @@ const applyTheme = theme => {
     else root.dataset.theme = theme
 }
 
-customElements.define("site-header", class extends HTMLElement {
-    connectedCallback() {
-        this.innerHTML = `
-            <header>
-                <h1><a href="/">Andy Stanish</a></h1>
-                <nav aria-label="Main">
-                    ${navLink("/about", "About")}
-                    ${navLink("/blog", "Blog")}
-                    ${navLink("/projects", "Projects")}
-                    <button class="theme-toggle" type="button"></button>
-                </nav>
-            </header>`
-        this.themeButton = this.querySelector(".theme-toggle")
-        this.showTheme(storedTheme())
-        this.themeButton.addEventListener("click", () => this.cycleTheme())
-    }
+// The header/nav is server-rendered HTML now (no layout shift on load), so JS
+// only enhances the theme button that's already in the DOM: fills its icon and
+// wires the click. Module scripts are deferred, so the button exists by now.
+const wireThemeToggle = () => {
+    const button = document.querySelector(".theme-toggle")
+    if (!button) return
 
-    showTheme(theme) {
+    const showTheme = theme => {
         applyTheme(theme)
-        this.themeButton.innerHTML = THEME_ICON[theme]
-        this.themeButton.title = `Theme: ${theme}`
-        this.themeButton.setAttribute("aria-label", `Theme: ${theme}. Activate to change.`)
+        button.innerHTML = THEME_ICON[theme]
+        button.title = `Theme: ${theme}`
+        button.setAttribute("aria-label", `Theme: ${theme}. Activate to change.`)
     }
 
-    cycleTheme() {
+    button.addEventListener("click", () => {
         const next = THEME_CYCLE[(THEME_CYCLE.indexOf(storedTheme()) + 1) % THEME_CYCLE.length]
         localStorage.setItem("theme", next)
-        this.showTheme(next)
-    }
-})
+        showTheme(next)
+    })
+    showTheme(storedTheme())
+}
+
+wireThemeToggle()
 
 customElements.define("site-footer", class extends HTMLElement {
     connectedCallback() {

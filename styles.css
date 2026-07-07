@@ -144,8 +144,9 @@ pre {
     white-space: pre-wrap;
 }
 
-site-header,
 site-footer {
+    /* footer is still a JS component; display: contents lets its <footer> child
+       be the grid item. (The header is server-rendered HTML now, no wrapper.) */
     display: contents;
 }
 
@@ -194,7 +195,11 @@ header {
             color: var(--text-color);
             cursor: pointer;
             display: inline-flex;
+            /* reserve the box: the button ships empty and JS fills the icon, so
+               without a fixed size the nav would nudge left when the icon lands. */
+            height: 1.5rem;
             padding: 0;
+            width: 1.5rem;
 
             & svg {
                 height: 1.5rem;

@@ -134,7 +134,15 @@
     <script src="/components.js" type="module"></script>
 </head>
 <body>
-    <site-header></site-header>
+    <header>
+        <h1><a href="/">Andy Stanish</a></h1>
+        <nav aria-label="Main">
+            <a href="/about">About</a>
+            <a href="/blog">Blog</a>
+            <a href="/projects" class="current" aria-current="page">Projects</a>
+            <button class="theme-toggle" type="button" aria-label="Theme"></button>
+        </nav>
+    </header>
     <sub-nav>
         <label>Projects</label>
         <nav>

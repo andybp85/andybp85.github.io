@@ -54,7 +54,15 @@
     <script type="module" src="/components.js"></script>
 </head>
 <body>
-<site-header></site-header>
+<header>
+    <h1><a href="/">Andy Stanish</a></h1>
+    <nav aria-label="Main">
+        <a href="/about" class="current" aria-current="page">About</a>
+        <a href="/blog">Blog</a>
+        <a href="/projects">Projects</a>
+        <button class="theme-toggle" type="button" aria-label="Theme"></button>
+    </nav>
+</header>
 <main><h2 id="about-me">About Me</h2>
     <blockquote>
         <p>It means something being from New Jersey. It means you have a sense of humor.<br/>
