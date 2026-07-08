@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <meta content="light dark" name="color-scheme" />
+    <meta content="Andy's autobiographical site for projects and random thoughts." name="description" />
+    <meta name="darkreader-lock" />
+    <meta
+        content="default-src 'self'; script-src-elem 'self' 'unsafe-inline' *.getclicky.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src *.getclicky.com"
+        http-equiv="Content-Security-Policy" />
+    <title>LG TV Eye Comfort — Andy Stanish</title>
+    <link href="/icons/favicon.svg" rel="icon" type="image/svg+xml" />
+    <link href="/icons/favicon.ico" rel="icon" sizes="32x32" />
+    <link href="/icons/apple-touch-icon.png" rel="apple-touch-icon" />
+    <link
+        as="font"
+        crossorigin
+        href="/fonts/B612-Regular/B612-Regular.woff"
+        rel="preload"
+        type="font/woff" />
+    <link
+        as="font"
+        crossorigin
+        href="/fonts/Inter/InterVariable.woff2"
+        rel="preload"
+        type="font/woff2" />
+    <link
+        as="font"
+        crossorigin
+        href="/fonts/Inter/InterVariable-Italic.woff2"
+        rel="preload"
+        type="font/woff2" />
+    <script>
+        /* Apply a pinned theme before first paint to avoid a flash; auto defers
+           to color-scheme: light dark (system). Kept in sync with components.js. */
+        {
+            const theme = localStorage.getItem("theme")
+            if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme
+        }
+    </script>
+    <style>
+        body {
+            visibility: hidden;
+        }
+
+        html {
+            background-image: linear-gradient(270deg, #222 90%, #2A2A2A 100%);
+        }
+
+        html[data-theme="light"] {
+            background-image: linear-gradient(90deg, #f9f9f9 95%, #BBB 100%);
+            color-scheme: light;
+        }
+
+        html[data-theme="dark"] {
+            color-scheme: dark;
+        }
+
+        @media (prefers-color-scheme: light) {
+            html:not([data-theme]) {
+                background-image: linear-gradient(90deg, #f9f9f9 95%, #BBB 100%);
+            }
+        }
+    </style>
+    <link as="style" href="/styles.css" rel="preload" />
+    <link href="/styles.css" rel="stylesheet" />
+    <link href="/projects/projects.css" rel="stylesheet" />
+    <script src="/components.js" type="module"></script>
+</head>
+<body>
+    <header>
+        <h1><a href="/">Andy Stanish</a></h1>
+        <nav aria-label="Main">
+            <a href="/about">About</a>
+            <a href="/blog">Blog</a>
+            <a href="/projects" class="current" aria-current="page">Projects</a>
+            <button class="theme-toggle" type="button" aria-label="Theme"></button>
+        </nav>
+    </header>
+    <sub-nav>
+        <label>Projects</label>
+        <nav>
+            <a class="current" data-categories="raspberry-pi|automation" data-date="2026-07-08" href="/projects/lg-tv-enhancer">LG TV Eye Comfort</a>
+            <a data-categories="firefox|extension" data-date="2026-07-05" href="/projects/firefox-windows-manager">Firefox Tab &amp; Window Manager</a>
+            <a data-categories="linux|raspberry-pi" data-date="2026-07-02" href="/projects/pi-sd-backup">Pi SD Card Backup</a>
+            <a data-categories="code|craft" data-date="2026-06-28" href="/projects/teaching-claude-to-code-like-me">Teaching Claude To Code Like Me</a>
+            <a data-categories="web|project" data-date="2026-06-28" href="/projects/andy-sam-save-the-date">Andy &amp; Sam's Save the Date</a>
+            <a data-categories="tech|how-to" data-date="2024-08-16" href="/projects/vim-config-with-YouCompleteMe">Vim Config With YouCompleteMe</a>
+        </nav>
+    </sub-nav>
+    <main>
+        <p><em>July 8, 2026</em></p>
+        <h2>Warming My LG TV from Sunset to Sunrise</h2>
+        <p>I'm an early riser, on screens earlier in the morning than I should be, and a TV throwing cool blue-white light across
+        a still-dark room before dawn is about the least gentle way to start a day. My LG C9 actually ships with a fix —
+        <strong>Eye Comfort Mode</strong>, which warms the picture and pulls the blue out, the same idea as
+        <a href="https://justgetflux.com/">f.lux</a> on a laptop. The catch is you have to remember to turn it on at night and
+        off after sunrise, and I never do: either the room's blasting blue at 5&nbsp;AM, or the afternoon IndyCar race looks like it
+        was shot at sunset. So I handed the job to a Raspberry Pi.</p>
+        <p><a href="https://github.com/andybp85/lg-tv-enhancer">lg-tv-enhancer</a> is a small daemon that flips Eye Comfort Mode
+        on at sunset and off at sunrise, every day, on its own. It talks to the TV over the LAN with
+        <a href="https://github.com/chros73/bscpylgtv">bscpylgtv</a> (webOS's local API), works out sunrise and sunset from my
+        coordinates with <a href="https://astral.readthedocs.io/">astral</a>, and runs as a systemd unit configured entirely
+        from the environment. That's the whole thing — but the part worth writing down is how it decides <em>when</em> to act.</p>
+        <h3>A reconcile loop, not a scheduler</h3>
+        <p>The obvious build is a scheduler: fire a "turn it on" job at sunset and a "turn it off" job at sunrise. I didn't,
+        because a scheduled job fires exactly once — and my TV is usually <em>off</em> at sunset. Miss that one instant (TV
+        asleep, Pi rebooting, a network blip) and the whole night goes by cool and blue with no second chance.</p>
+        <p>So instead of firing on events, the daemon runs a reconcile loop — the same shape a Kubernetes controller uses. Every
+        tick, sixty seconds by default, it computes the current solar phase and asks one question: is the TV in the mode it
+        <em>should</em> be in right now? If yes, do nothing. If no, fix it. Desired state is a pure function of the sun, and the
+        loop just drags reality toward it. When the TV was off at sunset, the correction simply lands on the first tick after it
+        rejoins the network. There's no moment to miss, because it isn't watching for a moment — it's watching for a mismatch.</p>
+        <h3>It's not a nag</h3>
+        <p>The flip side of "always correcting mismatches" is that a naive version would fight me. Turn Eye Comfort off by hand
+        one night because a film's real colors matter more than my eyeballs for a couple of hours, and a loop that re-asserts
+        every tick would slam it back on sixty seconds later, and again, and again. Infuriating. So it doesn't do that.</p>
+        <p>The rule is: apply a phase <strong>once</strong>, when it changes, then leave the TV alone until the next transition.
+        Night falls, it sets Eye Comfort on, and that's the last it touches the setting until sunrise. Override it in between and
+        the override stands — the daemon has already had its say for the night. Automation that honors a manual override is the
+        whole difference between a tool and a poltergeist.</p>
+        <h3>The setting you can write but can't read</h3>
+        <p>webOS turned out to be a slippery thing to automate, in three specific ways.</p>
+        <p>First, Eye Comfort Mode is <em>write-only</em> on this firmware. My first cut did the textbook thing: read the current
+        value, decide whether it needs changing, write, then read back to confirm. Except asking the C9 for that setting returns
+        <code>Some keys are not allowed for the request. ( eyeComfortMode )</code> — so the read failed every single tick and
+        nothing was ever applied. The TV will happily <em>accept</em> the write; it just won't tell you what the value currently
+        is. So a refused read now degrades to a blind write that's simply trusted — send it, assume it took — while a real
+        timeout still propagates, so a dead connection keeps retrying instead of being mistaken for success.</p>
+        <p>Second, this TV will vanish from the network without closing its TCP connection. It just stops answering, and a naive
+        <code>await</code> then hangs forever waiting on a reply that's never coming. Every call to the TV is wrapped in a
+        timeout, so a silent disappearance turns into a retry on the next tick instead of a wedged daemon.</p>
+        <p>Third, the one that cost me a genuinely confusing evening: the webOS client saves its pairing key after you pair, but
+        never reads it back on startup. Leave the key unset and every restart throws the "allow this device?" prompt up on the
+        TV as if it's meeting the Pi for the first time. The fix is to pin the key yourself in config so the daemon reuses it
+        silently. Small thing, obvious in hindsight, invisible until it isn't.</p>
+        <h3>What's next: a ramp instead of a switch</h3>
+        <p>Right now it's a clean binary — cool all day, warm all night, flipped at the horizon. The version I actually want is
+        circadian: instead of one hard step at sunset, gently ramp the color temperature warmer across the whole evening, the way
+        daylight itself falls off. I have it half-built and parked, because the honest answer is that it's messier than it sounds
+        — driving color temperature per picture mode fights the TV's own ISF Dark/Bright mode switching, and I'd rather ship the
+        simple thing that works than a clever thing that ambushes me at 5&nbsp;AM before I've had coffee. The binary flip
+        captures most of the benefit anyway. The smooth ramp is the someday version, waiting on a branch for a morning I feel
+        like untangling it.</p>
+    </main>
+    <site-footer></site-footer>
+</body>
+</html>
