@@ -123,6 +123,8 @@
 </span><span><span class="gu">## Lint &amp; Format Gates</span>
 </span><span>Mechanical constraints live in tooling, not these files: if a regex can check it, prose is the wrong home — an unenforced rule drifts.
 </span><span>Every project gets a formatter and linter, pinned exact so a caret bump can&#39;t reformat untouched files.
+</span><span>A formatter is not a validator — consistent markup is still invalid markup. HTML gets <span class="sb">`vnu`</span> (the W3C&#39;s own checker), opt-in per repo by
+</span><span>  committing a <span class="sb">`.vnu-filter`</span>; errors block, warnings don&#39;t, and the filter file documents each suppression&#39;s why.
 </span><span>The guard checks staged files only; it reports and stops, never fixes — a hook that reformats under you changes what you reviewed.
 </span><span>Prove a new gate fails before trusting it — linters lie about exit codes (<span class="sb">`swift format lint`</span> exits 0 unless <span class="sb">`--strict`</span>).
 </span><span>One file, one formatter — two claimants produce a diff that returns every time either runs.
@@ -176,7 +178,7 @@
 </span><span><span class="k">*</span><span class="w"> </span>isolate side effects (I/O) at the edges; keep core logic pure
 </span><span><span class="k">*</span><span class="w"> </span>keep variable liveness short — declare near first use, minimize the span
 </span><span><span class="k">*</span><span class="w"> </span>pair acquire with release by <span class="ge">*returning*</span> the release — <span class="sb">`open`</span>/<span class="sb">`attach`</span>/<span class="sb">`subscribe`</span>/<span class="sb">`lock`</span> hands back its own undo, so there&#39;s no &quot;am I
-</span><span>  open&quot; flag to keep in sync, nothing to release until you&#39;ve acquired, and each acquisition is released independently
+</span><span>  open&quot; flag to keep in sync and each acquisition releases independently
 </span><span>
 </span><span><span class="gu">## Naming</span>
 </span><span><span class="k">*</span><span class="w"> </span>name by purpose — never meaningless names (<span class="sb">`value`</span>, <span class="sb">`data`</span>, <span class="sb">`temp`</span>)
@@ -389,9 +391,42 @@
             <p>
                 Prose drifts from configs even when you wrote both. My ruff config wasn't selecting the no-stray-print rule my own
                 general.md demands, and it <em>was</em> enforcing one that forbade the well-named intermediate variables the rules
-                explicitly ask for. When a rule lives in two places, one of them is already wrong. The gates now have a test suite — 55
+                explicitly ask for. When a rule lives in two places, one of them is already wrong. The gates now have a test suite — 73
                 assertions, several of them against the tools themselves rather than my wrappers — so the next lying exit code fails a test
                 instead of silently disarming every guard on the machine.
+            </p>
+            <p>
+                HTML needed one more layer, because a formatter is not a validator: oxfmt will make invalid markup perfectly consistent. So
+                the guard now runs <a href="https://validator.github.io/validator/">vnu</a>, the W3C's own checker, on staged HTML — opt-in
+                per repo, switched on by committing a <code>.vnu-filter</code>. Pointing it at this site found two real errors repeated
+                across every page. One was a meta tag missing its required <code>content</code> attribute; fine, easy. The other is the
+                reason to bother: the syntax highlighter restarts line numbering in every code block, so the pages you're reading carried
+                <code>id="line-1"</code> about 130 times. Generated markup is where a validator earns its keep. No amount of care in a
+                template shows you what it emits at scale, and no formatter cares.
+            </p>
+            <p>
+                The filter file is the part I'd steal. It's a list of regexes naming messages vnu should drop, and a line of plain prose
+                matches nothing — so the file documents its own suppressions, right where the next failing commit will point. Here's the
+                second of this site's two entries:
+            </p>
+            <div class="codehilite source">
+                <pre><span></span><code><span>One regex per line; vnu drops any message it matches. Lines that are not
+</span><span>regexes match nothing, so this prose is inert and lives here rather than in a
+</span><span>README nobody opens next to a failing commit.
+</span><span>
+</span><span>2. Content-Security-Policy resource warnings. An artifact of checking a file
+</span><span>   instead of a URL: with no origin to resolve against, 'self' in the meta CSP
+</span><span>   can never match /styles.css, so vnu reports every same-origin asset as
+</span><span>   blocked. Verified against the live URL through the same Nu engine — zero CSP
+</span><span>   messages there. Drop this line and the gate fails on every page it ships.
+</span><span>.*Resource violates Content Security Policy.*
+</span></code></pre>
+            </div>
+            <p>
+                One deliberate asymmetry: the other gates key on file extensions, but this one only offers itself when a tracked
+                <code>.html</code> file opens with a doctype. Most HTML in a repo is a fragment (a template partial, a mail body, a test
+                fixture), and vnu is right to reject those as not-a-document, so the extension alone would make the offer wrong more often
+                than right.
             </p>
             <h3>Gating repos that don't exist yet</h3>
             <p>
