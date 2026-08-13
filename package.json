@@ -1,0 +1,31 @@
+{
+    "name": "andybp85.github.io",
+    "version": "1.0.0",
+    "description": "Hand-written HTML with vanilla web components and modern CSS, plus a small Python tool that builds the blog from Markdown. Zero JavaScript dependencies.",
+    "main": "components.js",
+    "directories": {
+        "doc": "docs"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "lint": "oxlint",
+        "format": "oxfmt",
+        "format:check": "oxfmt --check"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/andybp85/andybp85.github.io.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "type": "commonjs",
+    "bugs": {
+        "url": "https://github.com/andybp85/andybp85.github.io/issues"
+    },
+    "homepage": "https://github.com/andybp85/andybp85.github.io#readme",
+    "devDependencies": {
+        "oxfmt": "0.63.0",
+        "oxlint": "1.78.0"
+    }
+}

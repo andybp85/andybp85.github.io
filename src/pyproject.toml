@@ -3,16 +3,10 @@ build-backend = "hatchling.build"
 requires = ["hatchling"]
 
 [dependency-groups]
-dev = [
-    "pytest>=8",
-    "pytest-cov>=5",
-]
+dev = ["pytest>=8", "pytest-cov>=5", "ruff>=0.16.2"]
 
 [project]
-dependencies = [
-    "markdown>=3.6",
-    "pygments>=2.18",
-]
+dependencies = ["markdown>=3.6", "pygments>=2.18"]
 description = "Builds the blog from markdown and serves the site locally."
 name = "builder"
 requires-python = ">=3.12"

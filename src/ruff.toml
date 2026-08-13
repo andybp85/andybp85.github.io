@@ -1,0 +1,39 @@
+# Ruff for the Python tool scripts in ~/.claude — the hooks and the Amphetamine
+# keep-awake helper.
+#
+# It sits at the root rather than one copy per hook directory so the two cannot
+# drift apart. The exclusions matter: ruff walks upward looking for config, so
+# without them this file would silently start governing ~/.claude/skills, which
+# is its own git repo (github.com/andybp85/ai-skills) with its own conventions.
+
+# docs/ holds dated design records: ruff formats Python inside markdown fences,
+# and rewriting a historical plan to today's style would falsify the record.
+exclude = ["cache", "docs", "plugins", "projects", "python", "skills"]
+line-length = 140 # CLAUDE.md
+target-version = "py313" # the managed venv at ~/.claude/python
+
+[lint]
+# ANN + UP carry rules/python.md directly: annotate every signature, avoid Any,
+# built-in generics over List/Optional. BLE is selected so a deliberate
+# blanket-except in a hook has to justify itself with a noqa. T20 carries
+# general.md's "no stray debug output" — the two entry points where stdout IS
+# the interface carry a noqa, so a genuine stray print still fails.
+select = ["ANN", "B", "BLE", "E", "F", "I", "RET", "RUF", "SIM", "T20", "UP", "W"]
+
+# general.md asks for long chains broken into "well-named intermediate variables",
+# and RET504 forbids exactly that whenever the name is returned on the next line.
+# The rest of RET (early returns, no superfluous else) enforces the *same* file's
+# "flatten with guard clauses", so drop the one rule rather than the set.
+ignore = ["RET504"]
+
+[format]
+quote-style = "double"
+# general.md mandates LF. Ruff's default is "auto", which preserves whatever a
+# file arrives with — so a CRLF file stays CRLF and the rule goes unenforced.
+line-ending = "lf"
+
+[lint.per-file-ignores]
+# build/serve are console-script entry points declared in pyproject; their stdout
+# is how they report progress to whoever ran them.
+"builder/build.py" = ["T201"]
+"builder/serve.py" = ["T201"]
