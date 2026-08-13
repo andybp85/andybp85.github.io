@@ -78,6 +78,27 @@ Coverage:
 > cp src/pre-commit .git/hooks/ && chmod +x .git/hooks/pre-commit
 ```
 
+### HTML validity
+
+`oxfmt` makes the markup consistent; it has no opinion on whether the markup is
+*legal*. That job belongs to [vnu](https://github.com/validator/validator), the
+checker behind [validator.w3.org/nu](https://validator.w3.org/nu/) — same engine,
+so this repo and the website can't disagree:
+
+```shell
+> brew install vnu
+> git ls-files '*.html' | xargs vnu --filterfile .vnu-filter
+```
+
+The lint guard runs it on staged HTML at commit time. `.vnu-filter` holds the two
+suppressions and the reason each is earned — read it before adding a third.
+
+Validity is mostly a *generated* markup problem here. Pygments restarts its line
+numbering at 1 in every code block, so `linespans` alone put a duplicate
+`id="line-1"` on every page carrying two snippets; `_LineSpanFormatter` in
+`build.py` drops the ids and keeps the spans, which are what `projects.css`
+counts to draw the gutter.
+
 ## Deployment
 
 The site is hosted on GitHub Pages: once it's good locally it's just a git

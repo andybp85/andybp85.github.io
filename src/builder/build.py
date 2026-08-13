@@ -1,3 +1,4 @@
+from collections.abc import Iterator
 from datetime import date
 from functools import partial
 from pathlib import Path
@@ -10,15 +11,30 @@ from pygments.formatters.html import HtmlFormatter
 SRC_PATH = Path(__file__).parent.parent
 
 
+class _LineSpanFormatter(HtmlFormatter):  # type: ignore[type-arg]  # Pygments ships no type parameters for this class
+    """Wrap each source line in a bare <span>, dropping Pygments' per-line id.
+
+    The spans earn their place — projects.css hangs a CSS counter off
+    `code > span` to number and soft-wrap lines — but the ids do not: Pygments
+    restarts numbering at 1 for every block, so any page with two code blocks
+    emits a duplicate id="line-1" and fails the W3C validator. Nothing reads
+    them; the counter never looks at an id.
+    """
+
+    def _wrap_linespans(self, inner: Iterator[tuple[int, str]]) -> Iterator[tuple[int, str]]:
+        for is_line, line in inner:
+            yield is_line, f"<span>{line}</span>" if is_line else line
+
+
 def _markdown(md_text: str) -> tuple[str, dict[str, list[str]]]:
-    # linespans wraps each source line in its own <span> so a CSS counter can
-    # number the lines and soft-wrap them with a hanging indent (see projects.css).
+    # Only the truthiness of linespans matters now: it is what makes Pygments call
+    # _wrap_linespans at all, and the override above ignores the prefix it names.
     md = markdown.Markdown(
         extensions=[
             "attr_list",
             "fenced_code",
             "meta",
-            CodeHiliteExtension(pygments_formatter=partial(HtmlFormatter, linespans="line"), wrapcode=True),
+            CodeHiliteExtension(pygments_formatter=partial(_LineSpanFormatter, linespans="line"), wrapcode=True),
         ]
     )
     return md.convert(md_text), md.Meta

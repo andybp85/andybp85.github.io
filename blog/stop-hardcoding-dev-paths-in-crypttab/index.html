@@ -4,7 +4,7 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="color-scheme" content="light dark" />
-        <meta name="darkreader-lock" />
+        <meta content="" name="darkreader-lock" />
         <meta name="description" content="Andy's autobiographical site for projects and random thoughts." />
         <meta
             http-equiv="Content-Security-Policy"
@@ -83,16 +83,16 @@ unplugging an SD-card reader and rebooting: the mapper entry was gone and the bo
 <p>The fix is to key the unlock off the LUKS partition's <strong>UUID</strong> instead. The UUID lives in the partition's crypto
 metadata, so it's the same no matter where the drive lands in the enumeration order.</p>
 <p>Find it with <code>blkid</code>:</p>
-<div class="codehilite"><pre><span></span><code><span id="line-1">sudo<span class="w"> </span>blkid
+<div class="codehilite"><pre><span></span><code><span>sudo<span class="w"> </span>blkid
 </span></code></pre></div>
 
 <p>Look for the partition whose <code>TYPE</code> is <code>crypto_LUKS</code> and copy its <code>UUID</code>. Then in <code>/etc/crypttab</code>, swap the device path
 for <code>UUID=…</code>:</p>
-<div class="codehilite"><pre><span></span><code><span id="line-1"># before
-</span><span id="line-2">thevault  /dev/sda1  none  luks
-</span><span id="line-3">
-</span><span id="line-4"># after
-</span><span id="line-5">thevault  UUID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx  none  luks
+<div class="codehilite"><pre><span></span><code><span># before
+</span><span>thevault  /dev/sda1  none  luks
+</span><span>
+</span><span># after
+</span><span>thevault  UUID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx  none  luks
 </span></code></pre></div>
 
 <p>That's the whole change. <code>fstab</code> can stay exactly as it was: it mounts <code>/dev/mapper/thevault</code>, and that mapper name is

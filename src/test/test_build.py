@@ -42,6 +42,21 @@ def test__posts_sorts_newest_first(tmp_path: Path) -> None:
     assert [p["slug"] for p in build._posts(tmp_path)] == ["newer-post", "older-post"]
 
 
+def test__markdown_wraps_each_code_line_in_a_span() -> None:
+    # The spans are what projects.css counts to number lines, so losing them would
+    # silently drop the gutter. (Pygments opens the block with its own empty span.)
+    html, _ = build._markdown("date: 2016-10-22\n\n    one\n    two\n")
+    assert "<code><span>one\n</span><span>two\n</span></code>" in html
+
+
+def test__markdown_gives_code_lines_no_id() -> None:
+    # Pygments numbers its line spans from 1 per block, so two blocks on one page
+    # collide on id="line-1". The ids are dead weight either way — projects.css
+    # numbers lines with a CSS counter on `code > span` and never reads them.
+    html, _ = build._markdown("date: 2016-10-22\n\n    one\n\ntext\n\n    two\n")
+    assert 'id="line-' not in html
+
+
 def test__pygments_css_targets_codehilite() -> None:
     assert ".codehilite" in build._pygments_css()
 
