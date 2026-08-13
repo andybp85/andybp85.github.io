@@ -1,73 +1,75 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="color-scheme" content="light dark">
-    <meta name="darkreader-lock">
-    <meta name="description" content="Andy's autobiographical site for projects and random thoughts.">
-    <meta http-equiv="Content-Security-Policy"
-          content="default-src 'self'; script-src-elem 'self' 'unsafe-inline' *.getclicky.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src *.getclicky.com">
-    <title>Tips For Waking Up Far Far Too Early — Andy Stanish</title>
-    <link rel="preload" href="/fonts/B612-Regular/B612-Regular.woff" as="font" type="font/woff" crossorigin>
-    <link rel="preload" href="/fonts/Inter/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/fonts/Inter/InterVariable-Italic.woff2" as="font" type="font/woff2" crossorigin>
-    <script>
-        /* Apply a pinned theme before first paint to avoid a flash; auto defers
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="color-scheme" content="light dark" />
+        <meta name="darkreader-lock" />
+        <meta name="description" content="Andy's autobiographical site for projects and random thoughts." />
+        <meta
+            http-equiv="Content-Security-Policy"
+            content="default-src 'self'; script-src-elem 'self' 'unsafe-inline' *.getclicky.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src *.getclicky.com"
+        />
+        <title>Tips For Waking Up Far Far Too Early — Andy Stanish</title>
+        <link rel="preload" href="/fonts/B612-Regular/B612-Regular.woff" as="font" type="font/woff" crossorigin />
+        <link rel="preload" href="/fonts/Inter/InterVariable.woff2" as="font" type="font/woff2" crossorigin />
+        <link rel="preload" href="/fonts/Inter/InterVariable-Italic.woff2" as="font" type="font/woff2" crossorigin />
+        <script>
+            /* Apply a pinned theme before first paint to avoid a flash; auto defers
            to color-scheme: light dark (system). Kept in sync with components.js. */
-        {
-            const theme = localStorage.getItem("theme")
-            if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme
-        }
-    </script>
-    <style>
-        body {
-            visibility: hidden;
-        }
-
-        html {
-            background-image: linear-gradient(270deg, #222 90%, #2A2A2A 100%);
-        }
-
-        html[data-theme="light"] {
-            background-image: linear-gradient(90deg, #f9f9f9 95%, #BBB 100%);
-            color-scheme: light;
-        }
-
-        html[data-theme="dark"] {
-            color-scheme: dark;
-        }
-
-        @media (prefers-color-scheme: light) {
-            html:not([data-theme]) {
-                background-image: linear-gradient(90deg, #f9f9f9 95%, #BBB 100%);
+            {
+                const theme = localStorage.getItem('theme')
+                if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme
             }
-        }
-    </style>
-    <link as="style" href="/styles.css" rel="preload">
-    <link rel="stylesheet" href="/styles.css">
-    <link rel="stylesheet" href="/pygments.css">
-    <link rel="stylesheet" href="/blog/blog.css">
-    <link href="/icons/favicon.svg" rel="icon" type="image/svg+xml">
-<link href="/icons/favicon.ico" rel="icon" sizes="32x32">
-<link href="/icons/apple-touch-icon.png" rel="apple-touch-icon">
-    <script type="module" src="/components.js"></script>
-</head>
-<body>
-<header>
-    <h1><a href="/">Andy Stanish</a></h1>
-    <nav aria-label="Main">
-        <a href="/about">About</a>
-        <a href="/blog" class="current" aria-current="page">Blog</a>
-        <a href="/projects">Projects</a>
-        <button class="theme-toggle" type="button" aria-label="Theme"></button>
-    </nav>
-</header>
-<sub-nav>
-    <label>Posts</label>
-    <nav><a href="/blog/cutting-claude-code-token-use" data-date="2026-07-02" data-categories="claude-code|tokens">Cutting Claude Code Token Use</a><a href="/blog/stop-hardcoding-dev-paths-in-crypttab" data-date="2026-07-02" data-categories="linux|raspberry-pi">Stop Hardcoding Dev Paths In Crypttab</a><a href="/blog/thoughts-after-two-weeks-with-until-the-sun-explodes" data-date="2026-06-28" data-categories="music|review">Thoughts After Two Weeks With Until The Sun Explodes</a><a href="/blog/web-dev-roadmap" data-date="2026-06-28" data-categories="web|learning">Web Dev Roadmap</a><a href="/blog/tips-for-waking-up-far-far-too-early" data-date="2016-10-22" data-categories="life|sleep" class="current">Tips For Waking Up Far Far Too Early</a></nav>
-</sub-nav>
-<main><p><em>October 22, 2016</em></p>
+        </script>
+        <style>
+            body {
+                visibility: hidden;
+            }
+
+            html {
+                background-image: linear-gradient(270deg, #222 90%, #2a2a2a 100%);
+            }
+
+            html[data-theme='light'] {
+                background-image: linear-gradient(90deg, #f9f9f9 95%, #bbb 100%);
+                color-scheme: light;
+            }
+
+            html[data-theme='dark'] {
+                color-scheme: dark;
+            }
+
+            @media (prefers-color-scheme: light) {
+                html:not([data-theme]) {
+                    background-image: linear-gradient(90deg, #f9f9f9 95%, #bbb 100%);
+                }
+            }
+        </style>
+        <link as="style" href="/styles.css" rel="preload" />
+        <link rel="stylesheet" href="/styles.css" />
+        <link rel="stylesheet" href="/pygments.css" />
+        <link rel="stylesheet" href="/blog/blog.css" />
+        <link href="/icons/favicon.svg" rel="icon" type="image/svg+xml" />
+        <link href="/icons/favicon.ico" rel="icon" sizes="32x32" />
+        <link href="/icons/apple-touch-icon.png" rel="apple-touch-icon" />
+        <script type="module" src="/components.js"></script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="/">Andy Stanish</a></h1>
+            <nav aria-label="Main">
+                <a href="/about">About</a>
+                <a href="/blog" class="current" aria-current="page">Blog</a>
+                <a href="/projects">Projects</a>
+                <button class="theme-toggle" type="button" aria-label="Theme"></button>
+            </nav>
+        </header>
+        <sub-nav>
+            <label>Posts</label>
+            <nav><a href="/blog/cutting-claude-code-token-use" data-date="2026-07-02" data-categories="claude-code|tokens">Cutting Claude Code Token Use</a><a href="/blog/stop-hardcoding-dev-paths-in-crypttab" data-date="2026-07-02" data-categories="linux|raspberry-pi">Stop Hardcoding Dev Paths In Crypttab</a><a href="/blog/thoughts-after-two-weeks-with-until-the-sun-explodes" data-date="2026-06-28" data-categories="music|review">Thoughts After Two Weeks With Until The Sun Explodes</a><a href="/blog/web-dev-roadmap" data-date="2026-06-28" data-categories="web|learning">Web Dev Roadmap</a><a href="/blog/tips-for-waking-up-far-far-too-early" data-date="2016-10-22" data-categories="life|sleep" class="current">Tips For Waking Up Far Far Too Early</a></nav>
+        </sub-nav>
+        <main><p><em>October 22, 2016</em></p>
 <h2>Tips for Waking Up Far, Far Too Early</h2>
 <p>I’ve always been a stay-up-late kind of guy. Part of it is I don’t need a ton of sleep; 3 AM, 4 
 AM, I’d still be on the computer, then get four or five hours of sleep and be totally fine at work the next day. Now, I’ve always wanted to get more bass guitar practice in, but I always ran into a problem: in the evening, my brain wants to unwind from the day, not dedicate its depleted energy reserves to the kind of focus and perseverance it takes to do things like work on technique or learn a new piece of music. If I picked up my bass after work once a week, it was a lot. As of recent, I tried squeezing in some practice before work in the morning, which is great. My brain’s refreshed and I get to start the day doing one of the things I love most. Needless to say though, squeezing in 15 or 30 minutes of practice every so often isn’t going to make anyone the next Rocco Prestia, and after having a mind-blowing time at Catskill Chill music festival a few weeks ago I’ve been extremely motivated. I wanted to put hours a day towards playing, but I still had the evening motivation problems… which brings me to this past week.</p>
@@ -102,6 +104,6 @@ up regularly, in the past four days I’ve gotten in nine hours of music practic
 feel the difference in my playing already, but I got a proper practice space set up, I’ve 
 started learning a song I always wanted to play (
 <a href="https://www.youtube.com/watch?v=oAatPPEaZDA">What is Hip</a>, if you didn’t guess), made progress on a book on walking bass lines that I haven’t touched in like a year, started to really get to know the drum machine that I bought a few years ago, resumed working on the book on bass grooves that was why I got the drum machine, and went from being able to play a couple disjointed pieces of this sixteenth note slap groove to having the whole line down and getting it up to speed with a metronome. Most importantly, I demonstrated to myself that I can actually become a far better bass player while working a full-time job and doing all the other things I like to do. Somehow, I know there’s much more to this trip.</p></main>
-<site-footer></site-footer>
-</body>
+        <site-footer></site-footer>
+    </body>
 </html>

@@ -1,99 +1,111 @@
-<!DOCTYPE html>
+<!doctype html>
 
 <html lang="en">
-<head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1" name="viewport"/>
-    <meta content="light dark" name="color-scheme"/>
-    <meta name="darkreader-lock"/>
-    <meta content="Andy's autobiographical site for projects and random thoughts." name="description"/>
-    <meta content="default-src 'self'; script-src-elem 'self' 'unsafe-inline' *.getclicky.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src *.getclicky.com"
-          http-equiv="Content-Security-Policy"/>
-    <title>About — Andy Stanish</title>
-    <link as="font" crossorigin="" href="/fonts/B612-Regular/B612-Regular.woff" rel="preload" type="font/woff"/>
-    <link as="font" crossorigin="" href="/fonts/Inter/InterVariable.woff2" rel="preload" type="font/woff2"/>
-    <link as="font" crossorigin="" href="/fonts/Inter/InterVariable-Italic.woff2" rel="preload" type="font/woff2"/>
-    <script>
-        /* Apply a pinned theme before first paint to avoid a flash; auto defers
+    <head>
+        <meta charset="utf-8" />
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <meta content="light dark" name="color-scheme" />
+        <meta name="darkreader-lock" />
+        <meta content="Andy's autobiographical site for projects and random thoughts." name="description" />
+        <meta
+            content="default-src 'self'; script-src-elem 'self' 'unsafe-inline' *.getclicky.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src *.getclicky.com"
+            http-equiv="Content-Security-Policy"
+        />
+        <title>About — Andy Stanish</title>
+        <link as="font" crossorigin="" href="/fonts/B612-Regular/B612-Regular.woff" rel="preload" type="font/woff" />
+        <link as="font" crossorigin="" href="/fonts/Inter/InterVariable.woff2" rel="preload" type="font/woff2" />
+        <link as="font" crossorigin="" href="/fonts/Inter/InterVariable-Italic.woff2" rel="preload" type="font/woff2" />
+        <script>
+            /* Apply a pinned theme before first paint to avoid a flash; auto defers
            to color-scheme: light dark (system). Kept in sync with components.js. */
-        {
-            const theme = localStorage.getItem("theme")
-            if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme
-        }
-    </script>
-    <style>
-        body {
-            visibility: hidden;
-        }
-
-        html {
-            background-image: linear-gradient(270deg, #222 90%, #2A2A2A 100%);
-        }
-
-        html[data-theme="light"] {
-            background-image: linear-gradient(90deg, #f9f9f9 95%, #BBB 100%);
-            color-scheme: light;
-        }
-
-        html[data-theme="dark"] {
-            color-scheme: dark;
-        }
-
-        @media (prefers-color-scheme: light) {
-            html:not([data-theme]) {
-                background-image: linear-gradient(90deg, #f9f9f9 95%, #BBB 100%);
+            {
+                const theme = localStorage.getItem('theme')
+                if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme
             }
-        }
-    </style>
-    <link as="style" href="/styles.css" rel="preload"/>
-    <link href="/styles.css" rel="stylesheet"/>
-    <link href="/about/about.css" rel="stylesheet"/>
-    <link href="/icons/favicon.svg" rel="icon" type="image/svg+xml"/>
-<link href="/icons/favicon.ico" rel="icon" sizes="32x32"/>
-<link href="/icons/apple-touch-icon.png" rel="apple-touch-icon"/>
-    <script type="module" src="/components.js"></script>
-</head>
-<body>
-<header>
-    <h1><a href="/">Andy Stanish</a></h1>
-    <nav aria-label="Main">
-        <a href="/about" class="current" aria-current="page">About</a>
-        <a href="/blog">Blog</a>
-        <a href="/projects">Projects</a>
-        <button class="theme-toggle" type="button" aria-label="Theme"></button>
-    </nav>
-</header>
-<main><h2 id="about-me">About Me</h2>
-    <blockquote>
-        <p>It means something being from New Jersey. It means you have a sense of humor.<br/>
-            <em>— Anthony Bourdain</em>
-        </p>
-    </blockquote>
-    <p>I'm your typical programmer/musician with a ton of hobbies, including biking, history, electronics,
-        and spicy food. By day I work for NBCUniversal (née CNBC) as an engineering manager. Nights and weekends
-        I do music, including sound at one of the best bars (and with some of the best people) I've ever stumbled
-        upon, The Laundromat in Morristown, NJ. I also play bass in a blues rock band, Kru Kerly, which is based
-        out of my hometown of Jersey City, NJ.</p>
-    <h2 id="about-site">About This Site</h2>
-    <h3>Design</h3>
-    <p>KISS. It also has a light and dark mode, but you don't have to click a button for it; it uses
-        a <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme">media query</a> to
-        detect what you have your OS set to.</p>
-    <h4>Fonts</h4>
-    <p>I used a <a href="https://type-scale.com/">type scale</a> based on perfect fourths for the sizing. I wanted
-        to use the golden ratio or perfect fifths, but the size gets too huge too quickly.</p>
-    <h5>Headings: <a href="https://b612-font.com/">B612</a></h5>
-    <p>This font was developed by AirBus to have high visibility on airplane cockpit screens, which is just
-        about the coolest thing I've ever heard about a font. I'd love to use it as a programming font
-        (there's a monospace version), but the parentheses look far too close to square brackets.</p>
-    <h5>Body: <a href="https://rsms.me/inter/">Inter</a></h5>
-    <p>I found this font from
-        this <a href="https://www.quora.com/What-is-the-most-readable-font-for-the-screen">fascinating Quora answer</a>.
-        The site has some super interesting info as well.</p>
-    <h5>Code: <a href="https://berkeleygraphics.com/typefaces/berkeley-mono/">Berkeley Mono</a></h5>
-    <p>Never thought I'd pay for a coding font, but I love its retro look, and I was able to get a 7 with a
-        slash through it.</p>
-</main>
-<site-footer></site-footer>
-</body>
+        </script>
+        <style>
+            body {
+                visibility: hidden;
+            }
+
+            html {
+                background-image: linear-gradient(270deg, #222 90%, #2a2a2a 100%);
+            }
+
+            html[data-theme='light'] {
+                background-image: linear-gradient(90deg, #f9f9f9 95%, #bbb 100%);
+                color-scheme: light;
+            }
+
+            html[data-theme='dark'] {
+                color-scheme: dark;
+            }
+
+            @media (prefers-color-scheme: light) {
+                html:not([data-theme]) {
+                    background-image: linear-gradient(90deg, #f9f9f9 95%, #bbb 100%);
+                }
+            }
+        </style>
+        <link as="style" href="/styles.css" rel="preload" />
+        <link href="/styles.css" rel="stylesheet" />
+        <link href="/about/about.css" rel="stylesheet" />
+        <link href="/icons/favicon.svg" rel="icon" type="image/svg+xml" />
+        <link href="/icons/favicon.ico" rel="icon" sizes="32x32" />
+        <link href="/icons/apple-touch-icon.png" rel="apple-touch-icon" />
+        <script type="module" src="/components.js"></script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="/">Andy Stanish</a></h1>
+            <nav aria-label="Main">
+                <a href="/about" class="current" aria-current="page">About</a>
+                <a href="/blog">Blog</a>
+                <a href="/projects">Projects</a>
+                <button class="theme-toggle" type="button" aria-label="Theme"></button>
+            </nav>
+        </header>
+        <main>
+            <h2 id="about-me">About Me</h2>
+            <blockquote>
+                <p>
+                    It means something being from New Jersey. It means you have a sense of humor.<br />
+                    <em>— Anthony Bourdain</em>
+                </p>
+            </blockquote>
+            <p>
+                I'm your typical programmer/musician with a ton of hobbies, including biking, history, electronics, and spicy food. By day I
+                work for NBCUniversal (née CNBC) as an engineering manager. Nights and weekends I do music, including sound at one of the
+                best bars (and with some of the best people) I've ever stumbled upon, The Laundromat in Morristown, NJ. I also play bass in
+                a blues rock band, Kru Kerly, which is based out of my hometown of Jersey City, NJ.
+            </p>
+            <h2 id="about-site">About This Site</h2>
+            <h3>Design</h3>
+            <p>
+                KISS. It also has a light and dark mode, but you don't have to click a button for it; it uses a
+                <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme">media query</a> to detect what you
+                have your OS set to.
+            </p>
+            <h4>Fonts</h4>
+            <p>
+                I used a <a href="https://type-scale.com/">type scale</a> based on perfect fourths for the sizing. I wanted to use the
+                golden ratio or perfect fifths, but the size gets too huge too quickly.
+            </p>
+            <h5>Headings: <a href="https://b612-font.com/">B612</a></h5>
+            <p>
+                This font was developed by AirBus to have high visibility on airplane cockpit screens, which is just about the coolest thing
+                I've ever heard about a font. I'd love to use it as a programming font (there's a monospace version), but the parentheses
+                look far too close to square brackets.
+            </p>
+            <h5>Body: <a href="https://rsms.me/inter/">Inter</a></h5>
+            <p>
+                I found this font from this
+                <a href="https://www.quora.com/What-is-the-most-readable-font-for-the-screen">fascinating Quora answer</a>. The site has
+                some super interesting info as well.
+            </p>
+            <h5>Code: <a href="https://berkeleygraphics.com/typefaces/berkeley-mono/">Berkeley Mono</a></h5>
+            <p>Never thought I'd pay for a coding font, but I love its retro look, and I was able to get a 7 with a slash through it.</p>
+        </main>
+        <site-footer></site-footer>
+    </body>
 </html>

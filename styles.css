@@ -12,7 +12,7 @@
     font-family: B612-Regular;
     font-style: normal;
     font-weight: normal;
-    src: url("/fonts/B612-Regular/B612-Regular.woff") format("woff");
+    src: url('/fonts/B612-Regular/B612-Regular.woff') format('woff');
 }
 
 @font-face {
@@ -20,7 +20,7 @@
     font-family: InterVariable;
     font-style: normal;
     font-weight: 100 900;
-    src: url("/fonts/Inter/InterVariable.woff2") format("woff2-variations");
+    src: url('/fonts/Inter/InterVariable.woff2') format('woff2-variations');
 }
 
 @font-face {
@@ -28,16 +28,16 @@
     font-family: InterVariable;
     font-style: italic;
     font-weight: 100 900;
-    src: url("/fonts/Inter/InterVariable-Italic.woff2") format("woff2-variations");
+    src: url('/fonts/Inter/InterVariable-Italic.woff2') format('woff2-variations');
 }
 
 @font-face {
     font-display: swap;
-    font-family: "Berkeley Mono Variable";
+    font-family: 'Berkeley Mono Variable';
     font-weight: 100 1000;
     src:
-        url("/fonts/Berkeley-Mono-Variable/BerkeleyMonoVariable-Regular.woff2") format("woff2-variations"),
-        url("/fonts/Berkeley-Mono-Variable/BerkeleyMonoVariable-Italic.woff2") format("woff2-variations");
+        url('/fonts/Berkeley-Mono-Variable/BerkeleyMonoVariable-Regular.woff2') format('woff2-variations'),
+        url('/fonts/Berkeley-Mono-Variable/BerkeleyMonoVariable-Italic.woff2') format('woff2-variations');
 }
 
 :root {
@@ -90,7 +90,12 @@ body {
     }
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     font-family: B612-Regular, serif;
 }
 
@@ -127,7 +132,7 @@ blockquote {
 }
 
 code {
-    font-family: "Berkeley Mono Variable", monospace;
+    font-family: 'Berkeley Mono Variable', monospace;
     font-weight: lighter;
 }
 
@@ -180,7 +185,7 @@ header {
         }
 
         & .current::before {
-            content: "›";
+            content: '›';
             margin-inline-end: 0.15em; /* small, non-breaking gap so the marker hugs its label */
             /* Optically center the › on the caps. Measured from B612: cap-height
                0.75em (center 0.375em above baseline), › glyph center 0.273em; raise
@@ -287,7 +292,7 @@ sub-nav {
             color: var(--text-color);
 
             &::before {
-                content: "›";
+                content: '›';
                 margin-inline-end: 0.2em;
                 /* Sub-nav inherits Inter (not B612), so the offset differs: cap-height
                    0.7275em (center 0.364em), › glyph center 0.301em -> raise 0.063em.
@@ -328,7 +333,7 @@ body:has(sub-nav) main {
     }
 }
 
-:root[data-theme="light"] {
+:root[data-theme='light'] {
     color-scheme: light;
 
     --github-invert: 0;
@@ -337,6 +342,6 @@ body:has(sub-nav) main {
     --text-color: var(--text-color-light);
 }
 
-:root[data-theme="dark"] {
+:root[data-theme='dark'] {
     color-scheme: dark;
 }

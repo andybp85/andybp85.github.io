@@ -1,86 +1,91 @@
-<!DOCTYPE html>
+<!doctype html>
 
 <html lang="en">
-<head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
-<meta content="light dark" name="color-scheme"/>
-<meta name="darkreader-lock"/>
-<meta content="Andy's autobiographical site for projects and random thoughts." name="description"/>
-<meta content="default-src 'self'; script-src-elem 'self' 'unsafe-inline' *.getclicky.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src *.getclicky.com" http-equiv="Content-Security-Policy"/>
-<title>Andy Stanish</title>
-<link as="font" crossorigin="" href="/fonts/B612-Regular/B612-Regular.woff" rel="preload" type="font/woff"/>
-<link as="font" crossorigin="" href="/fonts/Inter/InterVariable.woff2" rel="preload" type="font/woff2"/>
-<link as="font" crossorigin="" href="/fonts/Inter/InterVariable-Italic.woff2" rel="preload" type="font/woff2"/>
-<script>
-    /* Apply a pinned theme before first paint to avoid a flash; auto defers
+    <head>
+        <meta charset="utf-8" />
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <meta content="light dark" name="color-scheme" />
+        <meta name="darkreader-lock" />
+        <meta content="Andy's autobiographical site for projects and random thoughts." name="description" />
+        <meta
+            content="default-src 'self'; script-src-elem 'self' 'unsafe-inline' *.getclicky.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src *.getclicky.com"
+            http-equiv="Content-Security-Policy"
+        />
+        <title>Andy Stanish</title>
+        <link as="font" crossorigin="" href="/fonts/B612-Regular/B612-Regular.woff" rel="preload" type="font/woff" />
+        <link as="font" crossorigin="" href="/fonts/Inter/InterVariable.woff2" rel="preload" type="font/woff2" />
+        <link as="font" crossorigin="" href="/fonts/Inter/InterVariable-Italic.woff2" rel="preload" type="font/woff2" />
+        <script>
+            /* Apply a pinned theme before first paint to avoid a flash; auto defers
        to color-scheme: light dark (system). Kept in sync with components.js. */
-    {
-        const theme = localStorage.getItem("theme")
-        if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme
-    }
-</script>
-<style>
-        body {
-            visibility: hidden;
-        }
-
-        html {
-            background-image: linear-gradient(270deg, #222 90%, #2A2A2A 100%);
-        }
-
-        html[data-theme="light"] {
-            background-image: linear-gradient(90deg, #f9f9f9 95%, #BBB 100%);
-            color-scheme: light;
-        }
-
-        html[data-theme="dark"] {
-            color-scheme: dark;
-        }
-
-        @media (prefers-color-scheme: light) {
-            html:not([data-theme]) {
-                background-image: linear-gradient(90deg, #f9f9f9 95%, #BBB 100%);
+            {
+                const theme = localStorage.getItem('theme')
+                if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme
             }
-        }
-    </style>
-<link as="style" href="/styles.css" rel="preload"/>
-<link href="/styles.css" rel="stylesheet"/>
-<link href="/home.css" rel="stylesheet"/>
-<link href="/icons/favicon.svg" rel="icon" type="image/svg+xml"/>
-<link href="/icons/favicon.ico" rel="icon" sizes="32x32"/>
-<link href="/icons/apple-touch-icon.png" rel="apple-touch-icon"/>
-<script type="module" src="/components.js"></script></head>
-<body>
-<header>
-    <h1><a href="/">Andy Stanish</a></h1>
-    <nav aria-label="Main">
-        <a href="/about">About</a>
-        <a href="/blog">Blog</a>
-        <a href="/projects">Projects</a>
-        <button class="theme-toggle" type="button" aria-label="Theme"></button>
-    </nav>
-</header>
-<main><section id="about-me">
-<h2>Welcome!</h2>
-    I'm Andy, a software engineer and musician living my dreams in Jersey City, NJ.
-    I have a ton of interests and always have several side projects going. This
-    is my place to share my work and ideas with the world.
-</section>
-<div id="pic-of-me">
-<img alt="Andy Stanish" height="300" src="/images/me.webp" width="300"/>
-</div>
-<section id="featured-projects">
-<h2>Featured Projects</h2>
-<div>
-<a href="/projects/pandajam-from-hamsterdam/" title="PandaJAM from HamsterDAM">
-<img alt="PandaJAM from HamsterDAM" height="75" id="pjhd-logo" src="/images/pjhd-logo.png" width="200"/>
-</a>
-<a href="https://www.krukerlyband.com/" target="_blank" title="Kru Kerly (opens in a new tab)">
-<img alt="Kru Kerly" height="108" src="/images/kk-logo.jpg" width="201"/>
-</a>
-</div>
-</section></main>
-<site-footer></site-footer>
-</body>
+        </script>
+        <style>
+            body {
+                visibility: hidden;
+            }
+
+            html {
+                background-image: linear-gradient(270deg, #222 90%, #2a2a2a 100%);
+            }
+
+            html[data-theme='light'] {
+                background-image: linear-gradient(90deg, #f9f9f9 95%, #bbb 100%);
+                color-scheme: light;
+            }
+
+            html[data-theme='dark'] {
+                color-scheme: dark;
+            }
+
+            @media (prefers-color-scheme: light) {
+                html:not([data-theme]) {
+                    background-image: linear-gradient(90deg, #f9f9f9 95%, #bbb 100%);
+                }
+            }
+        </style>
+        <link as="style" href="/styles.css" rel="preload" />
+        <link href="/styles.css" rel="stylesheet" />
+        <link href="/home.css" rel="stylesheet" />
+        <link href="/icons/favicon.svg" rel="icon" type="image/svg+xml" />
+        <link href="/icons/favicon.ico" rel="icon" sizes="32x32" />
+        <link href="/icons/apple-touch-icon.png" rel="apple-touch-icon" />
+        <script type="module" src="/components.js"></script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="/">Andy Stanish</a></h1>
+            <nav aria-label="Main">
+                <a href="/about">About</a>
+                <a href="/blog">Blog</a>
+                <a href="/projects">Projects</a>
+                <button class="theme-toggle" type="button" aria-label="Theme"></button>
+            </nav>
+        </header>
+        <main>
+            <section id="about-me">
+                <h2>Welcome!</h2>
+                I'm Andy, a software engineer and musician living my dreams in Jersey City, NJ. I have a ton of interests and always have
+                several side projects going. This is my place to share my work and ideas with the world.
+            </section>
+            <div id="pic-of-me">
+                <img alt="Andy Stanish" height="300" src="/images/me.webp" width="300" />
+            </div>
+            <section id="featured-projects">
+                <h2>Featured Projects</h2>
+                <div>
+                    <a href="/projects/pandajam-from-hamsterdam/" title="PandaJAM from HamsterDAM">
+                        <img alt="PandaJAM from HamsterDAM" height="75" id="pjhd-logo" src="/images/pjhd-logo.png" width="200" />
+                    </a>
+                    <a href="https://www.krukerlyband.com/" target="_blank" title="Kru Kerly (opens in a new tab)">
+                        <img alt="Kru Kerly" height="108" src="/images/kk-logo.jpg" width="201" />
+                    </a>
+                </div>
+            </section>
+        </main>
+        <site-footer></site-footer>
+    </body>
 </html>

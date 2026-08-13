@@ -1,7 +1,7 @@
 // Theme toggle: cycles auto -> light -> dark. "auto" removes html[data-theme] so
 // CSS falls back to prefers-color-scheme; light/dark pin it. The inline <head>
 // script applies a stored choice before first paint; this keeps them in sync.
-const THEME_CYCLE = ["auto", "light", "dark"]
+const THEME_CYCLE = ['auto', 'light', 'dark']
 
 const THEME_ICON = {
     auto: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -13,11 +13,11 @@ const THEME_ICON = {
                 <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/></svg>`,
 }
 
-const storedTheme = () => localStorage.getItem("theme") || "auto"
+const storedTheme = () => localStorage.getItem('theme') || 'auto'
 
 const applyTheme = theme => {
     const root = document.documentElement
-    if (theme === "auto") delete root.dataset.theme
+    if (theme === 'auto') delete root.dataset.theme
     else root.dataset.theme = theme
 }
 
@@ -25,19 +25,19 @@ const applyTheme = theme => {
 // only enhances the theme button that's already in the DOM: fills its icon and
 // wires the click. Module scripts are deferred, so the button exists by now.
 const wireThemeToggle = () => {
-    const button = document.querySelector(".theme-toggle")
+    const button = document.querySelector('.theme-toggle')
     if (!button) return
 
     const showTheme = theme => {
         applyTheme(theme)
         button.innerHTML = THEME_ICON[theme]
         button.title = `Theme: ${theme}`
-        button.setAttribute("aria-label", `Theme: ${theme}. Activate to change.`)
+        button.setAttribute('aria-label', `Theme: ${theme}. Activate to change.`)
     }
 
-    button.addEventListener("click", () => {
+    button.addEventListener('click', () => {
         const next = THEME_CYCLE[(THEME_CYCLE.indexOf(storedTheme()) + 1) % THEME_CYCLE.length]
-        localStorage.setItem("theme", next)
+        localStorage.setItem('theme', next)
         showTheme(next)
     })
     showTheme(storedTheme())
@@ -45,9 +45,11 @@ const wireThemeToggle = () => {
 
 wireThemeToggle()
 
-customElements.define("site-footer", class extends HTMLElement {
-    connectedCallback() {
-        this.innerHTML = `
+customElements.define(
+    'site-footer',
+    class extends HTMLElement {
+        connectedCallback() {
+            this.innerHTML = `
             <footer>
                 <div id="social-media-links">
                     <a href="https://github.com/andybp85" target="_blank" rel="noopener" title="Andy's Github (opens in new tab)">
@@ -68,10 +70,11 @@ customElements.define("site-footer", class extends HTMLElement {
                         <img alt="Clicky" src="/icons/click-badge.gif" height="15" width="80"></a>
                 </div>
             </footer>`
-        const clicky = document.createElement("script")
-        clicky.async = true
-        clicky.dataset.id = "101459580"
-        clicky.src = "//static.getclicky.com/js"
-        this.querySelector("#clicky").append(clicky)
-    }
-})
+            const clicky = document.createElement('script')
+            clicky.async = true
+            clicky.dataset.id = '101459580'
+            clicky.src = '//static.getclicky.com/js'
+            this.querySelector('#clicky').append(clicky)
+        }
+    },
+)
