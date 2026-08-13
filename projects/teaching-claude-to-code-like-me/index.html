@@ -479,11 +479,110 @@
                 dispatcher running them in order, so installing one guard never clobbers another and a credential leak blocks before a
                 missing doc does. I found that one out the hard way too: two guard installers, one hook file, last writer wins.
             </p>
+            <h3>A formatter is not a validator</h3>
             <p>
-                The theme under all of it: a rule that depends on being seen fails silently. Next is probably a CI layer, since local hooks
-                don't survive <code>--no-verify</code> or somebody else's clone, and a scheduled audit that re-checks recent commits against
-                the rules — enforcement without detection of <em>failed</em> enforcement is the same trap one level up. This is living
-                documentation, so it'll keep growing as Claude and I figure each other out.
+                Out of curiosity I pasted this very page into the
+                <a href="https://validator.w3.org/nu/">W3C validator</a> and got back a wall of red. Something like 130 duplicate
+                <code>id</code> attributes, plus a <code>&lt;meta&gt;</code> missing an attribute the spec requires, repeated across
+                eighteen files. The page had been through oxfmt on every commit for weeks. It was immaculately, consistently invalid.
+            </p>
+            <p>
+                My first thought was that oxfmt was doing something wrong, and it wasn't. The trailing slash it writes on
+                <code>&lt;meta ... /&gt;</code> is valid HTML5, and the validator only mentions it at info level. The duplicate ids were
+                mine: Pygments restarts its line numbering at 1 for every code block, so a page with eight snippets emits
+                <code>id="line-1"</code> eight times. A formatter has no opinion about that. It makes markup consistent, and consistent is
+                not the same as legal.
+            </p>
+            <p>
+                So HTML got its own gate, running <a href="https://github.com/validator/validator">vnu</a>, the actual engine behind
+                validator.w3.org rather than a re-implementation, so the thing blocking my commit and the thing judging my site can never
+                disagree about what "valid" means. The interesting part was picking the trigger. My first instinct was "this repo has
+                <code>.html</code> files", which is wrong in a way that would have made the gate useless: most HTML on disk is a fragment. A
+                template partial, an email body, a test fixture. vnu is <em>right</em> to reject those, so a gate keyed on the extension
+                would have blocked honest work in half my repos. It keys on a doctype instead:
+            </p>
+            <div class="codehilite source">
+                <pre><span></span><code><span><span class="c1"># Only whole documents. A repo that validates its pages almost always holds</span>
+</span><span><span class="c1"># fragments too, and vnu is right to reject a template partial as not-a-document.</span>
+</span><span><span class="nv">html_documents</span><span class="o">=()</span>
+</span><span><span class="k">for</span><span class="w"> </span>f<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="si">${</span><span class="nv">html_files</span><span class="p">[@]+</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">html_files</span><span class="p">[@]</span><span class="si">}</span><span class="s2">&quot;</span><span class="si">}</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+</span><span><span class="w">    </span><span class="nv">IFS</span><span class="o">=</span><span class="w"> </span><span class="nb">read</span><span class="w"> </span>-r<span class="w"> </span>first<span class="w"> </span>&lt;<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$f</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="k">continue</span>
+</span><span><span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$first</span><span class="s2">&quot;</span><span class="w"> </span><span class="k">in</span>
+</span><span><span class="w">        </span><span class="s1">&#39;&lt;!&#39;</span><span class="o">[</span>Dd<span class="o">][</span>Oo<span class="o">][</span>Cc<span class="o">][</span>Tt<span class="o">][</span>Yy<span class="o">][</span>Pp<span class="o">][</span>Ee<span class="o">]</span><span class="s1">&#39; &#39;</span><span class="o">[</span>Hh<span class="o">][</span>Tt<span class="o">][</span>Mm<span class="o">][</span>Ll<span class="o">]</span>*<span class="o">)</span><span class="w"> </span><span class="nv">html_documents</span><span class="o">+=(</span><span class="s2">&quot;</span><span class="nv">$f</span><span class="s2">&quot;</span><span class="o">)</span><span class="w"> </span><span class="p">;;</span>
+</span><span><span class="w">    </span><span class="k">esac</span>
+</span><span><span class="k">done</span>
+</span></code></pre>
+            </div>
+            <p>
+                I found that one by rolling it out, not by thinking about it. My DSP box keeps three real manual pages next to fifteen
+                content fragments, and gating it the obvious way would have blocked the next edit to any of the fifteen. Sixteen repos have
+                the gate now. Nine were already clean, the rest were not, and none of what turned up was cosmetic. A Firefox sidebar I use
+                every day had no <code>&lt;title&gt;</code> at all and no <code>lang</code> on its <code>&lt;html&gt;</code> element, which
+                is exactly the sort of thing a screen reader announces and I would never have noticed on my own.
+            </p>
+            <h3>The guard I'd installed least was the one I could least afford to miss</h3>
+            <p>
+                Then I counted. Across 71 repos on this machine: the lint guard in eighteen, plus every repo through
+                <code>core.hooksPath</code>. The docs guard in ten. The secrets guard, the one that scans staged changes for credentials, in
+                twelve.
+            </p>
+            <p>
+                Twelve. The only guard I'd given reliable delivery was the one whose failure costs least. A style violation is fixed by the
+                next commit; a credential that reaches a remote is public whatever you do next, and no later commit takes it back. I'd
+                written "every gate asks, none auto-installs" into the design months ago and it seemed principled at the time, but that rule
+                exists to protect you from noise, and that reason doesn't transfer to this guard at all.
+            </p>
+            <p>
+                So it moved into the dispatcher, ahead of the lint guard. One wrinkle worth stealing: it got its own off switch.
+                <code>claude.gates false</code> already silenced the lint guard and it would have been easy to reuse. Don't. Someone
+                silencing a chatty formatter in a noisy repo should never discover, months later, that they also turned off credential
+                scanning. Different costs, different switches.
+            </p>
+            <p>
+                Wiring it up meant pulling the guard out of the installer that had been carrying it as a heredoc, and that's where it got
+                interesting. The guard matches on my name, my handle, and my email, because the repos with an agent-written issue store are
+                full of text nobody hand-reviews before it lands in history. The design doc had a line about this: the guard must never be
+                committed, precisely because it names the identifiers it protects. That's why it lived untracked in
+                <code>.git/hooks</code>. And the file I'd just extracted was sitting in my skills repo, staged, about to be committed.
+            </p>
+            <p>
+                Nothing was pushed and that repo is private, so this is a near miss and not a story about a leak. The fix is the part I keep
+                chewing on. That constraint was never really about the guard, it was about the <em>patterns</em>, and conflating the two is
+                what had forced the guard to live untracked in the first place. Which is why it could never be shared with anyone, and why
+                it had no delivery mechanism, and therefore why it was installed in twelve repos out of seventy-one. One muddled sentence in
+                a design doc, three consequences downstream. The identifiers now load from an untracked file the guard reads at runtime, and
+                the guard itself is generic and safe to commit anywhere. A test greps it for my name, so a future edit that inlines one
+                fails as a leak rather than passing as a style nit.
+            </p>
+            <p>That refactor introduced a fresh way to fail open, too, and it's a good one:</p>
+            <div class="codehilite source">
+                <pre><span></span><code><span><span class="c1"># The emptiness test is load-bearing: `grep -qE &quot;&quot;` matches every line, so an</span>
+</span><span><span class="c1"># unset ALLOW_RE would clear every finding and pass the guard on everything.</span>
+</span><span><span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span>-n<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ALLOW_RE</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">printf</span><span class="w"> </span><span class="s1">&#39;%s&#39;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$content</span><span class="s2">&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-qiE<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ALLOW_RE</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+</span><span><span class="w">    </span><span class="k">continue</span>
+</span><span><span class="k">fi</span>
+</span></code></pre>
+            </div>
+            <p>
+                The allowlist clears lines that legitimately carry my handle, like the GitHub URLs in a README. It used to be a constant.
+                Now it comes from a file that might not exist, and an empty pattern handed to <code>grep -qE</code> matches every line on
+                earth. Without that <code>-n</code> test the guard would have skipped every finding in every repo and exited zero forever,
+                which is the most cheerful way a security check can possibly die.
+            </p>
+            <p>
+                My favorite part: the guard blocked its own commit three times. Once on my test fixtures, which contain real AWS key shapes
+                because a test proving the guard blocks has to contain something it blocks. Then twice on its own documentation, because a
+                comment explaining which patterns look like credentials is unavoidably a comment full of things that look like credentials.
+                Shell scripts are deliberately not exempt from that check, since an exported key in a <code>.sh</code> is how credentials
+                really escape. So I reworded the comments and left the rule alone. The guard was right and I was the one being sloppy, which
+                is more or less the entire reason to build it.
+            </p>
+            <p>
+                The theme under all of it: a rule that depends on being seen fails silently, and so does a guard that depends on being
+                installed. Next is probably a CI layer, since local hooks don't survive <code>--no-verify</code> or somebody else's clone,
+                and a scheduled audit that re-checks recent commits against the rules — enforcement without detection of <em>failed</em>
+                enforcement is the same trap one level up. This is living documentation, so it'll keep growing as Claude and I figure each
+                other out.
             </p>
             <h3>Influences</h3>
             <p>Some things that've influenced my thinking over the years:</p>
