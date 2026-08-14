@@ -99,6 +99,23 @@ numbering at 1 in every code block, so `linespans` alone put a duplicate
 `build.py` drops the ids and keeps the spans, which are what `projects.css`
 counts to draw the gutter.
 
+### CSS validity
+
+Same argument, one language over: `oxfmt` formats `display: flexx` as happily as
+it formats valid CSS, and a language server flags unknown property *names* but
+not unknown *values*. [stylelint](https://stylelint.io) closes that gap with
+`declaration-property-value-no-unknown`:
+
+```shell
+> npx stylelint '**/*.css'
+```
+
+The lint guard runs it on staged CSS at commit time. `.stylelintrc.json` turns
+off the rules that only flag correct code here — blank-line formatting (that's
+`oxfmt`'s job) and `no-descending-specificity`, which fights this repo's nested,
+page-order stylesheet structure. `pygments.css` is generated, so it's ignored,
+same as in `.oxfmtrc.json`.
+
 ## Deployment
 
 The site is hosted on GitHub Pages: once it's good locally it's just a git

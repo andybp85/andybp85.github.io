@@ -86,7 +86,7 @@
             </nav>
         </sub-nav>
         <main>
-            <p><em>June 28, 2026 · updated August 13, 2026</em></p>
+            <p><em>June 28, 2026 · updated August 14, 2026</em></p>
             <h2>Teaching Claude to Code Like Me</h2>
             <p>
                 After 20+ years of writing code, I've got a pretty good sense of what I like and what works. So when I started having Claude
@@ -110,32 +110,39 @@
 </span><span>
 </span><span><span class="gu">## Workflow &amp; Planning</span>
 </span><span>Complex features → design spec first. Small fixes/features → code directly.
-</span><span>Commit per logical unit; terse subject + a &quot;why&quot; body when the change isn&#39;t obvious.
+</span><span>Commit per logical unit without asking; terse subject + a &quot;why&quot; body when the change isn&#39;t obvious. Straight to main is fine in solo
+</span><span>  repos.
 </span><span>
 </span><span><span class="gu">## Testing</span>
 </span><span>Test-first by default: failing test, then code — bugfixes included (regression test). Spikes exempt — throw away before commit.
 </span><span>Unit tests are the primary investment: they exert design pressure. Hard to unit test = badly factored — that friction is the signal.
 </span><span>Integration tests prove wiring, not logic: real queries, migrations, serialization round-trips — where mocks lie. Fewer, deliberate.
+</span><span>Small E2E suite, kept green religiously. Broad and flaky is worse than absent; it gets ignored.
 </span><span>Test the public surface, not internals — that&#39;s what survives refactoring.
-</span><span>Mock only at system boundaries (network, clock, filesystem, randomness); prefer real collaborators.
+</span><span>Mock only at system boundaries (network, clock, filesystem, randomness); prefer real collaborators. Many mocks = the unit does too much.
 </span><span>Coverage is a diagnostic, never a target.
 </span><span>
 </span><span><span class="gu">## Lint &amp; Format Gates</span>
 </span><span>Mechanical constraints live in tooling, not these files: if a regex can check it, prose is the wrong home — an unenforced rule drifts.
-</span><span>Every project gets a formatter and linter, pinned exact so a caret bump can&#39;t reformat untouched files.
-</span><span>A formatter is not a validator — consistent markup is still invalid markup. HTML gets <span class="sb">`vnu`</span> (the W3C&#39;s own checker), opt-in per repo by
-</span><span>  committing a <span class="sb">`.vnu-filter`</span>; errors block, warnings don&#39;t, and the filter file documents each suppression&#39;s why.
-</span><span>The guard checks staged files only; it reports and stops, never fixes — a hook that reformats under you changes what you reviewed.
-</span><span>Prove a new gate fails before trusting it — linters lie about exit codes (<span class="sb">`swift format lint`</span> exits 0 unless <span class="sb">`--strict`</span>).
-</span><span>One file, one formatter — two claimants produce a diff that returns every time either runs.
+</span><span>Every project gets a formatter and linter, pinned exact; global hooks run the lint + secrets guards in every repo, and project-gates.sh
+</span><span>  offers missing setup at SessionStart.
+</span><span>Two opt-outs, never one: <span class="sb">`claude.gates false`</span> (lint) and <span class="sb">`claude.secrets false`</span> — silencing style must not silently stop credential
+</span><span>  scanning.
+</span><span>The guard checks staged files only; it reports and stops, never fixes.
+</span><span>Prove a new gate fails before trusting it — linters lie about exit codes.
 </span><span>
 </span><span><span class="gu">## Architectural Principles</span>
 </span><span>Modular and DRY (modularity wins ties). Tolerate duplication until the shape is known — extract on the third occurrence, not the second.
+</span><span>  Parameter + conditional in shared code = wrong abstraction: inline into callers, delete unneeded branches, re-extract.
 </span><span>Prefer functional paradigms: pure functions, immutability, composition over inheritance.
 </span><span>Parse, don&#39;t validate: decode untrusted input at the boundary into a type carrying the guarantee. No check-and-discard.
 </span><span>Illegal states unrepresentable where practical.
-</span><span>YAGNI: abstraction, layers, config only for a present need, never speculation. Exempt: what makes change easy (refactoring, tests, CI).
-</span><span>Chesterton&#39;s Fence: understand why something exists before removing it.
+</span><span>YAGNI: abstraction, layers, config only for a present need, never speculation. Match rigor to value; don&#39;t gold-plate. Exempt: what makes
+</span><span>  change easy (refactoring, tests, CI) and what adds no complexity today. Before building ahead, imagine the later refactor — usually no
+</span><span>  more expensive.
+</span><span>Chesterton&#39;s Fence: understand why something exists before removing it. Complexity you didn&#39;t write is not a mandate to refactor.
+</span><span>Precedence when principles conflict: correctness &gt; YAGNI &gt; type rigor — &quot;where practical&quot; bends before YAGNI does. Script-scale work:
+</span><span>  YAGNI wins by default.
 </span><span>Default to boring tech: when a dep is warranted, prefer mature (docs, track record, community) over new/shiny — maturity, not age.
 </span><span>Pike&#39;s 5 Rules: measure, don&#39;t assume bottlenecks. Fancy algorithms are slow when n is small (it usually is) and buggy — simple data
 </span><span>  structures.
@@ -161,7 +168,7 @@
 </span><span><span class="k">*</span><span class="w"> </span>build a vocabulary of small, composable functions
 </span><span><span class="k">*</span><span class="w"> </span>aim short; split when over ~20 lines or high cognitive complexity — but never split a single concept just to hit a number
 </span><span><span class="k">*</span><span class="w"> </span>entry points (<span class="sb">`main`</span>, scripts) may stay long once pure logic is factored out — locality wins there
-</span><span><span class="k">*</span><span class="w"> </span>limit heterogeneous positional params (≤3, hard max 4); beyond that use named/keyword args
+</span><span><span class="k">*</span><span class="w"> </span>limit heterogeneous positional params (≤3, hard max 4); beyond that use named/keyword args — meaningful names over meaningless positions
 </span><span><span class="k">*</span><span class="w"> </span>prefer explicit inputs and outputs over hidden state mutation — you understand a unit by what goes in and comes out
 </span><span>
 </span><span><span class="gu">## Control flow &amp; shape</span>
@@ -176,7 +183,8 @@
 </span><span><span class="k">*</span><span class="w"> </span>treat data as immutable — code as if you can copy but not change it (mutate during construction, then freeze)
 </span><span><span class="k">*</span><span class="w"> </span>no action-at-a-distance: no global mutable state; behavior should be understandable by reading locally
 </span><span><span class="k">*</span><span class="w"> </span>isolate side effects (I/O) at the edges; keep core logic pure
-</span><span><span class="k">*</span><span class="w"> </span>keep variable liveness short — declare near first use, minimize the span
+</span><span><span class="k">*</span><span class="w"> </span>keep variable liveness short — declare near first use, minimize the span; avoid long-lived cross-function mutable vars (use an object or
+</span><span>  refactor)
 </span><span><span class="k">*</span><span class="w"> </span>pair acquire with release by <span class="ge">*returning*</span> the release — <span class="sb">`open`</span>/<span class="sb">`attach`</span>/<span class="sb">`subscribe`</span>/<span class="sb">`lock`</span> hands back its own undo, so there&#39;s no &quot;am I
 </span><span>  open&quot; flag to keep in sync and each acquisition releases independently
 </span><span>
@@ -199,11 +207,18 @@
 </span><span>
 </span><span><span class="gu">## Comments &amp; docs</span>
 </span><span><span class="k">*</span><span class="w"> </span>comment the <span class="ge">*why*</span>, not the <span class="ge">*what*</span> — if a &quot;what&quot; feels needed, first make the code clearer (hard math/algorithms/perf excepted)
-</span><span><span class="k">*</span><span class="w"> </span>comment the non-obvious: anything a reader would ask about, anything you had to re-derive, and especially a hack you hadn&#39;t time to
-</span><span>  refactor
+</span><span><span class="k">*</span><span class="w"> </span>comment the non-obvious: anything a reader would ask about, anything you had to re-derive, non-specific catch blocks, and especially a
+</span><span>  hack you hadn&#39;t time to refactor
 </span><span><span class="k">*</span><span class="w"> </span>don&#39;t omit comments out of staleness-fear — names go stale too; prefer assertions over comments documenting assumptions
 </span><span><span class="k">*</span><span class="w"> </span>colocate docs with what they describe; read nearby commentary before editing
+</span><span><span class="k">*</span><span class="w"> </span>cite sources (say what a URL is <span class="ge">*for*</span>); mark temporary/workaround code with removal criteria; flag non-obvious cross-file coupling on both
+</span><span>  sides
 </span><span><span class="k">*</span><span class="w"> </span>generate API docs from source, don&#39;t hand-maintain a parallel copy; tests are documentation
+</span><span>
+</span><span><span class="gu">## Testing</span>
+</span><span><span class="k">*</span><span class="w"> </span>CLAUDE.md holds the strategy (test-first, regression tests, mock boundaries); these are code-level additions
+</span><span><span class="k">*</span><span class="w"> </span>a bug is a signal of excess complexity — fix the root cause and structure, not just the symptom
+</span><span><span class="k">*</span><span class="w"> </span>set up mocks/spies in the test that uses them (locality over DRY)
 </span><span>
 </span><span><span class="gu">## Hygiene</span>
 </span><span><span class="k">*</span><span class="w"> </span>no dead or vestigial code (unused imports, params, variables)
@@ -213,8 +228,9 @@
 </span><span><span class="gu">## Tooling</span>
 </span><span><span class="k">*</span><span class="w"> </span>the formatter owns formatting — don&#39;t hand-format around it or fight its output; if it&#39;s wrong, fix the config, not the file
 </span><span><span class="k">*</span><span class="w"> </span>a suppression (<span class="sb">`noqa`</span>, <span class="sb">`swift-format-ignore`</span>, <span class="sb">`eslint-disable`</span>) names the one rule it suppresses and states the invariant that earns it
-</span><span>  — narrowest scope that works; never bare, never file-wide where a line will do
+</span><span>  (&quot;cleanup only&quot;, &quot;source literal compiled into the binary&quot;) — narrowest scope that works; never bare, never file-wide where a line will do
 </span><span><span class="k">*</span><span class="w"> </span>if the same rule needs suppressing everywhere, the rule is wrong for this project — turn it off in the config, once, with the reason
+</span><span><span class="k">*</span><span class="w"> </span>stdout is a tool&#39;s product in a CLI entry point and debug noise everywhere else; suppress the print rule at the site, not repo-wide
 </span></code></pre>
             </div>
             <h3>Scoped by language</h3>
@@ -332,7 +348,7 @@
 </span></code></pre>
             </div>
             <p>
-                That closed the gap for about a day. The next look found a second bypass: nothing says a file gets written with the Write
+                That closed the gap for 47 minutes. The next look found a second bypass: nothing says a file gets written with the Write
                 tool. <code>cat &gt; app.ts &lt;&lt;'EOF'</code> in a shell command is a TypeScript write too, and it sailed straight past a
                 <code>Write|Edit</code> matcher — hence the <code>Bash</code> in the matcher above. The hook now reads shell commands for
                 write idioms (redirections, <code>tee</code>, <code>sed -i</code>), stripping heredoc bodies first, because a heredoc is
@@ -363,11 +379,13 @@
                 So the mechanical rules moved out of the rules files and into tooling: <a href="https://oxc.rs/">oxfmt and oxlint</a> for
                 web code, <a href="https://docs.astral.sh/ruff/">ruff</a> for Python,
                 <a href="https://github.com/swiftlang/swift-format">swift-format</a> for Swift, each pinned exact so a version bump can't
-                reformat files I didn't touch. A pre-commit guard runs the checks on staged files only, and it reports and stops — it never
-                rewrites anything, because a hook that reformats under you changes what gets committed after you reviewed it. For repos that
-                had already drifted there's a ratchet script that records existing violations as per-file ignores, so every
-                <em>other</em> file is enforced from the first commit. Clean a file and re-run it; the entry shrinks. Blocking commits on
-                old debt teaches you exactly one thing, and that thing is <code>--no-verify</code>.
+                reformat files I didn't touch, plus <a href="https://validator.github.io/validator/">vnu</a> for HTML validity and
+                <a href="https://stylelint.io/">stylelint</a> for CSS, which each earn their own section below. A pre-commit guard runs the
+                checks on staged files only, and it reports and stops — it never rewrites anything, because a hook that reformats under you
+                changes what gets committed after you reviewed it. For repos that had already drifted there's a ratchet script that records
+                existing violations as per-file ignores, so every <em>other</em> file is enforced from the first commit. Clean a file and
+                re-run it; the entry shrinks. Blocking commits on old debt teaches you exactly one thing, and that thing is
+                <code>--no-verify</code>.
             </p>
             <p>
                 Then the gotcha that earned its own line in my CLAUDE.md: prove a new gate fails before trusting it.
@@ -391,7 +409,7 @@
             <p>
                 Prose drifts from configs even when you wrote both. My ruff config wasn't selecting the no-stray-print rule my own
                 general.md demands, and it <em>was</em> enforcing one that forbade the well-named intermediate variables the rules
-                explicitly ask for. When a rule lives in two places, one of them is already wrong. The gates now have a test suite — 73
+                explicitly ask for. When a rule lives in two places, one of them is already wrong. The gates now have a test suite — 134
                 assertions, several of them against the tools themselves rather than my wrappers — so the next lying exit code fails a test
                 instead of silently disarming every guard on the machine.
             </p>
@@ -484,7 +502,8 @@
                 Out of curiosity I pasted this very page into the
                 <a href="https://validator.w3.org/nu/">W3C validator</a> and got back a wall of red. Something like 130 duplicate
                 <code>id</code> attributes, plus a <code>&lt;meta&gt;</code> missing an attribute the spec requires, repeated across
-                eighteen files. The page had been through oxfmt on every commit for weeks. It was immaculately, consistently invalid.
+                eighteen files. oxfmt had landed that same morning and had already made every page consistent. It was immaculately,
+                consistently invalid.
             </p>
             <p>
                 My first thought was that oxfmt was doing something wrong, and it wasn't. The trailing slash it writes on
@@ -520,17 +539,85 @@
                 every day had no <code>&lt;title&gt;</code> at all and no <code>lang</code> on its <code>&lt;html&gt;</code> element, which
                 is exactly the sort of thing a screen reader announces and I would never have noticed on my own.
             </p>
+            <h3>The same argument, one language over</h3>
+            <p>
+                With HTML gated I figured CSS was covered, because my editor already yells about stylesheet typos. Then I looked at what it
+                actually yells about: property <em>names</em>. Misspell <code>color</code> and the language server flags it; misspell the
+                <em>value</em> and nothing happens. <code>color: notacolor</code> parses fine, oxfmt formats <code>display: flexx</code> as
+                happily as it formats valid CSS, and the browser drops the whole declaration at runtime without a word. Same hole as the
+                HTML one, one language over, and quieter about it.
+            </p>
+            <p>
+                The obvious move was vnu again. The binary was already on the machine for the HTML gate and it has a
+                <code>--css</code> flag, so this looked free. It's a trap: vnu's CSS validator is the old Jigsaw engine, and it rejects
+                container queries, native nesting, <code>:has()</code>, <code>cqi</code> units, and <code>@starting-style</code> as invalid.
+                Seven wrong errors on one modern stylesheet, every one of them a feature this site actually uses. So CSS got
+                <a href="https://stylelint.io/">stylelint</a> instead, <code>stylelint-config-standard</code> pinned exact like everything
+                else, and the one rule this whole gate exists for: <code>declaration-property-value-no-unknown</code>. A repo opts in by
+                committing a <code>.stylelintrc.json</code>, the same marker pattern as <code>.vnu-filter</code>.
+            </p>
+            <p>
+                Prove a new gate fails before trusting it, says my own CLAUDE.md, so before anything real got staged I committed a proof
+                file carrying both bad declarations from the first paragraph. The commit bounced exactly the way it should:
+            </p>
+            <div class="codehilite source">
+                <pre><span></span><code><span>--- stylelint ---
+</span><span>
+</span><span>proof-gate.css
+</span><span>  2:12  ✖  Unknown value &quot;notacolor&quot; for property &quot;color&quot;  declaration-property-value-no-unknown
+</span><span>  3:14  ✖  Unknown value &quot;flexx&quot; for property &quot;display&quot;    declaration-property-value-no-unknown
+</span><span>
+</span><span>✖ 2 problems (2 errors, 0 warnings)
+</span><span>
+</span><span>lint guard: staged files fail this project&#39;s formatter or linter — see above.
+</span><span>Fix them, then re-stage. The guard never rewrites files itself.
+</span></code></pre>
+            </div>
+            <p>
+                Then the repo-wide check, which is where it got personal. Three decimal alpha values the standard config wants written as
+                percentages, three unquoted font-family names, and 28 complaints about <code>pygments.css</code> — which is generated, so it
+                went in <code>ignoreFiles</code> the same way <code>.oxfmtrc.json</code> already excludes it. Pygments' output is Pygments'
+                problem.
+            </p>
+            <p>
+                One rule didn't survive the rollout. <code>no-descending-specificity</code> flagged thirteen places in this site's main
+                stylesheet, and every one of them was this pattern:
+            </p>
+            <div class="codehilite source">
+                <pre><span></span><code><span><span class="k">&amp;</span><span class="w"> </span><span class="nt">main</span><span class="w"> </span><span class="p">{</span>
+</span><span><span class="w">    </span><span class="k">&amp;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nt">h1</span><span class="nd">:first-child</span><span class="w"> </span><span class="p">{</span>
+</span><span><span class="w">        </span><span class="nt">margin-top</span><span class="nd">:</span><span class="w"> </span><span class="nt">0</span><span class="o">;</span>
+</span><span><span class="w">    </span><span class="p">}</span>
+</span><span><span class="p">}</span>
+</span><span>
+</span><span><span class="nt">h1</span><span class="w"> </span><span class="p">{</span>
+</span><span><span class="w">    </span><span class="nt">font-size</span><span class="nd">:</span><span class="w"> </span><span class="nt">clamp</span><span class="o">(</span><span class="nt">2rem</span><span class="o">,</span><span class="w"> </span><span class="nt">10</span><span class="nc">.5vw</span><span class="o">,</span><span class="w"> </span><span class="nt">3</span><span class="nc">.157rem</span><span class="o">);</span>
+</span><span><span class="p">}</span>
+</span></code></pre>
+            </div>
+            <p>
+                The nested rule zeroes a margin; the flat one sets a font size. Different properties, no cascade conflict, nothing to fix.
+                The rule is a source-order heuristic, and a stylesheet organized the way mine are (nested, selectors following the page)
+                trips it on every one of these. A rule that only ever flags correct code isn't enforcement, it's guidance — so it's off, in
+                the global config, with the reason written down next to the seven rules already off for failing the same test.
+            </p>
+            <p>
+                The kicker: the guard blocked the very commit that installed all this. oxfmt objected to the indentation of the stylelint
+                config I'd just written and to the quote style of my font-name fix, so the commit landed on the second try, cleaner than I
+                wrote it. The gates gate the gates. I'd worry if they didn't.
+            </p>
             <h3>The guard I'd installed least was the one I could least afford to miss</h3>
             <p>
-                Then I counted. Across 71 repos on this machine: the lint guard in eighteen, plus every repo through
+                Then I counted. Thirty-three repos on this machine have my commits from after the first guard existed: the lint guard in
+                eighteen, plus every repo through
                 <code>core.hooksPath</code>. The docs guard in ten. The secrets guard, the one that scans staged changes for credentials, in
                 twelve.
             </p>
             <p>
                 Twelve. The only guard I'd given reliable delivery was the one whose failure costs least. A style violation is fixed by the
                 next commit; a credential that reaches a remote is public whatever you do next, and no later commit takes it back. I'd
-                written "every gate asks, none auto-installs" into the design months ago and it seemed principled at the time, but that rule
-                exists to protect you from noise, and that reason doesn't transfer to this guard at all.
+                written "every gate asks, none auto-installs" into the design two weeks earlier and it seemed principled at the time, but
+                that rule exists to protect you from noise, and that reason doesn't transfer to this guard at all.
             </p>
             <p>
                 So it moved into the dispatcher, ahead of the lint guard. One wrinkle worth stealing: it got its own off switch.
@@ -549,9 +636,9 @@
                 Nothing was pushed and that repo is private, so this is a near miss and not a story about a leak. The fix is the part I keep
                 chewing on. That constraint was never really about the guard, it was about the <em>patterns</em>, and conflating the two is
                 what had forced the guard to live untracked in the first place. Which is why it could never be shared with anyone, and why
-                it had no delivery mechanism, and therefore why it was installed in twelve repos out of seventy-one. One muddled sentence in
-                a design doc, three consequences downstream. The identifiers now load from an untracked file the guard reads at runtime, and
-                the guard itself is generic and safe to commit anywhere. A test greps it for my name, so a future edit that inlines one
+                it had no delivery mechanism, and therefore why it was installed in twelve repos out of thirty-three. One muddled sentence
+                in a design doc, three consequences downstream. The identifiers now load from an untracked file the guard reads at runtime,
+                and the guard itself is generic and safe to commit anywhere. A test greps it for my name, so a future edit that inlines one
                 fails as a leak rather than passing as a style nit.
             </p>
             <p>That refactor introduced a fresh way to fail open, too, and it's a good one:</p>

@@ -9,7 +9,7 @@
    swap-in causes no reflow and no visible flash. */
 @font-face {
     font-display: swap;
-    font-family: B612-Regular;
+    font-family: 'B612-Regular';
     font-style: normal;
     font-weight: normal;
     src: url('/fonts/B612-Regular/B612-Regular.woff') format('woff');
@@ -96,7 +96,7 @@ h3,
 h4,
 h5,
 h6 {
-    font-family: B612-Regular, serif;
+    font-family: 'B612-Regular', serif;
 }
 
 h1 {
@@ -174,7 +174,7 @@ header {
         align-items: center;
         align-self: center;
         display: flex;
-        font-family: B612-Regular, serif;
+        font-family: 'B612-Regular', serif;
         font-size: 2rem;
         gap: 1rem;
         grid-column-end: 5;

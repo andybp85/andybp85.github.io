@@ -22,7 +22,7 @@ main div {
 main > .codehilite.source {
     --editor-bg: #1c1c1e;
     --editor-border: #333;
-    --editor-chip: rgb(255 255 255 / 0.09);
+    --editor-chip: rgb(255 255 255 / 9%);
     --editor-code: #e6db74;
     --editor-emphasis: #cfd2d6;
     --editor-gutter: #555;
@@ -99,7 +99,7 @@ main > .codehilite.source {
 :root[data-theme='light'] main > .codehilite.source {
     --editor-bg: #f7f7f8;
     --editor-border: #d8d8dc;
-    --editor-chip: rgb(0 0 0 / 0.06);
+    --editor-chip: rgb(0 0 0 / 6%);
     --editor-code: #8a5a00;
     --editor-emphasis: #666;
     --editor-gutter: #b3b3b3;
@@ -110,7 +110,7 @@ main > .codehilite.source {
     :root:not([data-theme]) main > .codehilite.source {
         --editor-bg: #f7f7f8;
         --editor-border: #d8d8dc;
-        --editor-chip: rgb(0 0 0 / 0.06);
+        --editor-chip: rgb(0 0 0 / 6%);
         --editor-code: #8a5a00;
         --editor-emphasis: #666;
         --editor-gutter: #b3b3b3;

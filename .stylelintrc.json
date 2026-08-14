@@ -1,0 +1,14 @@
+{
+    "extends": ["stylelint-config-standard"],
+    "ignoreFiles": ["pygments.css"],
+    "rules": {
+        "at-rule-empty-line-before": null,
+        "comment-empty-line-before": null,
+        "custom-property-empty-line-before": null,
+        "declaration-empty-line-before": null,
+        "hue-degree-notation": null,
+        "no-descending-specificity": null,
+        "rule-empty-line-before": null,
+        "selector-class-pattern": null
+    }
+}

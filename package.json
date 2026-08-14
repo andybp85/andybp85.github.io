@@ -26,6 +26,8 @@
     "homepage": "https://github.com/andybp85/andybp85.github.io#readme",
     "devDependencies": {
         "oxfmt": "0.63.0",
-        "oxlint": "1.78.0"
+        "oxlint": "1.78.0",
+        "stylelint": "17.14.1",
+        "stylelint-config-standard": "40.0.0"
     }
 }
